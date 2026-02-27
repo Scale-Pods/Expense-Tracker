@@ -74,7 +74,7 @@ export default function Login() {
                 id="login-identifier"
                 type="text"
                 className="login-input"
-                placeholder="e.g. Adnan or adnan@scalepods.com"
+                placeholder="Enter your username or email"
                 value={identifier}
                 onChange={e => setIdentifier(e.target.value)}
                 autoComplete="username"
