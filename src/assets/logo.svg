@@ -1,0 +1,47 @@
+<svg width="160" height="32" viewBox="0 0 160 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@800&amp;display=swap');
+      .logo-text { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 26px; letter-spacing: -0.02em; }
+    </style>
+  </defs>
+  <text x="0" y="25" fill="currentColor" class="logo-text">ScaleP</text>
+  <g transform="translate(86, 17.5)" fill="currentColor">
+    <circle cx="0" cy="0" r="2" />
+    <circle cx="5.2" cy="0" r="1.1" />
+    <circle cx="3.677" cy="3.677" r="1.1" />
+    <circle cx="0" cy="5.2" r="1.1" />
+    <circle cx="-3.677" cy="3.677" r="1.1" />
+    <circle cx="-5.2" cy="0" r="1.1" />
+    <circle cx="-3.677" cy="-3.677" r="1.1" />
+    <circle cx="0" cy="-5.2" r="1.1" />
+    <circle cx="3.677" cy="-3.677" r="1.1" />
+    
+    <circle cx="9.5" cy="0" r="1.5" />
+    <circle cx="8.227" cy="4.75" r="1.5" />
+    <circle cx="4.75" cy="8.227" r="1.5" />
+    <circle cx="0" cy="9.5" r="1.5" />
+    <circle cx="-4.75" cy="8.227" r="1.5" />
+    <circle cx="-8.227" cy="4.75" r="1.5" />
+    <circle cx="-9.5" cy="0" r="1.5" />
+    <circle cx="-8.227" cy="-4.75" r="1.5" />
+    <circle cx="-4.75" cy="-8.227" r="1.5" />
+    <circle cx="0" cy="-9.5" r="1.5" />
+    <circle cx="4.75" cy="-9.5" r="1.5" />
+    <circle cx="4.75" cy="-8.227" r="1.5" />
+    <circle cx="8.227" cy="-4.75" r="1.5" />
+    <!-- Fixed outer ring coordinates for exact 12 dots -->
+    <g transform="rotate(30)"><circle cx="9.5" cy="0" r="1.5" /></g>
+    <g transform="rotate(60)"><circle cx="9.5" cy="0" r="1.5" /></g>
+    <g transform="rotate(90)"><circle cx="9.5" cy="0" r="1.5" /></g>
+    <g transform="rotate(120)"><circle cx="9.5" cy="0" r="1.5" /></g>
+    <g transform="rotate(150)"><circle cx="9.5" cy="0" r="1.5" /></g>
+    <g transform="rotate(180)"><circle cx="9.5" cy="0" r="1.5" /></g>
+    <g transform="rotate(210)"><circle cx="9.5" cy="0" r="1.5" /></g>
+    <g transform="rotate(240)"><circle cx="9.5" cy="0" r="1.5" /></g>
+    <g transform="rotate(270)"><circle cx="9.5" cy="0" r="1.5" /></g>
+    <g transform="rotate(300)"><circle cx="9.5" cy="0" r="1.5" /></g>
+    <g transform="rotate(330)"><circle cx="9.5" cy="0" r="1.5" /></g>
+  </g>
+  <text x="100" y="25" fill="currentColor" class="logo-text">ds</text>
+</svg>

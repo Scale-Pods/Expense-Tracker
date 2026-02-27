@@ -1,0 +1,102 @@
+.reports-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.reports-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.reports-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.btn-export {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-export:hover {
+  background-color: var(--color-bg-body);
+  color: var(--color-text-main);
+  border-color: var(--color-text-muted);
+}
+
+.reports-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-lg);
+}
+
+.summary-section {
+  margin-top: var(--spacing-sm);
+}
+
+.burn-stats {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: var(--spacing-md) 0;
+}
+
+.burn-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.burn-label {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.burn-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.burn-change {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.burn-change.positive { color: var(--color-danger); } /* Spending increase is usually bad */
+.burn-change.negative { color: var(--color-warning); }
+.burn-change.neutral { color: var(--color-text-secondary); }
+
+.burn-divider {
+  width: 1px;
+  height: 40px;
+  background-color: var(--color-border);
+}
+
+@media (max-width: 768px) {
+  .reports-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .burn-stats {
+    flex-direction: column;
+    gap: var(--spacing-lg);
+  }
+  
+  .burn-divider {
+    width: 100%;
+    height: 1px;
+  }
+}

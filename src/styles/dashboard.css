@@ -1,0 +1,165 @@
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+  width: 100%;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-xl);
+}
+
+.kpi-card {
+  padding: var(--spacing-xl);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.kpi-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  background-color: var(--color-bg-body); /* Default fallback */
+}
+
+.kpi-icon-wrapper.bg-primary-light { background-color: rgba(79, 70, 229, 0.1); }
+.kpi-icon-wrapper.bg-success-light { background-color: rgba(16, 185, 129, 0.1); }
+.kpi-icon-wrapper.bg-warning-light { background-color: rgba(245, 158, 11, 0.1); }
+.kpi-icon-wrapper.bg-purple-light { background-color: rgba(139, 92, 246, 0.1); }
+
+/* Ensure text colors in icons are correct */
+.kpi-icon-wrapper .text-primary { color: #4F46E5; }
+.kpi-icon-wrapper .text-success { color: #10B981; }
+.kpi-icon-wrapper .text-warning { color: #F59E0B; }
+.kpi-icon-wrapper .text-purple { color: #8B5CF6; }
+
+.kpi-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.kpi-label {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.kpi-value {
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: var(--color-text-main);
+  line-height: 1.1;
+}
+
+.charts-grid-main {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--spacing-xl);
+}
+
+.charts-grid-main > :first-child {
+  grid-column: span 4;
+}
+
+.charts-grid-main > :last-child {
+  grid-column: span 8;
+}
+
+.bottom-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--spacing-xl);
+}
+
+.bottom-grid > :first-child {
+  grid-column: span 7;
+}
+
+.bottom-grid > :last-child {
+  grid-column: span 5;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-lg);
+}
+
+.renewals-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.renewal-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-hover);
+  border: 1px solid var(--color-border);
+}
+
+.renewal-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.renewal-name {
+  font-weight: 700;
+  color: var(--color-text-main);
+  font-size: 1rem;
+}
+
+.renewal-date {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.renewal-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+}
+
+.renewal-amount {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+@media (max-width: 1400px) {
+  .charts-grid-main, .bottom-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .charts-grid-main > *, .bottom-grid > * {
+    grid-column: span 1 !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .charts-grid-main, .bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}

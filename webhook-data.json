@@ -1,0 +1,19 @@
+{
+  "data": [
+    {
+      "row_number": 2,
+      "Spent On": "vercel",
+      "Amount in $ (If Applicable)": 20,
+      "Amount in ₹": "INR Not Available",
+      "Date": "24/2/2026",
+      "Time ": "17:02:00",
+      "Spent From": "Unknown - N/A",
+      "Card Number": "No Card Used",
+      "Type": "One Time",
+      "Status": "",
+      "Paid By": "",
+      "UniqueID": "d3f5e2b8-6b8a-4d2a-9e8f-cbd3a2e17f7b",
+      "Waiting For": "[\"Merchant name (Spent On)\",\"Card name (e.g. AMEX, VISA)\",\"Card last 4 digits or CASH\"]"
+    }
+  ]
+}
