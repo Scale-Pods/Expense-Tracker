@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useAuth } from '../hooks/AuthContext';
 import Logo from '../components/common/Logo';
 import { Eye, EyeOff, LogIn, Lock, Mail } from 'lucide-react';
-import { useTheme } from '../hooks/ThemeContext';
 import '../styles/login.css';
 
 // Map friendly display names → Firebase emails
@@ -21,9 +20,6 @@ function resolveEmail(input) {
 
 export default function Login() {
   const { login } = useAuth();
-  const { theme } = useTheme();
-  // Logo should be white on dark card, black on light card
-  const logoColor = theme === 'dark' ? '#FFFFFF' : '#111827';
   const [identifier, setIdentifier] = useState(''); // username OR email
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -63,7 +59,7 @@ export default function Login() {
       <div className={`login-card ${shake ? 'shake' : ''}`}>
         <div className="login-card-header">
           <div className="login-logo-wrap">
-            <Logo className="login-logo" forceColor={logoColor} />
+            <Logo className="login-logo" />
           </div>
           <p className="login-subtitle">Sign in to your workspace</p>
         </div>
