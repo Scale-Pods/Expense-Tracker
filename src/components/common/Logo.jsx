@@ -10,18 +10,15 @@ const Logo = ({ className, forceColor }) => {
   const shouldInvert = !forceColor && theme === 'light';
 
   return (
-    <div 
-      className={`flex items-center justify-center ${className}`} 
-      style={{ height: '54px', width: '100%', position: 'relative' }}
-    >
+    <div className={`flex items-center justify-center ${className}`}>
       <img 
         src="https://framerusercontent.com/images/sTvMZBHEzwH4fTjPgKO2PS3htho.png?scale-down-to=2048&width=2363&height=2363" 
         alt="ScalePods"
         style={{ 
-          height: '400%',
-          width: 'auto', 
+          height: '100%',
+          width: '100%', 
           objectFit: 'contain',
-          objectPosition: 'center',
+          transform: 'scale(2.5)',
           filter: shouldInvert ? 'invert(1) hue-rotate(180deg) brightness(0.2)' : 'none',
           transition: 'filter 0.3s ease'
         }}
