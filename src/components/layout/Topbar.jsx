@@ -25,7 +25,6 @@ const Topbar = ({ toggleSidebar }) => {
       case '/': return `${getGreeting()}, ${currentUser?.username?.split(' ')[0] || 'User'} 👋`;
       case '/reminders': return 'Action Center & Reminders';
       case '/monthly': return 'Monthly Payments';
-      case '/services': return 'Services & Vendors';
       case '/categories': return 'Category Analysis';
       case '/reports': return 'Reports';
       case '/webhook': return 'Webhook Data';

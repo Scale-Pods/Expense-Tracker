@@ -82,8 +82,7 @@ const MonthlyPayments = () => {
 
     if (searchTerm) {
       data = data.filter(item =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.vendor.toLowerCase().includes(searchTerm.toLowerCase())
+        item.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -115,10 +114,6 @@ const MonthlyPayments = () => {
       header: <div className="sort-header" onClick={() => requestSort('name')}>Service <ArrowUpDown size={14} /></div>, 
       accessor: 'name',
       render: (row) => <span className="font-medium text-main">{row.name}</span>
-    },
-    { 
-      header: <div className="sort-header" onClick={() => requestSort('vendor')}>Vendor <ArrowUpDown size={14} /></div>, 
-      accessor: 'vendor' 
     },
     { 
       header: 'Type', 
@@ -232,7 +227,7 @@ const MonthlyPayments = () => {
             <Search size={18} className="payments-search-icon" />
             <input 
               type="text" 
-              placeholder="Search service/vendor..." 
+              placeholder="Search service..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="payments-search-input"

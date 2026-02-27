@@ -30,7 +30,6 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
     { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} /> },
     { name: 'Reminders', path: '/reminders', icon: <Bell size={20} /> },
     { name: 'Monthly Payments', path: '/monthly', icon: <Calendar size={20} /> },
-    { name: 'Services & Vendors', path: '/services', icon: <CreditCard size={20} /> },
     { name: 'Category Analysis', path: '/categories', icon: <PieChart size={20} /> },
     { name: 'Reports', path: '/reports', icon: <FileText size={20} /> },
   ];

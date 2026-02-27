@@ -5,7 +5,6 @@ import './styles/global.css';
 
 import Overview from './pages/Overview';
 import MonthlyPayments from './pages/MonthlyPayments';
-import Services from './pages/Services';
 import CategoryAnalysis from './pages/CategoryAnalysis';
 import Reports from './pages/Reports';
 import WebhookData from './pages/WebhookData';
@@ -54,7 +53,6 @@ function App() {
         >
           <Route index element={<Overview />} />
           <Route path="monthly" element={<MonthlyPayments />} />
-          <Route path="services" element={<Services />} />
           <Route path="categories" element={<CategoryAnalysis />} />
           <Route path="reports" element={<Reports />} />
           <Route path="webhook" element={<WebhookData />} />

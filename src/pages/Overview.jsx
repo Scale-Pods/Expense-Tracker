@@ -20,7 +20,8 @@ const Overview = () => {
   const { theme } = useTheme();
   const { currency, symbol, formatAmount, convert, exchangeRate } = useCurrency();
   const { data: webhookResponse, loading, error } = useWebhookData();
-  
+  const { data: remindersResponse } = useWebhookData('Reminder');
+
   const chartConfig = {
     gridStroke: theme === 'dark' ? '#334155' : '#E5E7EB',
     tooltipBg: theme === 'dark' ? '#1E293B' : '#FFFFFF',
@@ -61,7 +62,6 @@ const Overview = () => {
     let validDateExpenses = [];
     const categoryMap = {};
     const serviceMap = {};
-    const upcomingArr = [];
 
     expenses.forEach(exp => {
       // Parse amount logic prioritizing USD if available, else using dynamic exchangeRate for INR
@@ -103,17 +103,37 @@ const Overview = () => {
 
       if (!serviceMap._displayNames) serviceMap._displayNames = {};
       if (!serviceMap._displayNames[merchantKey]) serviceMap._displayNames[merchantKey] = rawMerchant;
-
-      if (exp.Type === 'One Time' || !exp.Status) {
-         upcomingArr.push({
-           id: exp.UniqueID || Math.random(),
-           name: serviceMap._displayNames[merchantKey],
-           date: exp.Date || 'No Date',
-           amount: amt,
-           status: exp.Status ? 'ok' : 'warning'
-         });
-      }
     });
+
+    let parsedReminders = [];
+    if (remindersResponse && remindersResponse.data && Array.isArray(remindersResponse.data)) {
+      parsedReminders = remindersResponse.data.map((item, idx) => {
+        const title = item["Tracker Title"] || item["Spent On"] || item.Title || item.title || item["Service"] || 'Untitled Reminder';
+        let dayOfMonth = item["Day of Month"] || item.DayOfMonth || item.dayOfMonth || item.day || '1';
+        if (dayOfMonth === '1' && item.Date && typeof item.Date === 'string') {
+          const dateParts = item.Date.split('/');
+          if (dateParts.length >= 1) dayOfMonth = dateParts[0];
+        }
+        
+        let amt = 0;
+        const usd = String(item["Amount in $ (If Applicable)"] || "0");
+        const inr = String(item["Amount in ₹"] || "0");
+        if (usd && usd !== "0" && usd !== "INR Not Available") {
+           amt = parseFloat(usd.replace(/[^0-9.]/g, '')) || 0;
+        } else if (inr && inr !== "0" && inr !== "INR Not Available") {
+           amt = (parseFloat(inr.replace(/[^0-9.]/g, '')) || 0) / exchangeRate; 
+        }
+
+        return {
+          id: item.UniqueID || item.id || `rem-${idx}`,
+          name: title,
+          date: `Day ${dayOfMonth} monthly`,
+          amount: amt,
+          status: item.Status || item.status || 'pending',
+          isReminder: true
+        };
+      });
+    }
 
     const activeServicesCount = new Set(expenses.map(e => (e["Spent On"] || '').toLowerCase().trim())).size;
     const recurringPercentage = expenses.length ? Math.round((recurringCount / expenses.length) * 100) : 0;
@@ -159,9 +179,9 @@ const Overview = () => {
       spendByCategory: topCats,
       monthlySpendTrend: trendArray.length ? trendArray : [{month: 'This Month', amount: monthlySpend}],
       topServices: topSrv,
-      upcomingRenewals: upcomingArr.slice(0, 5)
+      upcomingRenewals: parsedReminders.slice(0, 5)
     };
-  }, [webhookResponse, exchangeRate]);
+  }, [webhookResponse, remindersResponse, exchangeRate]);
 
   if (loading) {
     return (
@@ -325,20 +345,32 @@ const Overview = () => {
             <a href="#/reminders" className="text-xs text-primary font-semibold hover:underline">View All Reminders</a>
           </div>
           <div className="renewals-list">
-            {upcomingRenewals.map((item) => (
-              <div key={item.id} className="renewal-item">
-                <div className="renewal-info">
-                  <p className="renewal-name">{item.name}</p>
-                  <p className="renewal-date">Due: {item.date}</p>
+            {upcomingRenewals.length > 0 ? (
+              upcomingRenewals.map((item) => (
+                <div key={item.id} className="renewal-item">
+                  <div className="renewal-info">
+                    <p className="renewal-name">{item.name}</p>
+                    <p className="renewal-date">{item.date}</p>
+                  </div>
+                  <div className="renewal-meta">
+                    {item.amount > 0 && (
+                      <span className="renewal-amount font-semibold">
+                        {formatAmount(item.amount)}
+                      </span>
+                    )}
+                    {item.status === 'resolved' || item.status === 'ok' ? (
+                      <Badge variant="success">Resolved</Badge>
+                    ) : (
+                      <Badge variant="warning">Pending</Badge>
+                    )}
+                  </div>
                 </div>
-                <div className="renewal-meta">
-                  <span className="renewal-amount font-semibold">
-                    {formatAmount(item.amount)}
-                  </span>
-                  {item.status === 'warning' ? <Badge variant="warning">Missing Data</Badge> : <Badge variant="success">Cleared</Badge>}
-                </div>
+              ))
+            ) : (
+              <div className="text-sm text-gray-500 mt-4 h-full py-10 flex items-center justify-center">
+                No upcoming renewals found
               </div>
-            ))}
+            )}
           </div>
         </Card>
       </div>
