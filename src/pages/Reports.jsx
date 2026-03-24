@@ -188,14 +188,6 @@ const Reports = () => {
     <div className="reports-container">
       <div className="reports-header">
         <h3>Financial Reports & Projections</h3>
-        <div className="reports-actions">
-          <button className="btn-export">
-            <Download size={16} /> Export CSV
-          </button>
-          <button className="btn-export">
-            <Download size={16} /> Export Excel
-          </button>
-        </div>
       </div>
 
       <div className="reports-grid">

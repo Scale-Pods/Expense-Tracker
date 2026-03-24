@@ -32,15 +32,16 @@ const Reminders = () => {
   useEffect(() => {
     if (webhookResponse && webhookResponse.data && Array.isArray(webhookResponse.data)) {
       const formatted = webhookResponse.data.map((item, idx) => {
-        // Robust mapping to handle different naming conventions from the webhook
-        const title = item["Tracker Title"] || 
+        // Updated mapping based on actual webhook fields: "Service", "Description", "Due Date"
+        const title = item.Service || 
+                    item["Tracker Title"] || 
                     item["Spent On"] || 
                     item.Title || 
                     item.title || 
-                    item["Service"] ||
                     'Untitled Reminder';
         
-        let dayOfMonth = item["Day of Month"] || 
+        let dayOfMonth = item["Due Date"] ||
+                         item["Day of Month"] || 
                          item.DayOfMonth || 
                          item.dayOfMonth || 
                          item.day || 
@@ -54,9 +55,9 @@ const Reminders = () => {
           }
         }
 
-        const description = item["Notes & Context"] || 
+        const description = item.Description || 
+                          item["Notes & Context"] || 
                           item["Spent From"] ||
-                          item.Description || 
                           item.description || 
                           item["Vendor"] ||
                           '';
@@ -68,7 +69,7 @@ const Reminders = () => {
           description,
           status: item.Status || item.status || 'pending'
         };
-      });
+      }).filter(r => r.title !== 'Untitled Reminder' || r.description); // Filter out junk
       setManualReminders(formatted);
     }
   }, [webhookResponse]);
@@ -227,7 +228,7 @@ const Reminders = () => {
                   <ClipboardList size={16} className="icon" />
                   <input 
                     type="text" 
-                    placeholder="e.g. Domain Renewal"
+                    placeholder="e.g. AWS Reserved Instance / Domain Renewal"
                     value={newReminder.title}
                     onChange={(e) => setNewReminder({...newReminder, title: e.target.value})}
                     required

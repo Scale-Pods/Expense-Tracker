@@ -5,6 +5,7 @@
   width: 100%;
 }
 
+/* KPI Grid - 4 Columns on Desktop, 2x2 on Mobile */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -29,7 +30,7 @@
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
-  background-color: var(--color-bg-body); /* Default fallback */
+  background-color: var(--color-bg-body);
 }
 
 .kpi-icon-wrapper.bg-primary-light { background-color: rgba(79, 70, 229, 0.1); }
@@ -37,7 +38,6 @@
 .kpi-icon-wrapper.bg-warning-light { background-color: rgba(245, 158, 11, 0.1); }
 .kpi-icon-wrapper.bg-purple-light { background-color: rgba(139, 92, 246, 0.1); }
 
-/* Ensure text colors in icons are correct */
 .kpi-icon-wrapper .text-primary { color: #4F46E5; }
 .kpi-icon-wrapper .text-success { color: #10B981; }
 .kpi-icon-wrapper .text-warning { color: #F59E0B; }
@@ -62,31 +62,26 @@
   line-height: 1.1;
 }
 
-.charts-grid-main {
+.dashboard-main-grid {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   gap: var(--spacing-xl);
+  width: 100%;
 }
 
-.charts-grid-main > :first-child {
-  grid-column: span 4;
+.charts-carousel {
+  display: contents;
 }
 
-.charts-grid-main > :last-child {
-  grid-column: span 8;
+.charts-carousel > :nth-child(1) { grid-column: span 4; }
+.charts-carousel > :nth-child(2) { grid-column: span 8; }
+.charts-carousel > :nth-child(3) { grid-column: span 7; }
+
+.bottom-section {
+  display: contents;
 }
 
-.bottom-grid {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: var(--spacing-xl);
-}
-
-.bottom-grid > :first-child {
-  grid-column: span 7;
-}
-
-.bottom-grid > :last-child {
+.bottom-section > * {
   grid-column: span 5;
 }
 
@@ -141,25 +136,125 @@
 }
 
 @media (max-width: 1400px) {
-  .charts-grid-main, .bottom-grid {
+  .dashboard-main-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  .charts-grid-main > *, .bottom-grid > * {
+  .charts-carousel, .bottom-section {
+    display: contents;
+  }
+  .charts-carousel > *, .bottom-section > * {
     grid-column: span 1 !important;
   }
 }
 
 @media (max-width: 1024px) {
+  .dashboard-container {
+    gap: var(--spacing-md);
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  .dashboard-main-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+  
+  /* KPI Cards - 2x2 Grid NO SCROLL */
   .kpi-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
   }
-  .charts-grid-main, .bottom-grid {
+
+  .kpi-card {
+    padding: 1.25rem 0.5rem;
+    height: auto;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column !important;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .kpi-icon-wrapper {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    font-size: 1.125rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+  }
+
+  .kpi-content { 
+    align-items: center; 
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .kpi-label { 
+    font-size: 0.8rem;
+    margin-bottom: 2px;
+  }
+  
+  .kpi-value { 
+    font-size: clamp(0.75rem, 4.5vw, 1.25rem) !important; 
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    line-height: 1.2;
+  }
+
+  /* ONLY THESE 3 - Horizontal Scroll for Charts */
+  .charts-carousel {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    gap: var(--spacing-md);
+    padding: 0.5rem var(--spacing-md) 1.5rem;
+    margin: 0 calc(-1 * var(--spacing-md));
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    grid-template-columns: none; /* Reset grid */
+  }
+
+  .charts-carousel::-webkit-scrollbar { display: none; }
+
+  .charts-carousel > * {
+    flex: 0 0 88vw;
+    min-width: 88vw;
+    max-width: 450px;
+    height: auto;
+    min-height: 400px;
+    scroll-snap-align: center;
+    grid-column: auto !important;
+  }
+
+  /* Bottom Section Revert to Vertical */
+  .bottom-section {
     grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+  .bottom-section > * {
+    grid-column: span 1 !important;
   }
 }
 
 @media (max-width: 640px) {
-  .kpi-grid {
-    grid-template-columns: 1fr;
+  .renewal-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+  .renewal-meta {
+    width: 100%;
+    justify-content: space-between;
   }
 }

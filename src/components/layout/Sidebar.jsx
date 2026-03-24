@@ -39,6 +39,8 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
     setIsSettingsOpen(!isSettingsOpen);
   };
 
+  const [showMobileLogout, setShowMobileLogout] = useState(false);
+
   return (
     <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-header">
@@ -52,7 +54,6 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
           <NavLink 
             key={item.path} 
             to={item.path}
-            end={item.path === '/'}
             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
             onClick={closeSidebar}
           >
@@ -98,8 +99,16 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
 
       <div className="sidebar-footer">
         <button 
-          className="user-profile-logout" 
-          onClick={logout}
+          className={`user-profile-logout ${showMobileLogout ? 'show-logout' : ''}`} 
+          onClick={(e) => {
+            if (window.innerWidth <= 1024 && !showMobileLogout) {
+              e.preventDefault();
+              setShowMobileLogout(true);
+            } else {
+              logout();
+            }
+          }}
+          onMouseLeave={() => setShowMobileLogout(false)}
           title="Sign out"
         >
           <div className="profile-content">

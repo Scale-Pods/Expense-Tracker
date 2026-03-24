@@ -12,6 +12,7 @@ import { DollarSign, Calendar, RefreshCw, Layers, AlertCircle, Loader } from 'lu
 import { format } from 'date-fns';
 import { useTheme } from '../hooks/ThemeContext';
 import { useCurrency } from '../hooks/CurrencyContext';
+import QuickAddExpense from '../components/dashboard/QuickAddExpense';
 import '../styles/dashboard.css';
 
 const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6'];
@@ -19,8 +20,13 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'
 const Overview = () => {
   const { theme } = useTheme();
   const { currency, symbol, formatAmount, convert, exchangeRate } = useCurrency();
-  const { data: webhookResponse, loading, error } = useWebhookData();
-  const { data: remindersResponse } = useWebhookData('Reminder');
+  const { data: webhookResponse, loading, error, refetch: refetchExpenses } = useWebhookData();
+  const { data: remindersResponse, refetch: refetchReminders } = useWebhookData('Reminder');
+
+  const handleRefresh = React.useCallback(() => {
+    refetchExpenses();
+    refetchReminders();
+  }, [refetchExpenses, refetchReminders]);
 
   const chartConfig = {
     gridStroke: theme === 'dark' ? '#334155' : '#E5E7EB',
@@ -108,8 +114,22 @@ const Overview = () => {
     let parsedReminders = [];
     if (remindersResponse && remindersResponse.data && Array.isArray(remindersResponse.data)) {
       parsedReminders = remindersResponse.data.map((item, idx) => {
-        const title = item["Tracker Title"] || item["Spent On"] || item.Title || item.title || item["Service"] || 'Untitled Reminder';
-        let dayOfMonth = item["Day of Month"] || item.DayOfMonth || item.dayOfMonth || item.day || '1';
+        // Updated mapping based on actual webhook fields: "Service", "Description", "Due Date"
+        const title = item.Service || 
+                    item["Tracker Title"] || 
+                    item.Title || 
+                    item.title || 
+                    item.Description || 
+                    item["Spent On"] || 
+                    'Untitled Reminder';
+                    
+        let dayOfMonth = item["Due Date"] || 
+                         item["Day of Month"] || 
+                         item.DayOfMonth || 
+                         item.dayOfMonth || 
+                         item.day || 
+                         '1';
+        
         if (dayOfMonth === '1' && item.Date && typeof item.Date === 'string') {
           const dateParts = item.Date.split('/');
           if (dateParts.length >= 1) dayOfMonth = dateParts[0];
@@ -132,7 +152,7 @@ const Overview = () => {
           status: item.Status || item.status || 'pending',
           isReminder: true
         };
-      });
+      }).filter(r => r.name !== 'Untitled Reminder' || r.amount > 0); // Filter out junk empty reminders
     }
 
     const activeServicesCount = new Set(expenses.map(e => (e["Spent On"] || '').toLowerCase().trim())).size;
@@ -183,7 +203,7 @@ const Overview = () => {
     };
   }, [webhookResponse, remindersResponse, exchangeRate]);
 
-  if (loading) {
+  if (loading && !webhookResponse) {
     return (
       <div className="modern-loading-screen">
         <div className="loader-visual">
@@ -212,6 +232,9 @@ const Overview = () => {
 
   return (
     <div className="dashboard-container">
+      {/* Quick Add Section */}
+      <QuickAddExpense onRefresh={handleRefresh} />
+
       {/* KPI Cards */}
       <div className="kpi-grid">
         <Card className="kpi-card">
@@ -259,120 +282,122 @@ const Overview = () => {
         </Card>
       </div>
 
-      {/* Charts Row 1 */}
-      <div className="charts-grid-main grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
-        <ChartCard title={`Spend by Merchant (${currency})`} className="lg:col-span-1 min-h-[350px]">
-          {spendByCategory.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={spendByCategory.map(d => ({ ...d, value: convert(d.value) }))}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {spendByCategory.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  formatter={(value) => `${symbol}${Number(value).toLocaleString()}`}
-                  contentStyle={{ backgroundColor: chartConfig.tooltipBg, borderColor: chartConfig.tooltipBorder, color: chartConfig.tooltipText }}
-                  itemStyle={{ color: chartConfig.tooltipText }}
-                />
-                <Legend verticalAlign="bottom" height={36} wrapperStyle={{ paddingTop: '20px' }} />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="flex h-full items-center justify-center text-gray-400">No category data</div>
-          )}
-        </ChartCard>
-
-        <ChartCard title={`Monthly Spend Trend (${currency})`} className="lg:col-span-2 min-h-[350px]">
-          {monthlySpendTrend.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={monthlySpendTrend.map(d => ({ ...d, amount: convert(d.amount) }))} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartConfig.gridStroke} />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: chartConfig.tooltipText }} />
-                <YAxis 
-                   axisLine={false} 
-                   tickLine={false} 
-                   tickFormatter={(value) => `${symbol}${value >= 1000 ? (value/1000).toFixed(0) + 'k' : value}`} 
-                   tick={{ fill: chartConfig.tooltipText }} />
-                <Tooltip 
-                  formatter={(value) => `${symbol}${Number(value).toLocaleString()}`}
-                  contentStyle={{ backgroundColor: chartConfig.tooltipBg, borderColor: chartConfig.tooltipBorder, color: chartConfig.tooltipText }}
-                  itemStyle={{ color: chartConfig.tooltipText }}
-                />
-                <Line type="monotone" dataKey="amount" stroke="#4F46E5" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="flex h-full items-center justify-center text-gray-400">No trend data available</div>
-          )}
-        </ChartCard>
-      </div>
-
-      {/* Bottom Section */}
-      <div className="bottom-grid grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
-        <ChartCard title={`Most Expensive Merchants (${currency})`} className="min-h-[350px]">
-          {topServices.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={topServices.map(d => ({ ...d, cost: convert(d.cost) }))} layout="vertical" margin={{ top: 5, right: 30, left: 60, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={chartConfig.gridStroke} />
-                <XAxis type="number" hide />
-                <YAxis type="category" dataKey="name" width={100} axisLine={false} tickLine={false} tick={{ fontSize: 12, className: 'truncate', fill: chartConfig.tooltipText }} />
-                <Tooltip 
-                  formatter={(value) => `${symbol}${Number(value).toLocaleString()}`}
-                  contentStyle={{ backgroundColor: chartConfig.tooltipBg, borderColor: chartConfig.tooltipBorder, color: chartConfig.tooltipText }}
-                  itemStyle={{ color: chartConfig.tooltipText }}
-                  cursor={{fill: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}} 
-                />
-                <Bar dataKey="cost" fill="#4F46E5" radius={[0, 6, 6, 0]} barSize={24} />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="flex h-full items-center justify-center text-gray-400">No merchant data available</div>
-          )}
-        </ChartCard>
-
-        <Card>
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-bold">Upcoming Renewals</h3>
-            <a href="#/reminders" className="text-xs text-primary font-semibold hover:underline">View All Reminders</a>
-          </div>
-          <div className="renewals-list">
-            {upcomingRenewals.length > 0 ? (
-              upcomingRenewals.map((item) => (
-                <div key={item.id} className="renewal-item">
-                  <div className="renewal-info">
-                    <p className="renewal-name">{item.name}</p>
-                    <p className="renewal-date">{item.date}</p>
-                  </div>
-                  <div className="renewal-meta">
-                    {item.amount > 0 && (
-                      <span className="renewal-amount font-semibold">
-                        {formatAmount(item.amount)}
-                      </span>
-                    )}
-                    {item.status === 'resolved' || item.status === 'ok' ? (
-                      <Badge variant="success">Resolved</Badge>
-                    ) : (
-                      <Badge variant="warning">Pending</Badge>
-                    )}
-                  </div>
-                </div>
-              ))
+      {/* Combined Grid for Charts and Renewals */}
+      <div className="dashboard-main-grid">
+        <div className="charts-carousel">
+          <ChartCard title={`Spend by Merchant (${currency})`} className="min-h-[350px]">
+            {spendByCategory.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={spendByCategory.map(d => ({ ...d, value: convert(d.value) }))}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {spendByCategory.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    formatter={(value) => `${symbol}${Number(value).toLocaleString()}`}
+                    contentStyle={{ backgroundColor: chartConfig.tooltipBg, borderColor: chartConfig.tooltipBorder, color: chartConfig.tooltipText }}
+                    itemStyle={{ color: chartConfig.tooltipText }}
+                  />
+                  <Legend verticalAlign="bottom" height={36} wrapperStyle={{ paddingTop: '20px' }} />
+                </PieChart>
+              </ResponsiveContainer>
             ) : (
-              <div className="text-sm text-gray-500 mt-4 h-full py-10 flex items-center justify-center">
-                No upcoming renewals found
-              </div>
+              <div className="flex h-full items-center justify-center text-gray-400">No category data</div>
             )}
-          </div>
-        </Card>
+          </ChartCard>
+
+          <ChartCard title={`Monthly Spend Trend (${currency})`} className="min-h-[350px]">
+            {monthlySpendTrend.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={monthlySpendTrend.map(d => ({ ...d, amount: convert(d.amount) }))} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartConfig.gridStroke} />
+                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: chartConfig.tooltipText }} />
+                  <YAxis 
+                     axisLine={false} 
+                     tickLine={false} 
+                     tickFormatter={(value) => `${symbol}${value >= 1000 ? (value/1000).toFixed(0) + 'k' : value}`} 
+                     tick={{ fill: chartConfig.tooltipText }} />
+                  <Tooltip 
+                    formatter={(value) => `${symbol}${Number(value).toLocaleString()}`}
+                    contentStyle={{ backgroundColor: chartConfig.tooltipBg, borderColor: chartConfig.tooltipBorder, color: chartConfig.tooltipText }}
+                    itemStyle={{ color: chartConfig.tooltipText }}
+                  />
+                  <Line type="monotone" dataKey="amount" stroke="#4F46E5" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-full items-center justify-center text-gray-400">No trend data available</div>
+            )}
+          </ChartCard>
+
+          <ChartCard title={`Most Expensive Merchants (${currency})`} className="min-h-[350px]">
+            {topServices.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={topServices.map(d => ({ ...d, cost: convert(d.cost) }))} layout="vertical" margin={{ top: 5, right: 30, left: 60, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={chartConfig.gridStroke} />
+                  <XAxis type="number" hide />
+                  <YAxis type="category" dataKey="name" width={100} axisLine={false} tickLine={false} tick={{ fontSize: 12, className: 'truncate', fill: chartConfig.tooltipText }} />
+                  <Tooltip 
+                    formatter={(value) => `${symbol}${Number(value).toLocaleString()}`}
+                    contentStyle={{ backgroundColor: chartConfig.tooltipBg, borderColor: chartConfig.tooltipBorder, color: chartConfig.tooltipText }}
+                    itemStyle={{ color: chartConfig.tooltipText }}
+                    cursor={{fill: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}} 
+                  />
+                  <Bar dataKey="cost" fill="#4F46E5" radius={[0, 6, 6, 0]} barSize={24} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-full items-center justify-center text-gray-400">No merchant data available</div>
+            )}
+          </ChartCard>
+        </div>
+
+        {/* Renewals Section */}
+        <div className="bottom-section">
+          <Card>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold">Upcoming Renewals</h3>
+              <a href="#/reminders" className="text-xs text-primary font-semibold hover:underline">View All Reminders</a>
+            </div>
+            <div className="renewals-list">
+              {upcomingRenewals.length > 0 ? (
+                upcomingRenewals.map((item) => (
+                  <div key={item.id} className="renewal-item">
+                    <div className="renewal-info">
+                      <p className="renewal-name">{item.name}</p>
+                      <p className="renewal-date">{item.date}</p>
+                    </div>
+                    <div className="renewal-meta">
+                      {item.amount > 0 && (
+                        <span className="renewal-amount font-semibold">
+                          {formatAmount(item.amount)}
+                        </span>
+                      )}
+                      {item.status === 'resolved' || item.status === 'ok' ? (
+                        <Badge variant="success">Resolved</Badge>
+                      ) : (
+                        <Badge variant="warning">Pending</Badge>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-sm text-gray-500 mt-4 h-full py-10 flex items-center justify-center">
+                  No upcoming renewals found
+                </div>
+              )}
+            </div>
+          </Card>
+        </div>
       </div>
     </div>
   );

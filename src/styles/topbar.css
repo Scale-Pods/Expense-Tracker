@@ -48,6 +48,7 @@
   border: 1px solid var(--color-border);
   transition: all 0.2s ease;
   cursor: pointer;
+  z-index: 50;
 }
 
 .mobile-menu-btn:hover {

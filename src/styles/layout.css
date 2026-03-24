@@ -28,14 +28,24 @@
     width: 100%;
   }
 
+  .page-content {
+    padding: var(--spacing-md);
+  }
+
   /* Overlay that drops down behind the open sidebar and darkens content */
   .sidebar-overlay {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.4);
-    z-index: 40; /* Below sidebar (50) but above content */
+    z-index: 999; /* Below sidebar (1000) but above content */
     backdrop-filter: blur(2px);
     animation: fadeIn 0.2s ease;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-content {
+    padding: var(--spacing-sm);
   }
 }
 

@@ -7,7 +7,6 @@ import { useCurrency } from '../hooks/CurrencyContext';
 import { Search, Calendar, ArrowUpDown, Loader, AlertCircle } from 'lucide-react';
 import { format, parse } from 'date-fns';
 import '../styles/payments.css';
-import '../styles/services.css';
 
 const MonthlyPayments = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -212,12 +211,6 @@ const MonthlyPayments = () => {
         <Card className="stat-card">
           <p className="stat-label">Transactions</p>
           <h2 className="stat-value">{filteredData.length}</h2>
-        </Card>
-        <Card className="stat-card">
-          <p className="stat-label">Status</p>
-          <div className="flex items-center gap-2 mt-2">
-            <Badge variant="success">Sync Complete</Badge>
-          </div>
         </Card>
       </div>
 

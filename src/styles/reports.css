@@ -86,6 +86,12 @@
 }
 
 @media (max-width: 768px) {
+  .reports-header {
+    justify-content: center;
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+  }
+
   .reports-grid {
     grid-template-columns: 1fr;
   }

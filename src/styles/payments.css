@@ -166,7 +166,7 @@
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
   margin-bottom: var(--spacing-xl);
 }
@@ -230,6 +230,11 @@
   border-radius: 24px;
   box-shadow: 0 10px 40px -20px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  padding: 0 !important;
+}
+
+.payments-table-card .card-content {
+  padding: 0 !important;
 }
 
 .table-controls {
@@ -286,11 +291,40 @@
 @media (max-width: 768px) {
   .payments-header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    text-align: center;
     gap: var(--spacing-lg);
+    padding: 2rem 1.5rem;
+  }
+  .header-title-group h1 {
+    font-size: 1.85rem;
+    text-align: center;
+  }
+  .custom-dropdown-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
   }
   .stats-grid {
     grid-template-columns: 1fr;
+  }
+  .stat-card {
+    align-items: center;
+    text-align: center;
+    padding: 1.5rem;
+  }
+  .stat-label {
+    justify-content: center;
+  }
+  .stat-value {
+    font-size: 1.85rem;
+  }
+  .stat-value::before {
+    display: none; /* Hide side indicator when centered on mobile */
+  }
+  .stat-card .flex.items-center.gap-2 {
+    justify-content: center;
+    width: 100%;
   }
   .payments-search-wrapper {
     width: 100%;

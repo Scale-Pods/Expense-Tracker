@@ -8,7 +8,7 @@
   top: 0;
   display: flex;
   flex-direction: column;
-  z-index: 50;
+  z-index: 1000;
   box-shadow: 4px 0 24px rgba(0,0,0,0.02);
 }
 
@@ -145,7 +145,8 @@
   width: 100%;
 }
 
-.user-profile-logout:hover .profile-content {
+.user-profile-logout:hover .profile-content,
+.user-profile-logout.show-logout .profile-content {
   opacity: 0;
   transform: translateY(-20px);
   pointer-events: none;
@@ -210,18 +211,27 @@
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.user-profile-logout:hover .logout-content {
+.user-profile-logout:hover .logout-content,
+.user-profile-logout.show-logout .logout-content {
   opacity: 1;
   transform: translateY(0);
 }
 
 @media (max-width: 1024px) {
   .sidebar {
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
+    transform: translateX(-110%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    visibility: hidden;
+    box-shadow: 10px 0 30px rgba(0,0,0,0.2);
   }
   
   .sidebar.open {
     transform: translateX(0);
+    visibility: visible;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+    visibility: visible;
   }
 }

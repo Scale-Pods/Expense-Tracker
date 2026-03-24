@@ -61,6 +61,42 @@
 @media (max-width: 1100px) {
   .reminders-grid {
     grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .reminder-sidebar {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .reminders-container.redesigned {
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+  .reminders-welcome h1 {
+    font-size: 1.75rem;
+  }
+  .reminders-welcome p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .task-main {
+    flex-direction: column;
+  }
+  .task-icon-container {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+  .task-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+  .task-actions-group {
+    width: 100%;
+    justify-content: space-between;
   }
 }
 
