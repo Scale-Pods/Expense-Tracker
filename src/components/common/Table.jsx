@@ -9,7 +9,11 @@ const Table = ({ columns, data, onRowClick, className }) => {
         <thead>
           <tr>
             {columns.map((col, index) => (
-              <th key={index} className={col.className} style={col.style}>
+              <th 
+                key={index} 
+                className={clsx(col.className, col.align && `text-${col.align}`)} 
+                style={col.style}
+              >
                 {col.header}
               </th>
             ))}
@@ -24,7 +28,10 @@ const Table = ({ columns, data, onRowClick, className }) => {
                 className={onRowClick ? 'clickable' : ''}
               >
                 {columns.map((col, colIndex) => (
-                  <td key={colIndex} className={col.className}>
+                  <td 
+                    key={colIndex} 
+                    className={clsx(col.className, col.align && `text-${col.align}`)}
+                  >
                     {col.render ? col.render(row) : row[col.accessor]}
                   </td>
                 ))}

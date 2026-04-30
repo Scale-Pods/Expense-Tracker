@@ -17,6 +17,8 @@
   padding: var(--spacing-3xl) var(--spacing-xl) var(--spacing-3xl) var(--spacing-xl);
   flex: 1;
   width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
 }
@@ -29,7 +31,8 @@
   }
 
   .page-content {
-    padding: var(--spacing-md);
+    padding: 1rem;
+    padding-top: 0.5rem;
   }
 
   /* Overlay that drops down behind the open sidebar and darkens content */

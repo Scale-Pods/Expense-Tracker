@@ -112,25 +112,31 @@ const MonthlyPayments = () => {
     { 
       header: <div className="sort-header" onClick={() => requestSort('name')}>Service <ArrowUpDown size={14} /></div>, 
       accessor: 'name',
+      align: 'left',
       render: (row) => <span className="font-medium text-main">{row.name}</span>
     },
     { 
       header: 'Type', 
       accessor: 'type',
+      align: 'center',
       render: (row) => <Badge variant={row.type === 'Recurring' ? 'info' : 'secondary'}>{row.type}</Badge>
     },
     { 
       header: <div className="sort-header" onClick={() => requestSort('cost')}>Amount ({currency}) <ArrowUpDown size={14} /></div>, 
       accessor: 'cost',
-      render: (row) => <span className="font-semibold text-emerald-600">{symbol}{convert(row.cost).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+      align: 'right',
+      render: (row) => <span className="font-bold text-main">{symbol}{convert(row.cost).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
     },
     { 
       header: <div className="sort-header" onClick={() => requestSort('date')}>Date <ArrowUpDown size={14} /></div>, 
-      accessor: 'dateStr' 
+      accessor: 'dateStr',
+      align: 'center',
+      className: 'nowrap'
     },
     { 
       header: 'Status', 
       accessor: 'status',
+      align: 'right',
       render: (row) => (
         <Badge variant={row.status === 'Cleared' ? 'success' : 'warning'}>
           {row.status}
@@ -205,12 +211,16 @@ const MonthlyPayments = () => {
 
       <div className="stats-grid">
         <Card className="stat-card">
-          <p className="stat-label">Total Spent ({currency})</p>
-          <h2 className="stat-value">{formatAmount(totalMonthly)}</h2>
+          <div className="stat-flex">
+            <p className="stat-label">Total Spent</p>
+            <h2 className="stat-value">{formatAmount(totalMonthly)}</h2>
+          </div>
         </Card>
         <Card className="stat-card">
-          <p className="stat-label">Transactions</p>
-          <h2 className="stat-value">{filteredData.length}</h2>
+          <div className="stat-flex">
+            <p className="stat-label">Transactions</p>
+            <h2 className="stat-value">{filteredData.length}</h2>
+          </div>
         </Card>
       </div>
 

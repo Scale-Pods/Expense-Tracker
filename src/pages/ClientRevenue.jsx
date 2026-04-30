@@ -410,6 +410,7 @@ const ClientRevenue = () => {
     { 
       header: <div className="sort-header" onClick={() => requestSort('clientName')}>Client Name <ArrowUpDown size={14} /></div>, 
       accessor: 'clientName',
+      align: 'left',
       render: (row) => (
         <div className="flex flex-col">
           <span className="font-semibold text-main">{row.clientName}</span>
@@ -420,11 +421,13 @@ const ClientRevenue = () => {
     { 
       header: <div className="sort-header" onClick={() => requestSort('incomeAmount')}>Income Amount <ArrowUpDown size={14} /></div>, 
       accessor: 'incomeAmount',
+      align: 'right',
       render: (row) => <span className="font-medium text-gray-700">{CURRENCIES.find(c => c.code === row.currency)?.symbol || '₹'}{row.incomeAmount.toLocaleString()}</span>
     },
     { 
       header: <div className="sort-header" onClick={() => requestSort('realisedRevenue')}>Realised Revenue <ArrowUpDown size={14} /></div>, 
       accessor: 'realisedRevenue',
+      align: 'right',
       render: (row) => (
         <div className="flex flex-col">
           <span className="font-bold text-emerald-600">{CURRENCIES.find(c => c.code === row.currency)?.symbol || '₹'}{row.realisedRevenue.toLocaleString()}</span>
@@ -439,6 +442,7 @@ const ClientRevenue = () => {
     { 
       header: <div className="sort-header" onClick={() => requestSort('receivables')}>Receivables <ArrowUpDown size={14} /></div>, 
       accessor: 'receivables',
+      align: 'right',
       render: (row) => (
         <div className="flex flex-col">
           <span className="font-bold text-rose-500">{CURRENCIES.find(c => c.code === row.currency)?.symbol || '₹'}{row.receivables.toLocaleString()}</span>
@@ -453,6 +457,7 @@ const ClientRevenue = () => {
     {
       header: 'Actions',
       accessor: 'id',
+      align: 'center',
       render: (row) => (
         <button 
           onClick={() => handleDeleteRevenue(row.id)} 
@@ -501,7 +506,7 @@ const ClientRevenue = () => {
 
       <div className="reminders-grid">
         <div className="main-tasks">
-          <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', marginBottom: '2rem' }}>
+          <div className="stats-carousel">
             <Card className="stat-card">
               <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><TrendingUp size={20} /></div>
@@ -525,7 +530,7 @@ const ClientRevenue = () => {
             </Card>
           </div>
 
-          <div className="charts-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem', marginBottom: '2.5rem' }}>
+          <div className="charts-carousel-revenue">
             <Card className="chart-card-premium" style={{ padding: '1.5rem', borderRadius: '24px' }}>
               <div className="chart-header" style={{ marginBottom: '1.5rem' }}>
                 <h3 style={{ fontSize: '1.1rem', fontWeight: '700' }}>Revenue Flow</h3>
@@ -599,9 +604,7 @@ const ClientRevenue = () => {
                 </ResponsiveContainer>
               </div>
             </Card>
-          </div>
 
-          <div className="charts-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem', marginBottom: '2.5rem' }}>
             <Card className="chart-card-premium" style={{ padding: '1.5rem', borderRadius: '24px' }}>
               <div className="chart-header" style={{ marginBottom: '1.5rem' }}>
                 <h3 style={{ fontSize: '1.1rem', fontWeight: '700' }}>P&L Comparison</h3>

@@ -86,10 +86,10 @@ const Investments = () => {
   }, [investmentData]);
 
   const columns = [
-    { header: 'Date', accessor: 'date', render: (row) => <span className="font-medium">{row.date}</span> },
-    { header: 'Amount (INR)', accessor: 'amount', render: (row) => <span className="font-bold text-emerald-600">₹{row.amount.toLocaleString()}</span> },
-    { header: 'Note / Platform', accessor: 'note' },
-    { header: 'Investor', accessor: 'name' }
+    { header: 'Date', accessor: 'date', align: 'left', render: (row) => <span className="font-medium">{row.date}</span> },
+    { header: 'Amount (INR)', accessor: 'amount', align: 'right', render: (row) => <span className="font-bold text-emerald-600">₹{row.amount.toLocaleString()}</span> },
+    { header: 'Note / Platform', accessor: 'note', align: 'left' },
+    { header: 'Investor', accessor: 'name', align: 'right' }
   ];
 
   const sortedData = useMemo(() => {

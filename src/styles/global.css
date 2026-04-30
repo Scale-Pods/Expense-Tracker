@@ -61,8 +61,11 @@
 
 html, body {
   overflow-x: hidden;
+  overflow-y: auto;
   position: relative;
   width: 100%;
+  min-height: 100vh;
+  -webkit-overflow-scrolling: touch;
 }
 
 body {
