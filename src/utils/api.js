@@ -1,5 +1,5 @@
 export const fetchWebhookData = async (action = 'Expense') => {
-  const url = `https://n8n.srv1010832.hstgr.cloud/webhook/0c8d3fa1-25e7-417a-979b-3bbca5727b64?action=${action}`;
+  const url = `${import.meta.env.VITE_N8N_BASE_URL}/${import.meta.env.VITE_WEBHOOK_ID_DATA}?action=${action}`;
   try {
     const response = await fetch(url, {
       method: 'GET',
@@ -42,7 +42,7 @@ export const submitExpense = async (text, file = null, userEmail = '') => {
                    userEmail.toLowerCase().includes('raunak') ? 'raunak' : 
                    'unknown';
   
-  const url = `https://n8n.srv1010832.hstgr.cloud/webhook/8afa11c4-df1a-4f44-9990-6e6229f15cd2?action=${contentAction}&user=${userName}`;
+  const url = `${import.meta.env.VITE_N8N_BASE_URL}/${import.meta.env.VITE_WEBHOOK_ID_REVENUE}?action=${contentAction}&user=${userName}`;
   
   try {
     const formData = new FormData();

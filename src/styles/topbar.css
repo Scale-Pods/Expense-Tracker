@@ -90,7 +90,7 @@
 .currency-opt.active {
   background-color: var(--color-primary);
   color: white;
-  box-shadow: 0 4px 10px -2px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 4px 10px -2px rgba(20, 184, 166, 0.3);
 }
 
 .currency-opt:not(.active):hover {

@@ -6,13 +6,16 @@ import {
   CreditCard, 
   PieChart, 
   FileText, 
+  Receipt,
   Settings, 
   Database, 
   Bell,
   ChevronDown,
   ChevronUp,
   LogOut,
-  KeyRound
+  KeyRound,
+  Briefcase,
+  TrendingUp
 } from 'lucide-react';
 
 import Logo from '../common/Logo';
@@ -32,6 +35,9 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
     { name: 'Monthly Payments', path: '/monthly', icon: <Calendar size={20} /> },
     { name: 'Category Analysis', path: '/categories', icon: <PieChart size={20} /> },
     { name: 'Reports', path: '/reports', icon: <FileText size={20} /> },
+    { name: 'Invoice', path: '/invoice', icon: <Receipt size={20} /> },
+    { name: 'Client Revenue', path: '/revenue', icon: <Briefcase size={20} /> },
+    { name: 'Investments', path: '/investments', icon: <TrendingUp size={20} /> },
   ];
 
   const handleSettingsToggle = (e) => {

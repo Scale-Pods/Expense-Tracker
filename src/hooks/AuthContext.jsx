@@ -38,17 +38,59 @@ export function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
 
   // Listen to Firebase auth state — persists sessions automatically via Firebase SDK
+  // Added: 12-hour expiration logic
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setCurrentUser(buildUserProfile(firebaseUser));
+    const TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
+
+    const checkExpiry = async (user) => {
+      if (!user) return true; // Already logged out
+
+      const loginTime = localStorage.getItem('auth_login_time');
+      if (loginTime) {
+        const elapsed = Date.now() - parseInt(loginTime, 10);
+        if (elapsed > TWELVE_HOURS_MS) {
+          await signOut(auth);
+          localStorage.removeItem('auth_login_time');
+          return true; // Session expired
+        }
+      } else {
+        // Logged in but no timestamp — set one for continuity
+        localStorage.setItem('auth_login_time', Date.now().toString());
+      }
+      return false; // Valid session
+    };
+
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      const isExpired = await checkExpiry(firebaseUser);
+      
+      if (!isExpired && firebaseUser) {
+        setCurrentUser(buildUserProfile(firebaseUser));
+      } else {
+        setCurrentUser(null);
+      }
       setIsLoading(false);
     });
-    return unsubscribe;
+
+    // Background interval to check for expiry every minute (if tab stays open)
+    const intervalId = setInterval(() => {
+      if (auth.currentUser) {
+        checkExpiry(auth.currentUser).then(expired => {
+          if (expired) setCurrentUser(null);
+        });
+      }
+    }, 60000);
+
+    return () => {
+      unsubscribe();
+      clearInterval(intervalId);
+    };
   }, []);
 
   const login = async (email, password) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      // Store login time to enforce 12h session limit
+      localStorage.setItem('auth_login_time', Date.now().toString());
       return { success: true };
     } catch (err) {
       return { success: false, error: friendlyError(err.code) };
@@ -56,6 +98,7 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
+    localStorage.removeItem('auth_login_time');
     await signOut(auth);
   };
 

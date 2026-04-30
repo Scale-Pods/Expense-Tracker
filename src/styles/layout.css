@@ -14,7 +14,7 @@
 }
 
 .page-content {
-  padding: var(--spacing-xl) var(--spacing-xl) var(--spacing-xl) var(--spacing-xl);
+  padding: var(--spacing-3xl) var(--spacing-xl) var(--spacing-3xl) var(--spacing-xl);
   flex: 1;
   width: 100%;
   display: flex;

@@ -18,7 +18,7 @@ const Logo = ({ className, forceColor }) => {
           height: '100%',
           width: '100%', 
           objectFit: 'contain',
-          transform: 'scale(2.5)',
+          transform: 'scale(2.8)',
           filter: shouldInvert ? 'invert(1) hue-rotate(180deg) brightness(0.2)' : 'none',
           transition: 'filter 0.3s ease'
         }}

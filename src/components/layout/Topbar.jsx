@@ -28,6 +28,7 @@ const Topbar = ({ toggleSidebar }) => {
       case '/categories': return 'Category Analysis';
       case '/reports': return 'Reports';
       case '/webhook': return 'Webhook Data';
+      case '/revenue': return 'Client Revenue';
       default: return 'Expense Tracker';
     }
   };

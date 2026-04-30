@@ -33,15 +33,15 @@
   background-color: var(--color-bg-body);
 }
 
-.kpi-icon-wrapper.bg-primary-light { background-color: rgba(79, 70, 229, 0.1); }
+.kpi-icon-wrapper.bg-primary-light { background-color: rgba(20, 184, 166, 0.1); }
 .kpi-icon-wrapper.bg-success-light { background-color: rgba(16, 185, 129, 0.1); }
 .kpi-icon-wrapper.bg-warning-light { background-color: rgba(245, 158, 11, 0.1); }
-.kpi-icon-wrapper.bg-purple-light { background-color: rgba(139, 92, 246, 0.1); }
+.kpi-icon-wrapper.bg-purple-light { background-color: rgba(13, 148, 136, 0.1); }
 
-.kpi-icon-wrapper .text-primary { color: #4F46E5; }
+.kpi-icon-wrapper .text-primary { color: #14B8A6; }
 .kpi-icon-wrapper .text-success { color: #10B981; }
 .kpi-icon-wrapper .text-warning { color: #F59E0B; }
-.kpi-icon-wrapper .text-purple { color: #8B5CF6; }
+.kpi-icon-wrapper .text-purple { color: #0D9488; }
 
 .kpi-content {
   display: flex;

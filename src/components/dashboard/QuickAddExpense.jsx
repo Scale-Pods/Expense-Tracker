@@ -57,7 +57,6 @@ const QuickAddExpense = ({ onRefresh }) => {
         if (!isIncomplete) {
           setWebhookResult(null);
           if (onRefresh) onRefresh();
-          setTimeout(() => setStatus(null), 3000);
         }
       }
     } catch {
@@ -104,10 +103,7 @@ const QuickAddExpense = ({ onRefresh }) => {
           if (onRefresh) onRefresh();
         }
         
-        // If successful, clear status after delay. For warnings, let the user read it.
-        if (!isIncomplete) {
-          setTimeout(() => setStatus(null), 3000);
-        }
+        // Status remains visible until manually dismissed
       }
     } catch {
       setStatus('error');
@@ -126,13 +122,15 @@ const QuickAddExpense = ({ onRefresh }) => {
       
       <form onSubmit={handleSubmit} className="quick-add-form">
         <div className="input-container">
-          <textarea
-            placeholder="e.g., GitHub Copilot $10, AWS Bill $150 or just paste merchant details..."
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            disabled={isSubmitting}
-            className="quick-add-textarea"
-          />
+          {!preview && (
+            <textarea
+              placeholder="e.g., GitHub Copilot $10, AWS Bill $150 or just paste merchant details..."
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              disabled={isSubmitting}
+              className="quick-add-textarea"
+            />
+          )}
           
           {preview && (
             <div className="image-preview-container">
@@ -196,7 +194,7 @@ const QuickAddExpense = ({ onRefresh }) => {
             </div>
             
             <div className="status-content-wrapper">
-              {message && message.split('\n').filter(l => l.trim()).map((line, idx) => {
+              {message && message.split('\n').filter(l => l.trim()).filter(l => !l.toLowerCase().includes('if any details are incorrect')).map((line, idx) => {
                 const isBullet = line.trim().startsWith('•') || line.trim().startsWith('*') || line.trim().startsWith('-');
                 const cleanLine = isBullet ? line.trim().substring(1).trim() : line.trim();
                 
@@ -219,7 +217,7 @@ const QuickAddExpense = ({ onRefresh }) => {
               })}
             </div>
 
-            {status === 'warning' && webhookResult?.missing_fields?.includes('Type') && (
+            {status === 'warning' && webhookResult?.missing_fields?.length === 1 && webhookResult?.missing_fields?.includes('Type') && (
               <div className="quick-options-grid">
                 {[
                   'Recurring Monthly', 
@@ -240,6 +238,22 @@ const QuickAddExpense = ({ onRefresh }) => {
                 ))}
               </div>
             )}
+
+            <div className="status-actions" style={{ marginTop: '0.5rem', display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  if (status === 'success' && onRefresh) onRefresh();
+                  setStatus(null);
+                  setMessage('');
+                  setWebhookResult(null);
+                }}
+                className="submit-btn"
+                style={{ padding: '0.5rem 1.5rem' }}
+              >
+                Okay
+              </button>
+            </div>
           </div>
         )}
       </form>

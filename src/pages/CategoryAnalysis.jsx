@@ -12,7 +12,7 @@ import { useTheme } from '../hooks/ThemeContext';
 import { useCurrency } from '../hooks/CurrencyContext';
 import '../styles/categories.css';
 
-const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6'];
+const COLORS = ['#14B8A6', '#10B981', '#F59E0B', '#EF4444', '#0D9488', '#EC4899', '#2DD4BF'];
 
 const CategoryAnalysis = () => {
   const { theme } = useTheme();

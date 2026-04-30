@@ -1,0 +1,349 @@
+.invoice-generator-page {
+  display: grid;
+  grid-template-columns: 1fr 580px;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.preview-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-width: 0;
+  height: 100%;
+}
+
+.preview-header {
+  padding: 1.25rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--color-bg-card);
+  border-radius: 20px;
+  border: 1px solid var(--color-border);
+}
+
+.header-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.header-info h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.preview-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.icon-btn:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.preview-content {
+  flex: 1;
+  background: var(--color-bg-subtle, rgba(255, 255, 255, 0.02));
+  border-radius: 24px;
+  border: 1px solid var(--color-border);
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.invoice-paper, .a4-container {
+  background: white;
+  width: 210mm;
+  min-height: 297mm;
+  padding: 15mm;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  color: #333;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  border-radius: 2px;
+  margin: 0 auto 2rem auto;
+  box-sizing: border-box;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* Page separator between A4 pages (Google Docs style) */
+.page-separator {
+  width: 210mm;
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  user-select: none;
+}
+
+.page-separator-line {
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+.page-separator-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.a4-page-block {
+  margin-bottom: 0 !important;
+}
+
+.invoice-paper * {
+  box-sizing: border-box;
+}
+
+.invoice-paper h2, .invoice-paper h3, .invoice-paper h4 {
+  margin-top: 0;
+}
+
+/* Page Break Rules for PDF Generation & Live View */
+.page-break-inside-avoid {
+  page-break-inside: avoid;
+  break-inside: avoid;
+  display: block; /* Using block to avoid unwanted whitespace/gaps */
+  width: 100%;
+}
+
+.page-break-before {
+  page-break-before: always;
+  break-before: page;
+}
+
+.terms-section {
+  page-break-inside: avoid;
+  break-inside: avoid;
+  display: inline-block;
+  width: 100%;
+}
+
+.preview-actions-overlay {
+  position: absolute;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  gap: 0.75rem;
+  width: max-content;
+}
+
+.preview-actions-overlay.success-state {
+  top: 50%;
+  transform: translate(-50%, -50%);
+  flex-direction: column;
+  background: rgba(var(--color-bg-card-rgb), 0.9);
+  backdrop-filter: blur(20px);
+  padding: 2.5rem;
+  border-radius: 32px;
+  border: 1px solid var(--color-primary-light);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  align-items: center;
+  text-align: center;
+  animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.success-message {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.success-icon {
+  width: 64px;
+  height: 64px;
+  background: var(--color-primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  box-shadow: 0 10px 20px rgba(20, 184, 166, 0.4);
+  margin-bottom: 0.5rem;
+}
+
+.success-message span {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+}
+
+@keyframes modalPop {
+  from { opacity: 0; transform: translate(-50%, -40%) scale(0.95); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.action-btn-premium {
+  padding: 0.75rem 1.25rem;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(20, 184, 166, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.action-btn-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(20, 184, 166, 0.4);
+}
+
+.action-btn-premium:active {
+  transform: translateY(0);
+}
+
+.action-btn-premium.secondary {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-main);
+  box-shadow: none;
+}
+
+.action-btn-premium.secondary:hover {
+  background: var(--color-bg-hover);
+}
+
+.pdf-viewer {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.preview-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem;
+  color: var(--color-text-muted);
+}
+
+.preview-state svg {
+  margin-bottom: 1.5rem;
+  color: var(--color-text-muted);
+  opacity: 0.5;
+}
+
+.preview-state.empty h2 {
+  color: var(--color-text-main);
+  font-size: 1.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.preview-state p {
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+.hint-badges {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.hint-badge {
+  padding: 0.5rem 1rem;
+  background: var(--color-bg-subtle, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--color-border);
+  border-radius: 100px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.preview-state.loading {
+  color: var(--color-primary);
+}
+
+.spinner {
+  animation: rotate 2s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+.form-section-sidebar {
+  position: sticky;
+  top: 1rem;
+  height: calc(100vh - 2rem);
+  overflow: hidden; /* Only the inner form should scroll */
+}
+
+/* Custom scrollbar for form sidebar */
+.form-section-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.form-section-sidebar::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 10px;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 1200px) {
+  .invoice-generator-page {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  
+  .preview-section {
+    height: 600px;
+  }
+  
+  .form-section-sidebar {
+    position: static;
+    height: auto;
+  }
+}

@@ -11,10 +11,10 @@
   align-items: center;
   margin-bottom: var(--spacing-xl);
   background: var(--color-bg-card);
-  padding: 1.5rem 2rem;
-  border-radius: 20px;
+  padding: 2.5rem 3rem;
+  border-radius: 24px;
   border: 1px solid var(--color-border);
-  box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   position: relative;
   overflow: visible;
   z-index: 10;
@@ -71,7 +71,7 @@
   background-color: var(--color-bg-card);
   border-color: var(--color-primary);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px -2px rgba(79, 70, 229, 0.2);
+  box-shadow: 0 4px 12px -2px rgba(20, 184, 166, 0.2);
 }
 
 .custom-dropdown-trigger .chevron {
@@ -134,7 +134,7 @@
 }
 
 .dropdown-item.selected {
-  background: rgba(79, 70, 229, 0.08);
+  background: rgba(20, 184, 166, 0.08);
   color: var(--color-primary);
 }
 
@@ -172,11 +172,11 @@
 }
 
 .stat-card {
-  padding: 1.75rem;
+  padding: 2.5rem;
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
-  border-radius: 20px;
-  box-shadow: 0 4px 15px -10px rgba(0, 0, 0, 0.1);
+  border-radius: 24px;
+  box-shadow: 0 12px 30px -15px rgba(0, 0, 0, 0.1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
@@ -190,7 +190,7 @@
 
 .stat-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 15px 30px -10px rgba(79, 70, 229, 0.12);
+  box-shadow: 0 15px 30px -10px rgba(20, 184, 166, 0.12);
   border-color: var(--color-primary-light);
 }
 
@@ -272,7 +272,7 @@
 
 .payments-search-input:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
   outline: none;
 }
 

@@ -11,6 +11,9 @@ import WebhookData from './pages/WebhookData';
 import Reminders from './pages/Reminders';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
+import ClientRevenue from './pages/ClientRevenue';
+import Investments from './pages/Investments';
+import Invoices from './pages/Invoices';
 
 import { useAuth } from './hooks/AuthContext';
 
@@ -58,6 +61,9 @@ function App() {
           <Route path="webhook" element={<WebhookData />} />
           <Route path="reminders" element={<Reminders />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="revenue" element={<ClientRevenue />} />
+          <Route path="invoice" element={<Invoices />} />
+          <Route path="investments" element={<Investments />} />
         </Route>
 
         {/* Fallback */}

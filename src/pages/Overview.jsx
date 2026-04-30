@@ -15,7 +15,7 @@ import { useCurrency } from '../hooks/CurrencyContext';
 import QuickAddExpense from '../components/dashboard/QuickAddExpense';
 import '../styles/dashboard.css';
 
-const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6'];
+const COLORS = ['#14B8A6', '#10B981', '#F59E0B', '#EF4444', '#0D9488', '#EC4899', '#2DD4BF'];
 
 const Overview = () => {
   const { theme } = useTheme();
@@ -331,7 +331,7 @@ const Overview = () => {
                     contentStyle={{ backgroundColor: chartConfig.tooltipBg, borderColor: chartConfig.tooltipBorder, color: chartConfig.tooltipText }}
                     itemStyle={{ color: chartConfig.tooltipText }}
                   />
-                  <Line type="monotone" dataKey="amount" stroke="#4F46E5" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                  <Line type="monotone" dataKey="amount" stroke="#14B8A6" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
@@ -352,7 +352,7 @@ const Overview = () => {
                     itemStyle={{ color: chartConfig.tooltipText }}
                     cursor={{fill: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}} 
                   />
-                  <Bar dataKey="cost" fill="#4F46E5" radius={[0, 6, 6, 0]} barSize={24} />
+                  <Bar dataKey="cost" fill="#14B8A6" radius={[0, 6, 6, 0]} barSize={24} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (

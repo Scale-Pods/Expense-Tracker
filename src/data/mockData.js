@@ -26,11 +26,11 @@ export const KPIData = {
 };
 
 export const spendByCategory = [
-  { name: 'Cloud Infrastructure', value: 4500, color: '#4F46E5' },
+  { name: 'Cloud Infrastructure', value: 4500, color: '#14B8A6' },
   { name: 'Marketing Tools', value: 3200, color: '#10B981' },
   { name: 'Development Tools', value: 2100, color: '#F59E0B' },
   { name: 'Communication', value: 1200, color: '#EF4444' },
-  { name: 'Office & Admin', value: 1450, color: '#8B5CF6' },
+  { name: 'Office & Admin', value: 1450, color: '#0D9488' },
 ];
 
 export const monthlySpendTrend = Array.from({ length: 12 }).map((_, i) => {
