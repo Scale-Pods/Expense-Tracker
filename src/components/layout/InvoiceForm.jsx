@@ -29,6 +29,7 @@ const InvoiceForm = ({ onGenerate, onUpdate }) => {
     clientGstin: '',
     clientState: 'Maharashtra',
     amountInWords: '',
+    paymentTerm: 'One Time', // 'One Time' or 'Recurring'
     originalDetails: null
   });
 
@@ -243,13 +244,62 @@ const InvoiceForm = ({ onGenerate, onUpdate }) => {
         <div className="form-grid-vertical">
           <div className="form-row-flex">
             <div className="form-group flex-1">
-              <label><Building2 size={16} /> Client Name</label>
+              <label><Calendar size={16} /> Date</label>
               <input 
-                type="text" 
+                type="date" 
+                name="invoiceDate" 
+                value={formData.invoiceDate}
+                onChange={handleChange}
+                required 
+              />
+            </div>
+            {formData.type !== 'Tax' && (
+              <div className="form-group flex-1">
+                <label><Calendar size={16} /> Due Date</label>
+                <input 
+                  type="date" 
+                  name="dueDate" 
+                  value={formData.dueDate}
+                  onChange={handleChange}
+                  required 
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="form-section compact">
+            <div className="section-title">
+              <FileCheck size={18} />
+              <span>Payment Term</span>
+            </div>
+            <div className={`region-slider type-slider term-slider ${formData.paymentTerm.replace(' ', '')}`}>
+              <button 
+                type="button" 
+                className={formData.paymentTerm === 'One Time' ? 'active' : ''}
+                onClick={() => setFormData(prev => ({ ...prev, paymentTerm: 'One Time' }))}
+              >
+                One Time
+              </button>
+              <button 
+                type="button" 
+                className={formData.paymentTerm === 'Recurring' ? 'active' : ''}
+                onClick={() => setFormData(prev => ({ ...prev, paymentTerm: 'Recurring' }))}
+              >
+                Recurring
+              </button>
+              <div className="slider-thumb"></div>
+            </div>
+          </div>
+
+          <div className="form-row-flex">
+            <div className="form-group flex-1">
+              <label><Building2 size={16} /> Client Name & Address</label>
+              <textarea 
                 name="name" 
-                placeholder="Acme Corp" 
+                placeholder="Acme Corp&#10;123 Business St, City" 
                 value={formData.name}
                 onChange={handleChange}
+                rows="2"
                 required 
               />
             </div>
@@ -360,30 +410,7 @@ const InvoiceForm = ({ onGenerate, onUpdate }) => {
             </div>
           )}
 
-          <div className="form-row-flex">
-            <div className="form-group flex-1">
-              <label><Calendar size={16} /> Date</label>
-              <input 
-                type="date" 
-                name="invoiceDate" 
-                value={formData.invoiceDate}
-                onChange={handleChange}
-                required 
-              />
-            </div>
-            {formData.type !== 'Tax' && (
-              <div className="form-group flex-1">
-                <label><Calendar size={16} /> Due</label>
-                <input 
-                  type="date" 
-                  name="dueDate" 
-                  value={formData.dueDate}
-                  onChange={handleChange}
-                  required 
-                />
-              </div>
-            )}
-          </div>
+
 
           <div className="form-section">
             <div className="section-title">
@@ -421,10 +448,12 @@ const InvoiceForm = ({ onGenerate, onUpdate }) => {
                   <input type="text" name="branch" value={formData.branch} onChange={handleChange} />
                 </div>
               </div>
+            {formData.region === 'India' && (
               <div className="form-group">
-                <label><FileCheck size={16} /> My {formData.region === 'India' ? 'GSTIN' : 'TRN'}</label>
+                <label><FileCheck size={16} /> My GSTIN</label>
                 <input type="text" name="myGstin" value={formData.myGstin} onChange={handleChange} />
               </div>
+            )}
             </div>
           </div>
 

@@ -104,6 +104,19 @@ const Invoices = () => {
     }
   };
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    // If it's already in DD-MM-YYYY or DD/MM/YYYY, return it
+    if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr) || /^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) return dateStr;
+    
+    // Assuming YYYY-MM-DD
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+    return dateStr;
+  };
+
 
 
   const toWords = (num, currency = 'INR') => {
@@ -176,7 +189,7 @@ const Invoices = () => {
         
         <div style={{ display: 'flex', borderBottom: '1px solid #e0e0e0', flexWrap: 'wrap' }}>
           <div style={{ flex: '1', minWidth: '250px', padding: '10px', borderRight: '1px solid #e0e0e0' }}>
-            <img src="https://res.cloudinary.com/dc3a1bfvk/image/upload/v1777098139/ScalePods_-_Logo-_FINAL_----1-01_1_-min_hvvqyt.png" width="120" alt="Logo" style={{ marginBottom: '4px' }} />
+            <img src="https://res.cloudinary.com/dc3a1bfvk/image/upload/v1777098139/ScalePods_-_Logo-_FINAL_----1-01_1_-min_hvvqyt.png" width="180" alt="Logo" style={{ marginBottom: '4px' }} />
             <div style={{ fontSize: '12px', lineHeight: '1.2' }}>
               <strong style={{ fontSize: '15px', display: 'block', marginBottom: '4px' }}>SCALEPODS LLP</strong>
               503-A Crescent House, 159/161 Crescent House,<br />
@@ -192,7 +205,11 @@ const Invoices = () => {
             </div>
             <div style={{ marginBottom: '10px' }}>
               <span style={{ color: '#666', textTransform: 'uppercase', fontSize: '10px', fontWeight: '700', display: 'block' }}>Invoice Date</span>
-              <strong>{data.invoiceDate}</strong>
+              <strong>{formatDate(data.invoiceDate)}</strong>
+            </div>
+            <div style={{ marginBottom: '10px' }}>
+              <span style={{ color: '#666', textTransform: 'uppercase', fontSize: '10px', fontWeight: '700', display: 'block' }}>Payment Term</span>
+              <strong>{data.paymentTerm || 'One Time'}</strong>
             </div>
             <div>
               <span style={{ color: '#666', textTransform: 'uppercase', fontSize: '10px', fontWeight: '700', display: 'block' }}>Place of Supply</span>
@@ -205,7 +222,11 @@ const Invoices = () => {
           <div style={{ flex: '1', minWidth: '250px', padding: '8px', borderRight: '1px solid #e0e0e0' }}>
             <h3 style={{ margin: '0 0 10px 0', fontSize: '11px', color: '#666', textTransform: 'uppercase', letterSpacing: '1px' }}>Bill To:</h3>
             <div style={{ fontSize: '13px', lineHeight: '1.2' }}>
-              <strong style={{ fontSize: '15px', display: 'block' }}>{data.name}</strong>
+            <div style={{ fontSize: '12px', lineHeight: '1.2' }}>
+              {data.name.split('\n').map((line, i) => (
+                i === 0 ? <strong key={i} style={{ fontSize: '15px', display: 'block', marginBottom: '2px' }}>{line}</strong> : <span key={i} style={{ display: 'block' }}>{line}</span>
+              ))}
+            </div>
               {data.email && <div style={{ color: '#555' }}>{data.email}</div>}
               <div style={{ marginTop: '8px' }}>
                 <strong>GSTIN:</strong> {data.clientGstin || "Unregistered"}<br />
@@ -309,11 +330,10 @@ const Invoices = () => {
         
         <div style={{ display: 'flex', borderBottom: '1px solid #e0e0e0', flexWrap: 'wrap' }}>
           <div style={{ flex: '1', minWidth: '250px', padding: '10px', borderRight: '1px solid #e0e0e0' }}>
-            <img src="https://res.cloudinary.com/dc3a1bfvk/image/upload/v1777098139/ScalePods_-_Logo-_FINAL_----1-01_1_-min_hvvqyt.png" width="120" alt="Logo" style={{ marginBottom: '4px' }} />
+            <img src="https://res.cloudinary.com/dc3a1bfvk/image/upload/v1777098139/ScalePods_-_Logo-_FINAL_----1-01_1_-min_hvvqyt.png" width="180" alt="Logo" style={{ marginBottom: '4px' }} />
             <div style={{ fontSize: '12px', lineHeight: '1.2' }}>
               <strong style={{ fontSize: '15px', display: 'block', marginBottom: '4px' }}>SCALEPODS LLP</strong>
               503-A Crescent House, Mumbai, MH - 400009<br />
-              <strong>TRN:</strong> {data.myGstin || "100XXXXXXXXXXXX"}<br />
             </div>
           </div>
           <div style={{ flex: '0 1 280px', minWidth: '200px', padding: '10px', background: '#fafafa', fontSize: '12px', lineHeight: '1.2' }}>
@@ -323,7 +343,11 @@ const Invoices = () => {
             </div>
             <div style={{ marginBottom: '10px' }}>
               <span style={{ color: '#666', textTransform: 'uppercase', fontSize: '10px', fontWeight: '700', display: 'block' }}>Invoice Date</span>
-              <strong>{data.invoiceDate}</strong>
+              <strong>{formatDate(data.invoiceDate)}</strong>
+            </div>
+            <div style={{ marginBottom: '10px' }}>
+              <span style={{ color: '#666', textTransform: 'uppercase', fontSize: '10px', fontWeight: '700', display: 'block' }}>Payment Term</span>
+              <strong>{data.paymentTerm || 'One Time'}</strong>
             </div>
           </div>
         </div>
@@ -332,7 +356,11 @@ const Invoices = () => {
           <div style={{ flex: '1', minWidth: '250px', padding: '8px', borderRight: '1px solid #e0e0e0' }}>
             <h3 style={{ margin: '0 0 10px 0', fontSize: '11px', color: '#666', textTransform: 'uppercase', letterSpacing: '1px' }}>Bill To:</h3>
             <div style={{ fontSize: '13px', lineHeight: '1.2' }}>
-              <strong style={{ fontSize: '15px', display: 'block' }}>{data.name}</strong>
+            <div style={{ fontSize: '12px', lineHeight: '1.2' }}>
+              {data.name.split('\n').map((line, i) => (
+                i === 0 ? <strong key={i} style={{ fontSize: '15px', display: 'block', marginBottom: '2px' }}>{line}</strong> : <span key={i} style={{ display: 'block' }}>{line}</span>
+              ))}
+            </div>
               {data.email && <div style={{ color: '#555' }}>{data.email}</div>}
               <div style={{ marginTop: '8px' }}>
                 <strong>TRN:</strong> {data.clientGstin || "Unregistered"}<br />
@@ -416,7 +444,7 @@ const Invoices = () => {
       <div className="uae-proforma-invoice a4-container" style={{ padding: '0', border: '1px solid #e0e0e0', color: '#1a1a1a' }}>
         <div className="invoice-header-top" style={{ display: 'flex', justifyContent: 'space-between', gap: '20px', padding: '20px', flexWrap: 'wrap', borderBottom: '1px solid #eee' }}>
           <div className="logo-section" style={{ flex: '1', minWidth: '250px' }}>
-            <img src="https://res.cloudinary.com/dc3a1bfvk/image/upload/v1777098139/ScalePods_-_Logo-_FINAL_----1-01_1_-min_hvvqyt.png" alt="ScalePods Logo" style={{ width: '130px' }} />
+            <img src="https://res.cloudinary.com/dc3a1bfvk/image/upload/v1777098139/ScalePods_-_Logo-_FINAL_----1-01_1_-min_hvvqyt.png" alt="ScalePods Logo" style={{ width: '180px' }} />
             <div className="company-address" style={{ fontSize: '12px', lineHeight: '1.2', marginTop: '8px' }}>
               <strong>SCALEPODS LLP</strong><br />
               503-A Floor-5th, 159/161, Crescent house, Mumbai, MH - 400009
@@ -425,12 +453,13 @@ const Invoices = () => {
           
           <div className="invoice-details" style={{ flex: '0 1 auto', textAlign: 'right', minWidth: '200px' }}>
             <h2 style={{ margin: 0, color: '#444', textTransform: 'uppercase', fontSize: '20px', fontWeight: '800' }}>Proforma Invoice</h2>
-            <p style={{ margin: '5px 0', fontSize: '13px', fontWeight: '600', color: '#666' }}>#SPx{data.name?.replace(/\s+/g, '')}-{(data.invoiceDate || "").replace(/-/g, '.')}</p>
+            <p style={{ margin: '5px 0', fontSize: '13px', fontWeight: '600', color: '#666' }}>#SPx{data.name?.replace(/\s+/g, '')}-{(formatDate(data.invoiceDate)).replace(/-/g, '.')}</p>
             <div style={{ marginTop: '10px', display: 'inline-block' }}>
               <table className="details-table" style={{ borderCollapse: 'collapse', marginLeft: 'auto' }}>
                 <tbody>
-                  <tr><td style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 'bold', textAlign: 'right' }}>Date:</td><td style={{ padding: '4px 8px', fontSize: '13px', textAlign: 'left' }}>{data.invoiceDate}</td></tr>
-                  <tr><td style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 'bold', textAlign: 'right' }}>Due Date:</td><td style={{ padding: '4px 8px', fontSize: '13px', textAlign: 'left' }}>{data.dueDate}</td></tr>
+                  <tr><td style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 'bold', textAlign: 'right' }}>Date:</td><td style={{ padding: '4px 8px', fontSize: '13px', textAlign: 'left' }}>{formatDate(data.invoiceDate)}</td></tr>
+                  <tr><td style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 'bold', textAlign: 'right' }}>Due Date:</td><td style={{ padding: '4px 8px', fontSize: '13px', textAlign: 'left' }}>{formatDate(data.dueDate)}</td></tr>
+                  <tr><td style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 'bold', textAlign: 'right' }}>Term:</td><td style={{ padding: '4px 8px', fontSize: '13px', textAlign: 'left' }}>{data.paymentTerm || 'One Time'}</td></tr>
                   <tr style={{ color: '#d32f2f', background: 'rgba(211, 47, 47, 0.05)' }}>
                     <td style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 'bold', textAlign: 'right' }}>Balance Due:</td>
                     <td style={{ padding: '4px 8px', fontSize: '13px', textAlign: 'left', fontWeight: '800' }}>{data.currency} {(total - (Number(data.amountPaid) || 0)).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
@@ -443,7 +472,11 @@ const Invoices = () => {
 
         <div className="billing-info" style={{ padding: '20px', borderBottom: '1px solid #eee' }}>
           <h3 style={{ fontSize: '11px', marginBottom: '4px', color: '#777', textTransform: 'uppercase' }}>Bill To:</h3>
-          <p style={{ margin: 0, fontWeight: 'bold', fontSize: '15px' }}>{data.name}</p>
+          <div style={{ fontSize: '12px', lineHeight: '1.2' }}>
+            {data.name.split('\n').map((line, i) => (
+              i === 0 ? <strong key={i} style={{ fontSize: '15px', display: 'block', marginBottom: '2px' }}>{line}</strong> : <span key={i} style={{ display: 'block' }}>{line}</span>
+            ))}
+          </div>
         </div>
 
         <div style={{ overflowX: 'auto' }}>
@@ -537,7 +570,7 @@ const Invoices = () => {
       <div className="india-proforma-invoice a4-container">
         <div className="invoice-header-top" style={{ display: 'flex', justifyContent: 'space-between', gap: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
           <div className="logo-section" style={{ flex: '1', minWidth: '250px' }}>
-            <img src="https://res.cloudinary.com/dc3a1bfvk/image/upload/v1777098139/ScalePods_-_Logo-_FINAL_----1-01_1_-min_hvvqyt.png" alt="ScalePods Logo" style={{ width: '130px' }} />
+            <img src="https://res.cloudinary.com/dc3a1bfvk/image/upload/v1777098139/ScalePods_-_Logo-_FINAL_----1-01_1_-min_hvvqyt.png" alt="ScalePods Logo" style={{ width: '180px' }} />
             <div className="company-address" style={{ fontSize: '11px', lineHeight: '1.2', marginTop: '8px', color: '#555' }}>
               <strong style={{ fontSize: '13px', color: '#000' }}>SCALEPODS LLP</strong><br />
               503-A Floor-5th, 159/161, Crescent house, Mumbai, MH - 400009<br />
@@ -547,11 +580,12 @@ const Invoices = () => {
           
           <div className="invoice-details" style={{ flex: '0 1 auto', textAlign: 'right', minWidth: '200px' }}>
             <h2 style={{ margin: 0, color: '#222', textTransform: 'uppercase', fontSize: '20px', letterSpacing: '1px', fontWeight: '800' }}>Proforma Invoice</h2>
-            <p style={{ margin: '4px 0', fontSize: '12px', color: '#666', fontWeight: '600' }}>#SPx{data.name?.replace(/\s+/g, '')}-{(data.invoiceDate || "").split('-').join('.')}</p>
+            <p style={{ margin: '4px 0', fontSize: '12px', color: '#666', fontWeight: '600' }}>#SPx{data.name?.replace(/\s+/g, '')}-{(formatDate(data.invoiceDate)).replace(/-/g, '.')}</p>
             <div style={{ marginTop: '10px', display: 'inline-block' }}>
               <table className="details-table" style={{ borderCollapse: 'collapse', marginLeft: 'auto' }}>
                 <tbody>
-                  <tr><td style={{ padding: '3px 8px', fontSize: '12px', fontWeight: 'bold', textAlign: 'right', color: '#666' }}>Date:</td><td style={{ padding: '3px 8px', fontSize: '12px', textAlign: 'left', fontWeight: '700' }}>{data.invoiceDate}</td></tr>
+                  <tr><td style={{ padding: '3px 8px', fontSize: '12px', fontWeight: 'bold', textAlign: 'right', color: '#666' }}>Date:</td><td style={{ padding: '3px 8px', fontSize: '12px', textAlign: 'left', fontWeight: '700' }}>{formatDate(data.invoiceDate)}</td></tr>
+                  <tr><td style={{ padding: '3px 8px', fontSize: '12px', fontWeight: 'bold', textAlign: 'right', color: '#666' }}>Term:</td><td style={{ padding: '3px 8px', fontSize: '12px', textAlign: 'left', fontWeight: '700' }}>{data.paymentTerm || 'One Time'}</td></tr>
                   <tr><td style={{ padding: '3px 8px', fontSize: '12px', fontWeight: 'bold', textAlign: 'right', color: '#666' }}>Place of Supply:</td><td style={{ padding: '3px 8px', fontSize: '12px', textAlign: 'left', fontWeight: '700' }}>{data.clientState || "Maharashtra"}</td></tr>
                   <tr style={{ color: '#d32f2f', background: 'rgba(211, 47, 47, 0.05)' }}>
                     <td style={{ padding: '4px 8px', fontSize: '12px', fontWeight: 'bold', textAlign: 'right' }}>Balance Due:</td>
@@ -565,7 +599,11 @@ const Invoices = () => {
 
         <div className="billing-info" style={{ marginBottom: '15px', borderTop: '1px solid #eee', paddingTop: '10px' }}>
           <h3 style={{ fontSize: '11px', marginBottom: '4px', color: '#777', textTransform: 'uppercase' }}>Bill To:</h3>
-          <p style={{ margin: 0, fontWeight: 'bold', fontSize: '14px' }}>{data.name}</p>
+          <div style={{ fontSize: '12px', lineHeight: '1.2' }}>
+            {data.name.split('\n').map((line, i) => (
+              i === 0 ? <strong key={i} style={{ fontSize: '14px', display: 'block', marginBottom: '2px' }}>{line}</strong> : <span key={i} style={{ display: 'block' }}>{line}</span>
+            ))}
+          </div>
           <div style={{ fontSize: '11px', color: '#555', marginTop: '2px' }}>GSTIN: {data.clientGstin || "Unregistered"}</div>
         </div>
 
