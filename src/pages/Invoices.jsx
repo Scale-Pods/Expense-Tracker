@@ -240,7 +240,8 @@ const Invoices = () => {
               <strong>Bank:</strong> {data.bankName || "HDFC Bank Ltd"}<br />
               <strong>A/c Name:</strong> {data.accHolder || "SCALEPODS LLP"}<br />
               <strong>A/c No:</strong> {data.accNo || "50200119456950"}<br />
-              <strong>IFSC:</strong> {data.ifsc || "HDFC0000060"}
+              <strong>IFSC:</strong> {data.ifsc || "HDFC0000060"}<br />
+              <strong>A/c Type:</strong> {data.accType || "Current Account"}
             </div>
           </div>
         </div>
@@ -373,7 +374,8 @@ const Invoices = () => {
               <strong>Bank:</strong> {data.bankName || "HDFC Bank Ltd"}<br />
               <strong>A/c Name:</strong> {data.accHolder || "SCALEPODS LLP"}<br />
               <strong>A/c No:</strong> {data.accNo || "50200119456950"}<br />
-              <strong>IFSC:</strong> {data.ifsc || "HDFC0000060"}
+              <strong>IFSC:</strong> {data.ifsc || "HDFC0000060"}<br />
+              <strong>A/c Type:</strong> {data.accType || "Current Account"}
             </div>
           </div>
         </div>
@@ -512,6 +514,7 @@ const Invoices = () => {
             <strong>Bank Name:</strong> {data.bankName || "HDFC Bank Ltd"}<br />
             <strong>Account Number:</strong> {data.accNo || "50200119456950"}<br />
             <strong>Branch IFSC:</strong> {data.ifsc || "HDFC0000060"}<br />
+            <strong>A/c Type:</strong> {data.accType || "Current Account"}<br />
             <strong>Branch:</strong> {data.branch || "FORT"}
           </div>
 
@@ -640,6 +643,7 @@ const Invoices = () => {
             <strong>Bank:</strong> {data.bankName || "HDFC Bank Ltd"}<br />
             <strong>A/C No:</strong> {data.accNo || "50200119456950"}<br />
             <strong>IFSC:</strong> {data.ifsc || "HDFC0000060"}<br />
+            <strong>A/c Type:</strong> {data.accType || "Current Account"}<br />
             <strong>Branch:</strong> {data.branch || "FORT"}
           </div>
 
