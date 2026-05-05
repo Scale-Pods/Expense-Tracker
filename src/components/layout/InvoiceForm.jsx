@@ -3,12 +3,16 @@ import { Send, Globe, Building2, Calendar, Mail, FileText, FileCheck, Trash2, Pl
 import '../../styles/invoice-form.css';
 import BillingQueue from './BillingQueue';
 
+const CACHE_KEY = 'invoice_form_cache';
+const CACHE_DURATION = 60 * 60 * 1000; // 1 hour
+
 const InvoiceForm = ({ onGenerate, onUpdate }) => {
   const [activeTab, setActiveTab] = useState('create'); // 'create' or 'queue'
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    type: 'Proforma', // 'Proforma' or 'Tax'
-    region: 'India', // 'India' or 'UAE'
+  
+  const initialData = {
+    type: 'Proforma',
+    region: 'India',
     name: '',
     currency: 'INR',
     amount: '',
@@ -29,12 +33,32 @@ const InvoiceForm = ({ onGenerate, onUpdate }) => {
     clientGstin: '',
     clientState: 'Maharashtra',
     amountInWords: '',
-    paymentTerm: 'One Time', // 'One Time' or 'Recurring'
+    paymentTerm: 'One Time',
     originalDetails: null
+  };
+
+  const [formData, setFormData] = useState(() => {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      try {
+        const { data, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < CACHE_DURATION) {
+          return data;
+        }
+      } catch (e) {
+        console.error('Failed to parse cached invoice data', e);
+      }
+    }
+    return initialData;
   });
 
   React.useEffect(() => {
     onUpdate(formData);
+    // Save to cache
+    localStorage.setItem(CACHE_KEY, JSON.stringify({
+      data: formData,
+      timestamp: Date.now()
+    }));
   }, [formData]);
 
   const handleSubmit = async (e) => {
