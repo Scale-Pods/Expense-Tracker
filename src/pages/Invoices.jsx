@@ -459,7 +459,7 @@ const Invoices = () => {
                 <tbody>
                   <tr><td style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 'bold', textAlign: 'right' }}>Date:</td><td style={{ padding: '4px 8px', fontSize: '13px', textAlign: 'left' }}>{formatDate(data.invoiceDate)}</td></tr>
                   <tr><td style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 'bold', textAlign: 'right' }}>Due Date:</td><td style={{ padding: '4px 8px', fontSize: '13px', textAlign: 'left' }}>{formatDate(data.dueDate)}</td></tr>
-                  <tr><td style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 'bold', textAlign: 'right' }}>Term:</td><td style={{ padding: '4px 8px', fontSize: '13px', textAlign: 'left' }}>{data.paymentTerm || 'One Time'}</td></tr>
+                  <tr><td style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 'bold', textAlign: 'right' }}>Payment Term:</td><td style={{ padding: '4px 8px', fontSize: '13px', textAlign: 'left' }}>{data.paymentTerm || 'One Time'}</td></tr>
                   <tr style={{ color: '#d32f2f', background: 'rgba(211, 47, 47, 0.05)' }}>
                     <td style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 'bold', textAlign: 'right' }}>Balance Due:</td>
                     <td style={{ padding: '4px 8px', fontSize: '13px', textAlign: 'left', fontWeight: '800' }}>{data.currency} {(total - (Number(data.amountPaid) || 0)).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
@@ -585,7 +585,7 @@ const Invoices = () => {
               <table className="details-table" style={{ borderCollapse: 'collapse', marginLeft: 'auto' }}>
                 <tbody>
                   <tr><td style={{ padding: '3px 8px', fontSize: '12px', fontWeight: 'bold', textAlign: 'right', color: '#666' }}>Date:</td><td style={{ padding: '3px 8px', fontSize: '12px', textAlign: 'left', fontWeight: '700' }}>{formatDate(data.invoiceDate)}</td></tr>
-                  <tr><td style={{ padding: '3px 8px', fontSize: '12px', fontWeight: 'bold', textAlign: 'right', color: '#666' }}>Term:</td><td style={{ padding: '3px 8px', fontSize: '12px', textAlign: 'left', fontWeight: '700' }}>{data.paymentTerm || 'One Time'}</td></tr>
+                  <tr><td style={{ padding: '3px 8px', fontSize: '12px', fontWeight: 'bold', textAlign: 'right', color: '#666' }}>Payment Term:</td><td style={{ padding: '3px 8px', fontSize: '12px', textAlign: 'left', fontWeight: '700' }}>{data.paymentTerm || 'One Time'}</td></tr>
                   <tr><td style={{ padding: '3px 8px', fontSize: '12px', fontWeight: 'bold', textAlign: 'right', color: '#666' }}>Place of Supply:</td><td style={{ padding: '3px 8px', fontSize: '12px', textAlign: 'left', fontWeight: '700' }}>{data.clientState || "Maharashtra"}</td></tr>
                   <tr style={{ color: '#d32f2f', background: 'rgba(211, 47, 47, 0.05)' }}>
                     <td style={{ padding: '4px 8px', fontSize: '12px', fontWeight: 'bold', textAlign: 'right' }}>Balance Due:</td>
