@@ -217,316 +217,316 @@ const InvoiceForm = ({ onGenerate, onUpdate }) => {
       </div>
 
       {activeTab === 'create' ? (
-        <form onSubmit={handleSubmit} className="invoice-form inline">
-        <div className="form-section compact">
-          <div className="section-title">
-            <FileCheck size={18} />
-            <span>Invoice Type</span>
-          </div>
-          <div className={`region-slider type-slider ${formData.type}`}>
-            <button 
-              type="button" 
-              className={formData.type === 'Proforma' ? 'active' : ''}
-              onClick={() => setFormData(prev => ({ ...prev, type: 'Proforma' }))}
-            >
-              Proforma
-            </button>
-            <button 
-              type="button" 
-              className={formData.type === 'Tax' ? 'active' : ''}
-              onClick={() => setFormData(prev => ({ ...prev, type: 'Tax' }))}
-            >
-              Tax
-            </button>
-            <div className="slider-thumb"></div>
-          </div>
-        </div>
-
-        <div className="form-section compact">
-          <div className="section-title">
-            <Globe size={18} />
-            <span>Region</span>
-          </div>
-          <div className={`region-slider ${formData.region}`}>
-            <button 
-              type="button" 
-              className={formData.region === 'India' ? 'active' : ''}
-              onClick={() => setFormData(prev => ({ ...prev, region: 'India' }))}
-            >
-              India
-            </button>
-            <button 
-              type="button" 
-              className={formData.region === 'UAE' ? 'active' : ''}
-              onClick={() => setFormData(prev => ({ ...prev, region: 'UAE' }))}
-            >
-              UAE
-            </button>
-            <div className="slider-thumb"></div>
-          </div>
-        </div>
-
-        <div className="form-grid-vertical">
-          <div className="form-row-flex">
-            <div className="form-group flex-1">
-              <label><Calendar size={16} /> Date</label>
-              <input 
-                type="date" 
-                name="invoiceDate" 
-                value={formData.invoiceDate}
-                onChange={handleChange}
-                required 
-              />
-            </div>
-            {formData.type !== 'Tax' && (
-              <div className="form-group flex-1">
-                <label><Calendar size={16} /> Due Date</label>
-                <input 
-                  type="date" 
-                  name="dueDate" 
-                  value={formData.dueDate}
-                  onChange={handleChange}
-                  required 
-                />
+        <>
+          <form onSubmit={handleSubmit} className="invoice-form inline">
+            <div className="form-section compact">
+              <div className="section-title">
+                <FileCheck size={18} />
+                <span>Invoice Type</span>
               </div>
-            )}
-          </div>
-
-          <div className="form-section compact">
-            <div className="section-title">
-              <FileCheck size={18} />
-              <span>Payment Term</span>
-            </div>
-            <div className={`region-slider type-slider term-slider ${formData.paymentTerm.replace(' ', '')}`}>
-              <button 
-                type="button" 
-                className={formData.paymentTerm === 'One Time' ? 'active' : ''}
-                onClick={() => setFormData(prev => ({ ...prev, paymentTerm: 'One Time' }))}
-              >
-                One Time
-              </button>
-              <button 
-                type="button" 
-                className={formData.paymentTerm === 'Recurring' ? 'active' : ''}
-                onClick={() => setFormData(prev => ({ ...prev, paymentTerm: 'Recurring' }))}
-              >
-                Recurring
-              </button>
-              <div className="slider-thumb"></div>
-            </div>
-          </div>
-
-          <div className="form-row-flex">
-            <div className="form-group flex-1">
-              <label><Building2 size={16} /> Client Name & Address</label>
-              <textarea 
-                name="name" 
-                placeholder="Acme Corp&#10;123 Business St, City" 
-                value={formData.name}
-                onChange={handleChange}
-                rows="2"
-                required 
-              />
-            </div>
-
-            <div className="form-group flex-1">
-              <label><Mail size={16} /> Client Email</label>
-              <input 
-                type="email" 
-                name="email" 
-                placeholder="billing@acme.com" 
-                value={formData.email}
-                onChange={handleChange}
-                required 
-              />
-            </div>
-          </div>
-
-          <div className="form-row-flex">
-            <div className="form-group flex-1">
-              <label><FileCheck size={16} /> Client {formData.region === 'India' ? 'GSTIN' : 'TRN'}</label>
-              <input 
-                type="text" 
-                name="clientGstin" 
-                placeholder={formData.region === 'India' ? "27XXXXXXXXXXXXZ" : "100XXXXXXXXXXXX"} 
-                value={formData.clientGstin}
-                onChange={handleChange}
-              />
-            </div>
-            {formData.region === 'India' && (
-              <div className="form-group flex-1">
-                <label><Globe size={16} /> Client State</label>
-                <input 
-                  type="text" 
-                  name="clientState" 
-                  placeholder="Maharashtra" 
-                  value={formData.clientState}
-                  onChange={handleChange}
-                />
-              </div>
-            )}
-            {formData.region === 'India' && (
-              <div className="form-group flex-1">
-                <label><ListOrdered size={16} /> SAC Code</label>
-                <input 
-                  type="text" 
-                  name="sacCode" 
-                  placeholder="998313" 
-                  value={formData.sacCode}
-                  onChange={handleChange}
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="form-section">
-          <div className="section-title">
-            <FileText size={18} />
-            <span>Line Items</span>
-          </div>
-          <div className="form-grid-vertical">
-            {formData.items.map((item, index) => (
-              <div key={index} className="form-item-row">
-                <div className="form-group flex-2">
-                  <input 
-                    type="text" 
-                    placeholder="Description" 
-                    value={item.description}
-                    onChange={(e) => updateItem(index, 'description', e.target.value)}
-                    required 
-                  />
-                </div>
-                <div className="form-group flex-1">
-                  <input 
-                    type="number" 
-                    placeholder="Cost" 
-                    value={item.amount}
-                    onChange={(e) => updateItem(index, 'amount', e.target.value)}
-                    required 
-                  />
-                </div>
-                {formData.items.length > 1 && (
-                  <button type="button" className="icon-btn-danger" onClick={() => removeItem(index)}>
-                    <Trash2 size={16} />
-                  </button>
-                )}
-              </div>
-            ))}
-            <button type="button" className="btn-add-item" onClick={addItem}>
-              <Plus size={16} />
-              <span>Add Item</span>
-            </button>
-          </div>
-        </div>
-
-          <div className="form-row-flex">
-            <div className="form-group flex-1">
-              <label>Currency</label>
-              <select name="currency" value={formData.currency} onChange={handleChange}>
-                <option value="USD">USD ($)</option>
-                <option value="INR">INR (₹)</option>
-                <option value="AED">AED (د.إ)</option>
-              </select>
-            </div>
-            <div className="form-group flex-1">
-              <label>Total</label>
-              <input type="number" name="amount" value={formData.amount} onChange={handleChange} readOnly />
-            </div>
-          </div>
-
-          {formData.type !== 'Tax' && (
-            <div className="form-row-flex">
-              <div className="form-group flex-1">
-                <label>Paid</label>
-                <input type="number" name="amountPaid" value={formData.amountPaid} onChange={handleChange} placeholder="0" />
-              </div>
-              <div className="form-group flex-1">
-                <label>Due</label>
-                <input type="number" name="dueAmount" value={formData.dueAmount} onChange={handleChange} />
+              <div className={`region-slider type-slider ${formData.type}`}>
+                <button 
+                  type="button" 
+                  className={formData.type === 'Proforma' ? 'active' : ''}
+                  onClick={() => setFormData(prev => ({ ...prev, type: 'Proforma' }))}
+                >
+                  Proforma
+                </button>
+                <button 
+                  type="button" 
+                  className={formData.type === 'Tax' ? 'active' : ''}
+                  onClick={() => setFormData(prev => ({ ...prev, type: 'Tax' }))}
+                >
+                  Tax
+                </button>
+                <div className="slider-thumb"></div>
               </div>
             </div>
-          )}
 
-
-
-          <div className="form-section">
-            <div className="section-title">
-              <Building2 size={18} />
-              <span>Bank Details</span>
+            <div className="form-section compact">
+              <div className="section-title">
+                <Globe size={18} />
+                <span>Region</span>
+              </div>
+              <div className={`region-slider ${formData.region}`}>
+                <button 
+                  type="button" 
+                  className={formData.region === 'India' ? 'active' : ''}
+                  onClick={() => setFormData(prev => ({ ...prev, region: 'India' }))}
+                >
+                  India
+                </button>
+                <button 
+                  type="button" 
+                  className={formData.region === 'UAE' ? 'active' : ''}
+                  onClick={() => setFormData(prev => ({ ...prev, region: 'UAE' }))}
+                >
+                  UAE
+                </button>
+                <div className="slider-thumb"></div>
+              </div>
             </div>
+
             <div className="form-grid-vertical">
               <div className="form-row-flex">
                 <div className="form-group flex-1">
-                  <label>Account Holder</label>
-                  <input type="text" name="accHolder" value={formData.accHolder} onChange={handleChange} />
+                  <label><Calendar size={16} /> Date</label>
+                  <input 
+                    type="date" 
+                    name="invoiceDate" 
+                    value={formData.invoiceDate}
+                    onChange={handleChange}
+                    required 
+                  />
                 </div>
-                <div className="form-group flex-1">
-                  <label>Account Number</label>
-                  <input type="text" name="accNo" value={formData.accNo} onChange={handleChange} />
+                {formData.type !== 'Tax' && (
+                  <div className="form-group flex-1">
+                    <label><Calendar size={16} /> Due Date</label>
+                    <input 
+                      type="date" 
+                      name="dueDate" 
+                      value={formData.dueDate}
+                      onChange={handleChange}
+                      required 
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="form-section compact">
+                <div className="section-title">
+                  <FileCheck size={18} />
+                  <span>Payment Term</span>
+                </div>
+                <div className={`region-slider type-slider term-slider ${formData.paymentTerm.replace(' ', '')}`}>
+                  <button 
+                    type="button" 
+                    className={formData.paymentTerm === 'One Time' ? 'active' : ''}
+                    onClick={() => setFormData(prev => ({ ...prev, paymentTerm: 'One Time' }))}
+                  >
+                    One Time
+                  </button>
+                  <button 
+                    type="button" 
+                    className={formData.paymentTerm === 'Recurring' ? 'active' : ''}
+                    onClick={() => setFormData(prev => ({ ...prev, paymentTerm: 'Recurring' }))}
+                  >
+                    Recurring
+                  </button>
+                  <div className="slider-thumb"></div>
                 </div>
               </div>
+
               <div className="form-row-flex">
                 <div className="form-group flex-1">
-                  <label>Bank Name</label>
-                  <input type="text" name="bankName" value={formData.bankName} onChange={handleChange} />
+                  <label><Building2 size={16} /> Client Name & Address</label>
+                  <textarea 
+                    name="name" 
+                    placeholder="Acme Corp&#10;123 Business St, City" 
+                    value={formData.name}
+                    onChange={handleChange}
+                    rows="2"
+                    required 
+                  />
                 </div>
+
                 <div className="form-group flex-1">
-                  <label>Account Type</label>
-                  <input type="text" name="accType" value={formData.accType} onChange={handleChange} />
+                  <label><Mail size={16} /> Client Email</label>
+                  <input 
+                    type="email" 
+                    name="email" 
+                    placeholder="billing@acme.com" 
+                    value={formData.email}
+                    onChange={handleChange}
+                    required 
+                  />
                 </div>
               </div>
+
               <div className="form-row-flex">
                 <div className="form-group flex-1">
-                  <label>IFSC Code</label>
-                  <input type="text" name="ifsc" value={formData.ifsc} onChange={handleChange} />
+                  <label><FileCheck size={16} /> Client {formData.region === 'India' ? 'GSTIN' : 'TRN'}</label>
+                  <input 
+                    type="text" 
+                    name="clientGstin" 
+                    placeholder={formData.region === 'India' ? "27XXXXXXXXXXXXZ" : "100XXXXXXXXXXXX"} 
+                    value={formData.clientGstin}
+                    onChange={handleChange}
+                  />
                 </div>
-                <div className="form-group flex-1">
-                  <label>Branch</label>
-                  <input type="text" name="branch" value={formData.branch} onChange={handleChange} />
+                {formData.region === 'India' && (
+                  <div className="form-group flex-1">
+                    <label><Globe size={16} /> Client State</label>
+                    <input 
+                      type="text" 
+                      name="clientState" 
+                      placeholder="Maharashtra" 
+                      value={formData.clientState}
+                      onChange={handleChange}
+                    />
+                  </div>
+                )}
+                {formData.region === 'India' && (
+                  <div className="form-group flex-1">
+                    <label><ListOrdered size={16} /> SAC Code</label>
+                    <input 
+                      type="text" 
+                      name="sacCode" 
+                      placeholder="998313" 
+                      value={formData.sacCode}
+                      onChange={handleChange}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="form-section">
+                <div className="section-title">
+                  <FileText size={18} />
+                  <span>Line Items</span>
+                </div>
+                <div className="form-grid-vertical">
+                  {formData.items.map((item, index) => (
+                    <div key={index} className="form-item-row">
+                      <div className="form-group flex-2">
+                        <input 
+                          type="text" 
+                          placeholder="Description" 
+                          value={item.description}
+                          onChange={(e) => updateItem(index, 'description', e.target.value)}
+                          required 
+                        />
+                      </div>
+                      <div className="form-group flex-1">
+                        <input 
+                          type="number" 
+                          placeholder="Cost" 
+                          value={item.amount}
+                          onChange={(e) => updateItem(index, 'amount', e.target.value)}
+                          required 
+                        />
+                      </div>
+                      {formData.items.length > 1 && (
+                        <button type="button" className="icon-btn-danger" onClick={() => removeItem(index)}>
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button type="button" className="btn-add-item" onClick={addItem}>
+                    <Plus size={16} />
+                    <span>Add Item</span>
+                  </button>
                 </div>
               </div>
-            {formData.region === 'India' && (
+
+              <div className="form-row-flex">
+                <div className="form-group flex-1">
+                  <label>Currency</label>
+                  <select name="currency" value={formData.currency} onChange={handleChange}>
+                    <option value="USD">USD ($)</option>
+                    <option value="INR">INR (₹)</option>
+                    <option value="AED">AED (د.إ)</option>
+                  </select>
+                </div>
+                <div className="form-group flex-1">
+                  <label>Total</label>
+                  <input type="number" name="amount" value={formData.amount} onChange={handleChange} readOnly />
+                </div>
+              </div>
+
+              {formData.type !== 'Tax' && (
+                <div className="form-row-flex">
+                  <div className="form-group flex-1">
+                    <label>Paid</label>
+                    <input type="number" name="amountPaid" value={formData.amountPaid} onChange={handleChange} placeholder="0" />
+                  </div>
+                  <div className="form-group flex-1">
+                    <label>Due</label>
+                    <input type="number" name="dueAmount" value={formData.dueAmount} onChange={handleChange} />
+                  </div>
+                </div>
+              )}
+
+              <div className="form-section">
+                <div className="section-title">
+                  <Building2 size={18} />
+                  <span>Bank Details</span>
+                </div>
+                <div className="form-grid-vertical">
+                  <div className="form-row-flex">
+                    <div className="form-group flex-1">
+                      <label>Account Holder</label>
+                      <input type="text" name="accHolder" value={formData.accHolder} onChange={handleChange} />
+                    </div>
+                    <div className="form-group flex-1">
+                      <label>Account Number</label>
+                      <input type="text" name="accNo" value={formData.accNo} onChange={handleChange} />
+                    </div>
+                  </div>
+                  <div className="form-row-flex">
+                    <div className="form-group flex-1">
+                      <label>Bank Name</label>
+                      <input type="text" name="bankName" value={formData.bankName} onChange={handleChange} />
+                    </div>
+                    <div className="form-group flex-1">
+                      <label>Account Type</label>
+                      <input type="text" name="accType" value={formData.accType} onChange={handleChange} />
+                    </div>
+                  </div>
+                  <div className="form-row-flex">
+                    <div className="form-group flex-1">
+                      <label>IFSC Code</label>
+                      <input type="text" name="ifsc" value={formData.ifsc} onChange={handleChange} />
+                    </div>
+                    <div className="form-group flex-1">
+                      <label>Branch</label>
+                      <input type="text" name="branch" value={formData.branch} onChange={handleChange} />
+                    </div>
+                  </div>
+                  {formData.region === 'India' && (
+                    <div className="form-group">
+                      <label><FileCheck size={16} /> My GSTIN</label>
+                      <input type="text" name="myGstin" value={formData.myGstin} onChange={handleChange} />
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <div className="form-group">
-                <label><FileCheck size={16} /> My GSTIN</label>
-                <input type="text" name="myGstin" value={formData.myGstin} onChange={handleChange} />
+                <label><FileText size={16} /> Amount in Words</label>
+                <input 
+                  type="text" 
+                  name="amountInWords" 
+                  placeholder={formData.region === 'India' ? "Rupees Five Thousand Only" : "Five Thousand Dirhams Only"} 
+                  value={formData.amountInWords}
+                  onChange={handleChange}
+                />
               </div>
-            )}
+
+              <div className="form-group">
+                <label>T&C</label>
+                <textarea 
+                  name="terms" 
+                  rows="6" 
+                  placeholder="Terms..."
+                  value={formData.terms}
+                  onChange={handleChange}
+                ></textarea>
+              </div>
             </div>
-          </div>
-
-          <div className="form-group">
-            <label><FileText size={16} /> Amount in Words</label>
-            <input 
-              type="text" 
-              name="amountInWords" 
-              placeholder={formData.region === 'India' ? "Rupees Five Thousand Only" : "Five Thousand Dirhams Only"} 
-              value={formData.amountInWords}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>T&C</label>
-            <textarea 
-              name="terms" 
-              rows="6" 
-              placeholder="Terms..."
-              value={formData.terms}
-              onChange={handleChange}
-            ></textarea>
-          </div>
-        </div>
-      </form>
-      <button 
-        type="button" 
-        className="btn-submit full-width" 
-        onClick={handleSubmit}
-        disabled={isSubmitting}
-        style={{ marginTop: '1.5rem' }}
-      >
-        <Send size={18} />
-        <span>Generate {formData.type} Invoice</span>
-      </button>
+          </form>
+          <button 
+            type="button" 
+            className="btn-submit full-width" 
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            style={{ marginTop: '1.5rem' }}
+          >
+            <Send size={18} />
+            <span>Generate {formData.type} Invoice</span>
+          </button>
+        </>
       ) : (
         <BillingQueue onSelectClient={handleClientSelect} />
       )}
