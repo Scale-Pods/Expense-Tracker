@@ -45,7 +45,8 @@ const Invoices = () => {
         pagebreak: { mode: ['css', 'legacy'], after: '.a4-page-block' }
       };
 
-      const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+      const rawBlob = await html2pdf().set(opt).from(element).output('blob');
+      const pdfBlob = new Blob([rawBlob], { type: 'application/pdf' });
       setPdfBlob(pdfBlob);
       const url = URL.createObjectURL(pdfBlob);
       setPdfUrl(url);
@@ -194,7 +195,7 @@ const Invoices = () => {
               <strong style={{ fontSize: '15px', display: 'block', marginBottom: '4px' }}>SCALEPODS LLP</strong>
               503-A Crescent House, 159/161 Crescent House,<br />
               Mumbai, MH - 400009<br />
-              <strong>GSTIN:</strong> {data.myGstin || "27XXXXXXXXXXXXZ"}<br />
+              {data.myGstin && <><strong>GSTIN:</strong> {data.myGstin}<br /></>}
               <strong>State:</strong> Maharashtra (27)
             </div>
           </div>
@@ -229,7 +230,7 @@ const Invoices = () => {
             </div>
               {data.email && <div style={{ color: '#555' }}>{data.email}</div>}
               <div style={{ marginTop: '8px' }}>
-                <strong>GSTIN:</strong> {data.clientGstin || "Unregistered"}<br />
+                {data.clientGstin && <><strong>GSTIN:</strong> {data.clientGstin}<br /></>}
                 <strong>State:</strong> {data.clientState || "Maharashtra"}
               </div>
             </div>
@@ -363,9 +364,9 @@ const Invoices = () => {
               ))}
             </div>
               {data.email && <div style={{ color: '#555' }}>{data.email}</div>}
-              <div style={{ marginTop: '8px' }}>
-                <strong>TRN:</strong> {data.clientGstin || "Unregistered"}<br />
-              </div>
+              {data.clientGstin && <div style={{ marginTop: '8px' }}>
+                <strong>TRN:</strong> {data.clientGstin}<br />
+              </div>}
             </div>
           </div>
           <div style={{ flex: '0 1 280px', minWidth: '200px', padding: '8px', fontSize: '12px' }}>
@@ -577,7 +578,7 @@ const Invoices = () => {
             <div className="company-address" style={{ fontSize: '11px', lineHeight: '1.2', marginTop: '8px', color: '#555' }}>
               <strong style={{ fontSize: '13px', color: '#000' }}>SCALEPODS LLP</strong><br />
               503-A Floor-5th, 159/161, Crescent house, Mumbai, MH - 400009<br />
-              <strong>GSTIN:</strong> {data.myGstin || "27XXXXXXXXXXXXZ"}
+              {data.myGstin && <><strong>GSTIN:</strong> {data.myGstin}</>}
             </div>
           </div>
           
@@ -607,7 +608,7 @@ const Invoices = () => {
               i === 0 ? <strong key={i} style={{ fontSize: '14px', display: 'block', marginBottom: '2px' }}>{line}</strong> : <span key={i} style={{ display: 'block' }}>{line}</span>
             ))}
           </div>
-          <div style={{ fontSize: '11px', color: '#555', marginTop: '2px' }}>GSTIN: {data.clientGstin || "Unregistered"}</div>
+          {data.clientGstin && <div style={{ fontSize: '11px', color: '#555', marginTop: '2px' }}>GSTIN: {data.clientGstin}</div>}
         </div>
 
         <div style={{ overflowX: 'auto', marginBottom: '10px' }}>
@@ -868,7 +869,7 @@ const Invoices = () => {
                   {isSending ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
                   <span>{isSending ? 'Sending...' : 'Send to Client'}</span>
                 </button>
-                <a href={pdfUrl} download={`Invoice_${liveData?.name}.pdf`} className="action-btn-premium">
+                <a href={pdfUrl} download={`Invoice_${liveData?.name?.split('\n')[0].replace(/\s+/g, '_')}.pdf`} className="action-btn-premium">
                   <Download size={18} />
                   <span>Download Now</span>
                 </a>
