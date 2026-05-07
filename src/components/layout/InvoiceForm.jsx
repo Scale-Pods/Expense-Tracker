@@ -34,6 +34,7 @@ const InvoiceForm = ({ onGenerate, onUpdate }) => {
     clientState: 'Maharashtra',
     amountInWords: '',
     paymentTerm: 'One Time',
+    sacCode: '998313',
     originalDetails: null
   };
 
@@ -360,6 +361,18 @@ const InvoiceForm = ({ onGenerate, onUpdate }) => {
                   name="clientState" 
                   placeholder="Maharashtra" 
                   value={formData.clientState}
+                  onChange={handleChange}
+                />
+              </div>
+            )}
+            {formData.region === 'India' && (
+              <div className="form-group flex-1">
+                <label><ListOrdered size={16} /> SAC Code</label>
+                <input 
+                  type="text" 
+                  name="sacCode" 
+                  placeholder="998313" 
+                  value={formData.sacCode}
                   onChange={handleChange}
                 />
               </div>

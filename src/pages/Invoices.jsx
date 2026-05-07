@@ -263,7 +263,7 @@ const Invoices = () => {
                     <strong style={{ fontSize: '13px' }}>{item.description}</strong><br />
                     <span style={{ fontSize: '11px', color: '#666' }}>Software automation and workflow orchestration services.</span>
                   </td>
-                  <td style={{ padding: '8px 15px', textAlign: 'center', verticalAlign: 'top', color: '#666' }}>998313</td>
+                  <td style={{ padding: '8px 15px', textAlign: 'center', verticalAlign: 'top', color: '#666' }}>{data.sacCode || "998313"}</td>
                   <td style={{ padding: '8px 15px', textAlign: 'right', verticalAlign: 'top', fontWeight: '600' }}>{Number(item.amount).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
                 </tr>
               ))}
@@ -628,7 +628,7 @@ const Invoices = () => {
                     <strong>{item.description}</strong><br />
                     <span style={{ fontSize: '10px', color: '#777' }}>AI & Automation Workflow Implementation</span>
                   </td>
-                  <td style={{ padding: '10px', borderBottom: '1px solid #eee', fontSize: '12px', verticalAlign: 'top' }}>998313</td>
+                  <td style={{ padding: '10px', borderBottom: '1px solid #eee', fontSize: '12px', verticalAlign: 'top' }}>{data.sacCode || "998313"}</td>
                   <td style={{ padding: '10px', borderBottom: '1px solid #eee', fontSize: '12px', verticalAlign: 'top' }}>{data.currency} {Number(item.amount).toLocaleString()}</td>
                   <td style={{ padding: '10px', borderBottom: '1px solid #eee', fontSize: '12px', verticalAlign: 'top', textAlign: 'right', fontWeight: '700' }}>{data.currency} {Number(item.amount).toLocaleString()}</td>
                 </tr>
@@ -692,7 +692,7 @@ const Invoices = () => {
             )) 
           : (
               <div className="page-break-inside-avoid" style={{ padding: '0 0 0 0', margin: 0, background: '#fff', fontSize: '12px', color: '#666', lineHeight: '1.2' }}>
-                1. This is a Proforma Invoice, not a Tax Invoice. 2. 18% GST applied as per SAC 998313. 3. Full payment required to initiate automation setup.
+                1. This is a Proforma Invoice, not a Tax Invoice. 2. 18% GST applied as per SAC {data.sacCode || "998313"}. 3. Full payment required to initiate automation setup.
               </div>
             )
         }
