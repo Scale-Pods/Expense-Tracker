@@ -515,13 +515,18 @@ const InvoiceForm = ({ onGenerate, onUpdate }) => {
               onChange={handleChange}
             ></textarea>
           </div>
-          
-          <button type="submit" className="btn-submit full-width">
-            <Send size={18} />
-            <span>Generate {formData.type} Invoice</span>
-          </button>
         </div>
       </form>
+      <button 
+        type="button" 
+        className="btn-submit full-width" 
+        onClick={handleSubmit}
+        disabled={isSubmitting}
+        style={{ marginTop: '1.5rem' }}
+      >
+        <Send size={18} />
+        <span>Generate {formData.type} Invoice</span>
+      </button>
       ) : (
         <BillingQueue onSelectClient={handleClientSelect} />
       )}
