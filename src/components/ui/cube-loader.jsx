@@ -63,19 +63,22 @@ export default function CubeLoader() {
       <style>{`
         .cube-wrapper-fullscreen {
           position: fixed;
-          top: 0;
-          left: 0;
-          width: 100vw;
-          height: 100vh;
+          inset: 0;
           display: flex;
           align-items: center;
           justify-content: center;
           z-index: 9999;
-          background: rgba(10, 15, 25, 0.2);
-          backdrop-filter: blur(10px);
-          pointer-events: none; /* Let clicks pass through if needed, but usually we block interaction */
+          background: rgba(10, 15, 25, 0.4);
+          backdrop-filter: blur(12px);
+          pointer-events: none;
+          /* Center in the content area by offsetting the sidebar width */
+          padding-left: 280px; 
         }
 
+        @media (max-width: 1024px) {
+          .cube-wrapper-fullscreen {
+            padding-left: 0;
+          }
         }
 
         .cube-loader-container {
@@ -89,8 +92,8 @@ export default function CubeLoader() {
 
         .cube-scene {
           position: relative;
-          width: 160px; /* Increased from 96px */
-          height: 160px; /* Increased from 96px */
+          width: 160px;
+          height: 160px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -108,8 +111,8 @@ export default function CubeLoader() {
           position: absolute;
           inset: 0;
           margin: auto;
-          width: 50px; /* Increased from 32px */
-          height: 50px; /* Increased from 32px */
+          width: 50px;
+          height: 50px;
           background: white;
           border-radius: 9999px;
           filter: blur(12px);
@@ -134,7 +137,7 @@ export default function CubeLoader() {
         }
 
         .loading-title {
-          font-size: 18px; /* Increased from 14px */
+          font-size: 18px;
           font-weight: 700;
           letter-spacing: 0.5em;
           color: #67e8f9;
@@ -153,7 +156,7 @@ export default function CubeLoader() {
         }
 
         @keyframes breathe {
-          0%, 100% { transform: translateZ(80px); opacity: 0.9; } /* 80px is half of 160px */
+          0%, 100% { transform: translateZ(80px); opacity: 0.9; }
           50% { transform: translateZ(130px); opacity: 0.4; border-color: rgba(255,255,255,0.8); }
         }
 
