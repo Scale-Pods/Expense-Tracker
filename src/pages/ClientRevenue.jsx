@@ -250,6 +250,11 @@ const ClientRevenue = () => {
     textColor: theme === 'dark' ? '#FFFFFF' : '#1F2937'
   }), [theme]);
 
+  const profitPieData = useMemo(() => [
+    { name: 'Revenue', value: stats.totalIncome, color: '#14b8a6' },
+    { name: 'Expenses', value: totalExpenses, color: '#f59e0b' }
+  ], [stats, totalExpenses]);
+
   const comparisonData = useMemo(() => {
     const months = {};
     revenueData.forEach(r => {
