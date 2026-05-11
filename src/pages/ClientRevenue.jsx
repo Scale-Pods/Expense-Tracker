@@ -462,8 +462,8 @@ const ClientRevenue = () => {
     <div className="payments-container redesigned">
       <div className="payments-header">
         <div className="header-title-group">
+          <p className="top-tagline">Real-time client income and receivable analytics</p>
           <h1>Revenue Tracking</h1>
-          <p>Real-time client income and receivable analytics</p>
         </div>
       </div>
 

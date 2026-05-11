@@ -26,7 +26,7 @@ const Topbar = ({ toggleSidebar }) => {
   return (
     <header className="topbar">
       <div className="greeting-section">
-        <h2>{pageTitle}</h2>
+        {/* Page title removed as requested */}
       </div>
       
       <div className="topbar-actions">

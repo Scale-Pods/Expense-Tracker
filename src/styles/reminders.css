@@ -1359,11 +1359,11 @@
   backdrop-filter: blur(10px);
 }
 
-/* Revenue Chart Accents */
-.chart-card-premium.accent-cyan { border-top: 3px solid #00e5cc; }
-.chart-card-premium.accent-pink { border-top: 3px solid #f43f5e; }
-.chart-card-premium.accent-yellow { border-top: 3px solid #f59e0b; }
-.chart-card-premium.accent-green { border-top: 3px solid #10b981; }
+/* Revenue Chart Accents - Borders Removed */
+.chart-card-premium.accent-cyan { border-top: none; }
+.chart-card-premium.accent-pink { border-top: none; }
+.chart-card-premium.accent-yellow { border-top: none; }
+.chart-card-premium.accent-green { border-top: none; }
 
 .chart-header h3 {
   font-size: 1rem;

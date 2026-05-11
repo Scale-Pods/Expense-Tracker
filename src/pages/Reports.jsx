@@ -189,8 +189,8 @@ const Reports = () => {
     <div className="reports-container redesigned">
       <div className="reports-header">
         <div className="header-title-group">
+          <p className="top-tagline">{isCustomRangeActive ? 'Custom Period Analysis' : 'Monthly projections and fiscal health analysis'}</p>
           <h1>Financial Reports</h1>
-          <p>{isCustomRangeActive ? 'Custom Period Analysis' : 'Monthly projections and fiscal health analysis'}</p>
         </div>
         <div className="header-filters">
           {isCustomRangeActive && (

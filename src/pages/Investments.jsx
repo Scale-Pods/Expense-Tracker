@@ -180,8 +180,8 @@ const Investments = () => {
             <div className="welcome-tag">
               <Sparkles size={14} /> Growing Your Wealth
             </div>
+            <p className="top-tagline">Track your capital deployments and monitor financial growth.</p>
             <h1>Investment Portfolio</h1>
-            <p>Track your capital deployments and monitor financial growth.</p>
           </div>
 
           <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', marginBottom: '2rem', display: 'grid', gap: '1.5rem' }}>

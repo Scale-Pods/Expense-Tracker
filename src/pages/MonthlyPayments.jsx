@@ -221,13 +221,13 @@ const MonthlyPayments = () => {
     <div className="payments-container redesigned">
       <div className="payments-header">
         <div className="header-title-group">
-          <h1>Monthly Payments</h1>
-          <p>
+          <p className="top-tagline">
             {isCustomRange 
               ? `Range: ${dateRange.start || '...'} to ${dateRange.end || '...'}`
               : `Track expenses for ${format(parse(selectedMonth, 'yyyy-MM', new Date()), 'MMMM yyyy')}`
             }
           </p>
+          <h1>Monthly Payments</h1>
         </div>
         
         <div className="header-filters">

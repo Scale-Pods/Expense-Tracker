@@ -160,9 +160,24 @@ select {
   color: #00E5CC !important;
 }
 
-.dropdown-item.selected {
-  background: rgba(0, 229, 204, 0.1);
+.top-tagline {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
   color: var(--color-primary);
+  margin-bottom: 8px;
+  display: block;
+}
+
+[data-theme='dark'] .top-tagline {
+  color: #00e5cc;
+  opacity: 0.9;
+}
+
+.header-title-group h1 {
+  margin-top: 0;
+  line-height: 1.1;
 }
 
 .dropdown-item .dot {

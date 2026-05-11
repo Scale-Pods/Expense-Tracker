@@ -14,7 +14,7 @@
 }
 
 .page-content {
-  padding: 8px 32px 32px; /* Reduced top padding from 32px to 8px */
+  padding: 0px 32px 32px; /* Removed top padding to move headers up */
   flex: 1;
   width: 100%;
   max-width: 100%;

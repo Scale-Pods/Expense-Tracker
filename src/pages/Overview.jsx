@@ -157,6 +157,12 @@ const Overview = () => {
 
   return (
     <div className="dashboard-container stagger-load">
+      <div className="payments-header" style={{ marginBottom: '2.5rem' }}>
+        <div className="header-title-group">
+          <p className="top-tagline">Real-time visibility into your financial ecosystem</p>
+          <h1>Dashboard Overview</h1>
+        </div>
+      </div>
       <QuickEntryDrawer onRefresh={handleRefresh} />
 
       {/* KPI Cards */}

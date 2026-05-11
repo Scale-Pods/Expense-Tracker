@@ -228,8 +228,8 @@ const Reminders = () => {
             <div className="welcome-tag">
               <Sparkles size={14} /> Powering Financial Clarity
             </div>
+            <p className="top-tagline">Intelligence-driven reminders to keep your spend tracking precise.</p>
             <h1>Action Center & Tasks</h1>
-            <p>Intelligence-driven reminders to keep your spend tracking precise.</p>
           </div>
 
           <section className="task-section">

@@ -121,6 +121,12 @@ const CategoryAnalysis = () => {
 
   return (
     <div className="categories-container stagger-load">
+      <div className="payments-header" style={{ marginBottom: '2.5rem' }}>
+        <div className="header-title-group">
+          <p className="top-tagline">Deep-dive into where your capital is allocated</p>
+          <h1>Categorical Spend Analysis</h1>
+        </div>
+      </div>
       <div className="category-cards-grid">
         {spendByCategory.map((cat, index) => (
           <Card key={index} className="category-summary-card">
