@@ -40,7 +40,7 @@
 }
 
 .drawer-toggle-btn.open {
-  right: 400px;
+  right: 320px;
   transform: translateY(-50%) rotate(0deg);
 }
 
@@ -51,8 +51,8 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.5); /* dark enough to dim the dashboard */
+  backdrop-filter: blur(8px);
   z-index: 999;
   opacity: 0;
   visibility: hidden;
@@ -69,12 +69,10 @@
   position: fixed;
   top: 0;
   right: 0;
-  width: 400px;
+  width: 320px;
   height: 100vh;
-  background: rgba(10, 20, 50, 0.6);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  background: #111827; /* fully solid, no alpha */
+  border-left: 1px solid rgba(255, 255, 255, 0.10);
   padding: 32px 28px;
   box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
   transform: translateX(100%);
