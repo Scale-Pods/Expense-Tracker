@@ -76,9 +76,6 @@ export default function CubeLoader() {
           pointer-events: none; /* Let clicks pass through if needed, but usually we block interaction */
         }
 
-        /* Adjusting for sidebar presence in the layout */
-        body:has(.sidebar) .cube-wrapper-fullscreen {
-           padding-left: 260px; /* Offset for the 260px sidebar */
         }
 
         .cube-loader-container {
