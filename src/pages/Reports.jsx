@@ -21,6 +21,7 @@ const Reports = () => {
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
   const [isCustomRangeActive, setIsCustomRangeActive] = useState(false);
   const [customRange, setCustomRange] = useState({ start: '', end: '' });
+  const [isMonthSelectOpen, setIsMonthSelectOpen] = useState(false);
 
   const loading = expLoading || revLoading;
   const error = expError || revError;
@@ -205,27 +206,39 @@ const Reports = () => {
             </div>
           )}
           <div className="custom-dropdown-container">
-            <select 
-              value={selectedMonth} 
-              onChange={(e) => {
-                if (e.target.value === 'custom') {
-                  setIsCustomRangeActive(true);
-                } else {
-                  setSelectedMonth(e.target.value);
-                  setIsCustomRangeActive(false);
-                }
-              }}
-              className="custom-dropdown-trigger"
-              style={{ appearance: 'none', paddingRight: '40px' }}
+            <div 
+              className={`custom-dropdown-trigger ${isMonthSelectOpen ? 'active' : ''}`}
+              onClick={() => setIsMonthSelectOpen(!isMonthSelectOpen)}
             >
-              {monthOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-              <option value="custom">Custom Range...</option>
-            </select>
-            <div style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
               <ArrowUpDown size={14} className="opacity-50" />
+              <span>{isCustomRangeActive ? 'Custom Range' : monthOptions.find(opt => opt.value === selectedMonth)?.label}</span>
             </div>
+            
+            {isMonthSelectOpen && (
+              <div className="custom-dropdown-menu animate-dropdown" style={{ right: 0 }}>
+                <button 
+                  className={`dropdown-item ${isCustomRangeActive ? 'selected' : ''}`}
+                  onClick={() => { setIsCustomRangeActive(true); setIsMonthSelectOpen(false); }}
+                >
+                  Custom Range...
+                </button>
+                <div className="menu-divider" />
+                {monthOptions.map(opt => (
+                  <button 
+                    key={opt.value} 
+                    className={`dropdown-item ${(!isCustomRangeActive && selectedMonth === opt.value) ? 'selected' : ''}`}
+                    onClick={() => {
+                      setSelectedMonth(opt.value);
+                      setIsCustomRangeActive(false);
+                      setIsMonthSelectOpen(false);
+                    }}
+                  >
+                    {opt.label}
+                    {(!isCustomRangeActive && selectedMonth === opt.value) && <div className="dot"></div>}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

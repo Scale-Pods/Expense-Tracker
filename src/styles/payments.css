@@ -44,91 +44,6 @@
   align-items: center;
 }
 
-/* Custom Glass Dropdown */
-.custom-dropdown-container {
-  position: relative;
-}
-
-.custom-dropdown-trigger {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  padding: 10px 18px;
-  border-radius: 14px;
-  border: 1px solid var(--glass-border);
-  color: var(--color-text-main);
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  min-width: 180px;
-  justify-content: space-between;
-}
-
-.custom-dropdown-trigger:hover,
-.custom-dropdown-trigger.active {
-  background: var(--glass-highlight);
-  border-color: var(--color-primary);
-  box-shadow: 0 0 15px rgba(20, 184, 166, 0.2);
-}
-
-.custom-dropdown-trigger .chevron {
-  opacity: 0.5;
-  transition: transform 0.3s ease;
-}
-
-.custom-dropdown-trigger .chevron.rotate {
-  transform: rotate(180deg);
-}
-
-.custom-dropdown-menu {
-  position: absolute;
-  top: calc(100% + 10px);
-  right: 0;
-  min-width: 220px;
-  background: var(--glass-bg);
-  backdrop-filter: blur(32px);
-  border: 1px solid var(--glass-border);
-  border-radius: 16px;
-  padding: 8px;
-  box-shadow: var(--glass-shadow);
-  z-index: 1000;
-  transform-origin: top;
-}
-
-[data-theme='light'] .custom-dropdown-menu {
-  background: white;
-}
-
-.dropdown-item {
-  width: 100%;
-  padding: 10px 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-radius: 10px;
-  color: var(--color-text-secondary);
-  font-size: 0.85rem;
-  font-weight: 500;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: left;
-}
-
-.dropdown-item:hover {
-  background: rgba(0, 229, 204, 0.05);
-  color: var(--color-primary);
-}
-
-.dropdown-item.selected {
-  background: rgba(0, 229, 204, 0.1);
-  color: var(--color-primary);
-}
-
 .dropdown-item .dot {
   width: 6px;
   height: 6px;
@@ -195,6 +110,12 @@
 .range-field input:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 10px rgba(20, 184, 166, 0.2);
+}
+
+[data-theme='dark'] .range-field input {
+  background: rgba(15, 23, 42, 0.8);
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .clear-range-btn {

@@ -632,21 +632,142 @@ const ClientRevenue = () => {
             </div>
             <form onSubmit={handleAddRevenue} className="reminder-form-redesign">
               <div className="redesign-group">
-                <label>Client Name</label>
+                <label>Client Details</label>
                 <div className="input-with-icon">
                   <Briefcase size={16} className="icon" />
-                  <input type="text" placeholder="Enter client name..." value={newRevenue.clientName} onChange={(e) => setNewRevenue({...newRevenue, clientName: e.target.value})} required />
+                  <input 
+                    type="text" 
+                    placeholder="Client Name" 
+                    value={newRevenue.clientName} 
+                    onChange={(e) => setNewRevenue({...newRevenue, clientName: e.target.value})} 
+                    required 
+                  />
+                </div>
+                <div className="input-row-multi">
+                  <div className="input-with-icon">
+                    <Mail size={14} className="icon" />
+                    <input 
+                      type="email" 
+                      placeholder="Email Address" 
+                      value={newRevenue.clientEmail} 
+                      onChange={(e) => setNewRevenue({...newRevenue, clientEmail: e.target.value})} 
+                    />
+                  </div>
+                  <div className="input-with-icon">
+                    <Phone size={14} className="icon" />
+                    <input 
+                      type="text" 
+                      placeholder="Phone Number" 
+                      value={newRevenue.clientPhone} 
+                      onChange={(e) => setNewRevenue({...newRevenue, clientPhone: e.target.value})} 
+                    />
+                  </div>
                 </div>
               </div>
+
               <div className="redesign-group">
-                <label>Amount</label>
-                <div className="input-with-icon">
-                  < IndianRupee size={16} className="icon" />
-                  <input type="number" placeholder="0.00" value={newRevenue.realisedRevenue} onChange={(e) => setNewRevenue({...newRevenue, realisedRevenue: e.target.value})} required />
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label style={{ margin: 0 }}>Services / Line Items</label>
+                  <button type="button" onClick={handleAddService} className="btn-add-mini">
+                    <Plus size={14} /> Add Item
+                  </button>
+                </div>
+                <div className="services-list-container">
+                  {newRevenue.services.map((service, index) => (
+                    <div key={index} className="service-entry-row animate-in">
+                      <input 
+                        type="text" 
+                        placeholder="Service name..." 
+                        value={service.name} 
+                        onChange={(e) => handleServiceChange(index, 'name', e.target.value)}
+                        className="service-name-input"
+                      />
+                      <div className="amount-input-wrapper">
+                        <span className="currency-prefix">{CURRENCIES.find(c => c.code === newRevenue.currency)?.symbol || '₹'}</span>
+                        <input 
+                          type="number" 
+                          placeholder="0.00" 
+                          value={service.amount} 
+                          onChange={(e) => handleServiceChange(index, 'amount', e.target.value)}
+                          className="service-amount-input"
+                        />
+                      </div>
+                      {newRevenue.services.length > 1 && (
+                        <button type="button" onClick={() => handleRemoveService(index)} className="btn-remove-service">
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
+
+              <div className="redesign-group">
+                <div className="input-row-multi">
+                  <div className="field-block">
+                    <label>Currency</label>
+                    <select 
+                      value={newRevenue.currency} 
+                      onChange={(e) => setNewRevenue({...newRevenue, currency: e.target.value})}
+                      className="form-select-premium"
+                    >
+                      {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.code} ({c.symbol})</option>)}
+                    </select>
+                  </div>
+                  <div className="field-block">
+                    <label>Total Income</label>
+                    <div className="input-with-icon read-only">
+                      <IndianRupee size={16} className="icon" />
+                      <input type="text" value={newRevenue.incomeAmount} readOnly placeholder="0.00" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="redesign-group">
+                <label>Realised Revenue</label>
+                <div className="input-row-multi">
+                  <div className="input-with-icon">
+                    <IndianRupee size={16} className="icon" />
+                    <input 
+                      type="number" 
+                      placeholder="Amount realised" 
+                      value={newRevenue.realisedRevenue} 
+                      onChange={(e) => setNewRevenue({...newRevenue, realisedRevenue: e.target.value})} 
+                    />
+                  </div>
+                  <div className="input-with-icon">
+                    <Calendar size={16} className="icon" />
+                    <input 
+                      type="date" 
+                      value={newRevenue.realisedDate} 
+                      onChange={(e) => setNewRevenue({...newRevenue, realisedDate: e.target.value})} 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="redesign-group">
+                <label>Receivables Info</label>
+                <div className="input-row-multi">
+                  <div className="input-with-icon read-only">
+                    <IndianRupee size={16} className="icon" />
+                    <input type="text" value={newRevenue.receivables} readOnly placeholder="Balance" />
+                  </div>
+                  <div className="input-with-icon">
+                    <Clock size={16} className="icon" />
+                    <input 
+                      type="date" 
+                      value={newRevenue.receivableDate} 
+                      onChange={(e) => setNewRevenue({...newRevenue, receivableDate: e.target.value})} 
+                      placeholder="Due Date"
+                    />
+                  </div>
+                </div>
+              </div>
+
               <button type="submit" className="btn-submit-redesign" disabled={submitting}>
-                {submitting ? 'Syncing...' : 'Add Entry'}
+                {submitting ? 'Syncing...' : 'Track Revenue'}
               </button>
             </form>
           </div>
