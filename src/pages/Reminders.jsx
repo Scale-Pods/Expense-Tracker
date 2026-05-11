@@ -14,12 +14,12 @@ import {
   Sparkles,
   Info,
   Trash2,
-  Loader,
   AlertCircle,
   IndianRupee,
   Tag,
   CreditCard
 } from 'lucide-react';
+import CubeLoader from '../components/ui/cube-loader';
 import '../styles/reminders.css';
 
 const WEBHOOK_URL = `${import.meta.env.VITE_N8N_BASE_URL}/${import.meta.env.VITE_WEBHOOK_ID_GENERAL}`;
@@ -29,7 +29,7 @@ const Reminders = () => {
     title: '', 
     description: '',
     amount: '',
-    costType: 'Fixed',
+    costType: 'Salary',
     debitDate: '1',
     mode: ''
   });
@@ -198,15 +198,10 @@ const Reminders = () => {
     }
   };
 
-  if (loading) {
+  if (loading && !webhookResponse) {
     return (
-      <div className="modern-loading-screen">
-        <div className="loader-visual">
-          <div className="loader-aura"></div>
-          <div className="loader-ring"></div>
-          <div className="loader-dot"></div>
-        </div>
-        <p className="loading-text-modern">Syncing Monthly Trackers</p>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <CubeLoader />
       </div>
     );
   }
@@ -214,11 +209,11 @@ const Reminders = () => {
   if (error || (webhookResponse && webhookResponse.error)) {
     return (
       <div className="reminders-container redesigned">
-        <div className="p-6 bg-red-50 rounded-xl border border-red-100 flex items-start shadow-sm max-w-2xl mx-auto mt-20">
+        <div className="p-6 bg-red-50/10 rounded-xl border border-red-500/20 flex items-start shadow-sm max-w-2xl mx-auto mt-20">
           <AlertCircle className="text-red-500 mr-4 mt-1" size={32} />
           <div>
-            <h3 className="text-xl font-bold text-red-700">Sync Failed</h3>
-            <p className="text-red-600/80">{error?.message || webhookResponse?.message || 'Could not synchronize.'}</p>
+            <h3 className="text-xl font-bold text-red-500">Sync Failed</h3>
+            <p className="text-red-500/80">{error?.message || webhookResponse?.message || 'Could not synchronize.'}</p>
           </div>
         </div>
       </div>
@@ -226,7 +221,7 @@ const Reminders = () => {
   }
 
   return (
-    <div className="reminders-container redesigned">
+    <div className="reminders-container redesigned stagger-load">
       <div className="reminders-grid">
         <div className="main-tasks">
           <div className="reminders-welcome">
@@ -325,21 +320,7 @@ const Reminders = () => {
               </div>
               
               <div className="redesign-group">
-                <label>Amount (INR)</label>
-                <div className="input-with-icon">
-                  <IndianRupee size={16} className="icon" />
-                  <input 
-                    type="number" 
-                    placeholder="0.00"
-                    value={newReminder.amount}
-                    onChange={(e) => setNewReminder({...newReminder, amount: e.target.value})}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="redesign-group">
-                <label>Type of Cost</label>
+                <label>Category (Type of Cost)</label>
                 <div className="input-with-icon">
                   <Tag size={16} className="icon" />
                   <select 
@@ -347,8 +328,11 @@ const Reminders = () => {
                     onChange={(e) => setNewReminder({...newReminder, costType: e.target.value})}
                     required
                   >
-                    <option value="Fixed">Fixed Cost</option>
-                    <option value="Variable">Variable Cost</option>
+                    <option value="Salary">Salary</option>
+                    <option value="One-Time tools">One-Time tools</option>
+                    <option value="Subscriptions">Subscriptions</option>
+                    <option value="Ads">Ads</option>
+                    <option value="Overheads">Overheads</option>
                   </select>
                 </div>
               </div>
@@ -356,7 +340,7 @@ const Reminders = () => {
               <div className="redesign-group">
                 <label>Date of Debit (Day of Month)</label>
                 <div className="calendar-mini-grid">
-                  {[...Array(30)].map((_, i) => {
+                  {[...Array(31)].map((_, i) => {
                     const day = String(i + 1);
                     return (
                       <button
@@ -397,6 +381,19 @@ const Reminders = () => {
                       </>
                     )}
                   </select>
+                </div>
+              </div>
+
+              <div className="redesign-group">
+                <label>Amount (INR) - Optional</label>
+                <div className="input-with-icon">
+                  <IndianRupee size={16} className="icon" />
+                  <input 
+                    type="number" 
+                    placeholder="0.00"
+                    value={newReminder.amount}
+                    onChange={(e) => setNewReminder({...newReminder, amount: e.target.value})}
+                  />
                 </div>
               </div>
 

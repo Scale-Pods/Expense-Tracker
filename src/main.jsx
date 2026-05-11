@@ -40,6 +40,13 @@ import { ThemeProvider } from './hooks/ThemeContext.jsx'
 import { CurrencyProvider } from './hooks/CurrencyContext.jsx'
 import { AuthProvider } from './hooks/AuthContext.jsx'
 
+// Firefox fallback for zoom
+if (navigator.userAgent.includes("Firefox")) {
+  document.documentElement.style.transform = "scale(0.8)";
+  document.documentElement.style.transformOrigin = "top left";
+  document.documentElement.style.width = "125%";
+}
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ErrorBoundary>

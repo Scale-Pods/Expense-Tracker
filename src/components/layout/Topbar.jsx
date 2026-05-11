@@ -3,9 +3,8 @@ import { useLocation } from 'react-router-dom';
 import { Sun, Moon, Menu } from 'lucide-react';
 import { useTheme } from '../../hooks/ThemeContext';
 import { useAuth } from '../../hooks/AuthContext';
-import '../../styles/topbar.css';
-
 import { useCurrency } from '../../hooks/CurrencyContext';
+import '../../styles/topbar.css';
 
 const Topbar = ({ toggleSidebar }) => {
   const location = useLocation();
@@ -20,46 +19,28 @@ const Topbar = ({ toggleSidebar }) => {
     return 'Good Evening';
   };
 
-  const getPageTitle = (pathname) => {
-    switch (pathname) {
-      case '/': return `${getGreeting()}, ${currentUser?.username?.split(' ')[0] || 'User'} 👋`;
-      case '/reminders': return 'Action Center & Reminders';
-      case '/monthly': return 'Monthly Payments';
-      case '/categories': return 'Category Analysis';
-      case '/reports': return 'Reports';
-      case '/webhook': return 'Webhook Data';
-      case '/revenue': return 'Client Revenue';
-      default: return 'Expense Tracker';
-    }
-  };
+  const pageTitle = location.pathname === '/' 
+    ? `${getGreeting()}, ${currentUser?.username?.split(' ')[0] || 'User'} 👋`
+    : location.pathname.slice(1).replace('-', ' ').toUpperCase();
 
   return (
     <header className="topbar">
-      <div className="topbar-left">
-        <button className="mobile-menu-btn" onClick={toggleSidebar} aria-label="Open Menu">
-          <Menu size={24} />
-        </button>
-        <h2 className="page-title">{getPageTitle(location.pathname)}</h2>
+      <div className="greeting-section">
+        <h2>{pageTitle}</h2>
       </div>
+      
       <div className="topbar-actions">
-        <div className="currency-selector-modular">
-          <button 
-            onClick={() => currency !== 'INR' && toggleCurrency()} 
-            className={`currency-opt ${currency === 'INR' ? 'active' : ''}`}
-          >
-            ₹ INR
-          </button>
-          <button 
-            onClick={() => currency !== 'USD' && toggleCurrency()} 
-            className={`currency-opt ${currency === 'USD' ? 'active' : ''}`}
-          >
-            $ USD
-          </button>
-        </div>
-        <button onClick={toggleTheme} className="theme-toggle" title="Toggle Light/Dark Mode">
-          {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+        <button className="action-pill currency-toggle-pill" onClick={toggleCurrency}>
+          <span>{currency === 'INR' ? '₹ INR' : '$ USD'}</span>
         </button>
-        <span className="date-display">{new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+        
+        <button onClick={toggleTheme} className="theme-toggle-btn">
+          {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+        </button>
+        
+        <div className="action-pill date-pill">
+          <span>{new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+        </div>
       </div>
     </header>
   );

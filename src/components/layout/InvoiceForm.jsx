@@ -448,7 +448,7 @@ const InvoiceForm = ({ onGenerate, onUpdate }) => {
                 </div>
               )}
 
-              <div className="form-section">
+              <div className="form-section bank-details-section">
                 <div className="section-title">
                   <Building2 size={18} />
                   <span>Bank Details</span>
@@ -504,7 +504,7 @@ const InvoiceForm = ({ onGenerate, onUpdate }) => {
                 />
               </div>
 
-              <div className="form-group">
+              <div className="form-group terms-section">
                 <label>T&C</label>
                 <textarea 
                   name="terms" 

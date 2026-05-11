@@ -17,6 +17,7 @@ import { useAuth } from '../hooks/AuthContext';
 import Badge from '../components/common/Badge';
 import Card from '../components/common/Card';
 import Table from '../components/common/Table';
+import CubeLoader from '../components/ui/cube-loader';
 import { 
   AreaChart, 
   Area, 
@@ -165,13 +166,8 @@ const Investments = () => {
 
   if (loading) {
     return (
-      <div className="modern-loading-screen">
-        <div className="loader-visual">
-          <div className="loader-aura"></div>
-          <div className="loader-ring"></div>
-          <div className="loader-dot"></div>
-        </div>
-        <p className="loading-text-modern">Analyzing Investments</p>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <CubeLoader />
       </div>
     );
   }

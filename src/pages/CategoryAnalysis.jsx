@@ -7,16 +7,17 @@ import {
   PieChart, Pie, Cell 
 } from 'recharts';
 import { format } from 'date-fns';
-import { Loader, AlertCircle } from 'lucide-react';
 import { useTheme } from '../hooks/ThemeContext';
 import { useCurrency } from '../hooks/CurrencyContext';
+import CubeLoader from '../components/ui/cube-loader';
+import { AlertCircle } from 'lucide-react';
 import '../styles/categories.css';
 
 const COLORS = ['#14B8A6', '#10B981', '#F59E0B', '#EF4444', '#0D9488', '#EC4899', '#2DD4BF'];
 
 const CategoryAnalysis = () => {
   const { theme } = useTheme();
-  const { currency, symbol, formatAmount, convert } = useCurrency();
+  const { currency, symbol, formatAmount, convert, exchangeRate } = useCurrency();
   const { data: webhookResponse, loading, error } = useWebhookData();
 
   const chartConfig = {
@@ -35,21 +36,22 @@ const CategoryAnalysis = () => {
     const categoryMap = {};
     const trendMap = {}; 
     const categoriesSet = new Set();
-
     const displayNames = {};
+
     expenses.forEach(exp => {
       let amt = 0;
-      const usd = String(exp["Amount in $ (If Applicable)"] || "0");
-      const inr = String(exp["Amount in ₹"] || "0");
-      if (usd && usd !== "0" && usd !== "INR Not Available") {
-         amt = parseFloat(usd.replace(/[^0-9.]/g, '')) || 0;
-      } else if (inr && inr !== "0" && inr !== "INR Not Available") {
-         amt = (parseFloat(inr.replace(/[^0-9.]/g, '')) || 0) / 83; 
+      const usdStr = String(exp["Amount in $ (If Applicable)"] || "");
+      const inrStr = String(exp["Amount in ₹"] || "");
+      
+      if (usdStr && usdStr !== "0" && usdStr !== "INR Not Available") {
+        amt = parseFloat(usdStr.replace(/[^0-9.]/g, '')) || 0;
+      } else if (inrStr && inrStr !== "0" && inrStr !== "INR Not Available") {
+        amt = (parseFloat(inrStr.replace(/[^0-9.]/g, '')) || 0) / exchangeRate;
       }
 
       if (amt === 0) return;
 
-      const rawName = exp["Spent On"] || 'Unknown';
+      const rawName = exp.Category || exp.Type || 'Uncategorized';
       const nameKey = rawName.toLowerCase().trim();
       if (!displayNames[nameKey]) displayNames[nameKey] = rawName;
       const normalizedName = displayNames[nameKey];
@@ -77,13 +79,8 @@ const CategoryAnalysis = () => {
     });
 
     const sortedCats = Object.keys(categoryMap).map(k => ({ name: k, value: categoryMap[k] })).sort((a,b) => b.value - a.value);
-    
     let topCats = sortedCats.map((c, i) => ({ ...c, color: COLORS[i % COLORS.length] }));
-    
-    const unsortedTrendArray = Object.keys(trendMap).map(monthStr => {
-      return { month: monthStr, ...trendMap[monthStr] };
-    });
-
+    const unsortedTrendArray = Object.keys(trendMap).map(monthStr => ({ month: monthStr, ...trendMap[monthStr] }));
     unsortedTrendArray.sort((a,b) => a.dt - b.dt);
     
     return {
@@ -91,7 +88,7 @@ const CategoryAnalysis = () => {
       categoryTrendData: unsortedTrendArray,
       allFoundCategories: Array.from(categoriesSet)
     };
-  }, [webhookResponse]);
+  }, [webhookResponse, exchangeRate]);
 
   const convertedTrendData = useMemo(() => {
     return categoryTrendData.map(monthData => {
@@ -103,15 +100,10 @@ const CategoryAnalysis = () => {
     });
   }, [categoryTrendData, allFoundCategories, convert]);
 
-  if (loading) {
+  if (loading && !webhookResponse) {
     return (
-      <div className="modern-loading-screen">
-        <div className="loader-visual">
-          <div className="loader-aura"></div>
-          <div className="loader-ring"></div>
-          <div className="loader-dot"></div>
-        </div>
-        <p className="loading-text-modern">Analyzing Categories</p>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <CubeLoader />
       </div>
     );
   }
@@ -119,18 +111,17 @@ const CategoryAnalysis = () => {
   if (error || (webhookResponse && webhookResponse.error)) {
     return (
       <div className="categories-container">
-        <div className="p-6 bg-red-50 rounded-xl border border-red-100 flex items-center shadow-sm">
+        <div className="p-6 bg-red-50/10 rounded-xl border border-red-500/20 flex items-center shadow-sm">
           <AlertCircle className="text-red-500 mr-4" size={32} />
-          <p className="text-red-600/80">Failed to aggregate stats. {error?.message || webhookResponse?.message}</p>
+          <p className="text-red-500">Failed to aggregate stats. {error?.message || webhookResponse?.message}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="categories-container">
-      {/* Summary Cards */}
-      <div className="category-cards-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+    <div className="categories-container stagger-load">
+      <div className="category-cards-grid">
         {spendByCategory.map((cat, index) => (
           <Card key={index} className="category-summary-card">
             <div className="category-header">
@@ -151,9 +142,8 @@ const CategoryAnalysis = () => {
         ))}
       </div>
 
-      {/* Charts */}
-      <div className="category-charts-grid grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
-        <ChartCard title={`Monthly Spend by Merchant (${currency})`} className="lg:col-span-2 min-h-[400px]">
+      <div className="category-charts-grid">
+        <ChartCard title={`Monthly Spend by Category (${currency})`}>
           {convertedTrendData.length > 0 ? (
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={convertedTrendData}>
@@ -181,18 +171,13 @@ const CategoryAnalysis = () => {
           )}
         </ChartCard>
 
-        <ChartCard title={`Category Distribution (${currency})`} className="lg:col-span-1 min-h-[400px]">
+        <ChartCard title={`Category Distribution (${currency})`}>
            {spendByCategory.length > 0 ? (
              <ResponsiveContainer width="100%" height={350}>
                <PieChart>
                 <Pie
                   data={spendByCategory.map(d => ({ ...d, value: convert(d.value) }))}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={70}
-                  outerRadius={90}
-                  paddingAngle={5}
-                  dataKey="value"
+                  cx="50%" cy="50%" innerRadius={70} outerRadius={90} paddingAngle={5} dataKey="value"
                 >
                   {spendByCategory.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />

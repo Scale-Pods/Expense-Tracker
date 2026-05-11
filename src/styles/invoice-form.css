@@ -401,3 +401,126 @@ form {
     flex-direction: column;
   }
 }
+
+/* Light Mode Refinements */
+[data-theme='light'] .invoice-form-container {
+  background: #F0F2F7 !important;
+  padding: 24px;
+}
+
+[data-theme='light'] .invoice-form {
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 20px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+  padding: 24px 20px;
+  max-width: 480px;
+  margin: 0 auto;
+  overflow-y: auto;
+}
+
+[data-theme='light'] .form-section,
+[data-theme='light'] .form-group.terms-section {
+  background: #F8FAFC;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+
+[data-theme='light'] .section-title,
+[data-theme='light'] .form-group label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  color: #94A3B8;
+}
+
+[data-theme='light'] .form-group input, 
+[data-theme='light'] .form-group select, 
+[data-theme='light'] .form-group textarea {
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.09);
+  border-radius: 8px;
+  color: #0F172A;
+  font-size: 13px;
+  padding: 8px 12px;
+}
+
+[data-theme='light'] .form-group input:focus, 
+[data-theme='light'] .form-group select:focus, 
+[data-theme='light'] .form-group textarea:focus {
+  border-color: #00E5CC;
+  box-shadow: 0 0 0 3px rgba(0, 229, 204, 0.10);
+}
+
+[data-theme='light'] .region-slider button.active,
+[data-theme='light'] .toggle-thumb,
+[data-theme='light'] .slider-thumb {
+  background: #00E5CC;
+  color: #000;
+  font-weight: 600;
+  border-radius: 20px;
+  font-size: 12px;
+  box-shadow: 0 2px 8px rgba(0, 229, 204, 0.3);
+}
+
+[data-theme='light'] .bank-details-section {
+  background: #F1F5F9;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-left: 3px solid rgba(0, 229, 204, 0.5);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+[data-theme='light'] .bank-details-section input {
+  color: #0F172A;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+[data-theme='light'] .bank-details-section label {
+  color: #64748B;
+  font-size: 11px;
+}
+
+[data-theme='light'] .terms-section {
+  background: #FFF9F0;
+  border: 1px solid rgba(245, 158, 11, 0.15);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+[data-theme='light'] .terms-section textarea {
+  background: transparent;
+  border: none;
+  font-size: 11px;
+  color: #78716C;
+  line-height: 1.6;
+}
+
+[data-theme='light'] .btn-submit {
+  background: linear-gradient(135deg, #00E5CC, #0EA5E9);
+  color: #000;
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 14px;
+  width: 100%;
+  padding: 14px;
+  box-shadow: 0 4px 16px rgba(0, 229, 204, 0.3);
+}
+
+[data-theme='light'] .form-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+[data-theme='light'] .view-toggle-slider button.active,
+[data-theme='light'] .toggle-thumb {
+  background: #00E5CC;
+  color: #000;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0, 229, 204, 0.35);
+}

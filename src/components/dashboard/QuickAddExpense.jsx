@@ -1,20 +1,45 @@
-import React, { useState, useRef } from 'react';
-import { Send, Image as ImageIcon, X, Check, Loader2, AlertCircle } from 'lucide-react';
-import Card from '../common/Card';
+import React, { useState, useRef, useEffect } from 'react';
+import { 
+  Pencil, 
+  ChevronRight, 
+  Image as ImageIcon, 
+  Send, 
+  X, 
+  Check, 
+  Loader2, 
+  AlertCircle,
+  ArrowRight
+} from 'lucide-react';
 import { submitExpense } from '../../utils/api';
 import { useAuth } from '../../hooks/AuthContext';
 import './QuickAddExpense.css';
 
 const QuickAddExpense = ({ onRefresh }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
   const [text, setText] = useState('');
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [status, setStatus] = useState(null); // 'success', 'error'
+  const [status, setStatus] = useState(null); // 'success', 'error', 'warning'
   const [message, setMessage] = useState('');
   const [webhookResult, setWebhookResult] = useState(null);
   const fileInputRef = useRef(null);
+  const containerRef = useRef(null);
   const { currentUser } = useAuth();
+
+  // Close panel when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        // Only collapse if we are not in the middle of an interaction that needs to be visible
+        if (status !== 'warning') {
+          setIsExpanded(false);
+        }
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [status]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -34,7 +59,8 @@ const QuickAddExpense = ({ onRefresh }) => {
     }
   };
 
-  const removeImage = () => {
+  const removeImage = (e) => {
+    e?.stopPropagation();
     setImage(null);
     setPreview(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
@@ -57,6 +83,11 @@ const QuickAddExpense = ({ onRefresh }) => {
         if (!isIncomplete) {
           setWebhookResult(null);
           if (onRefresh) onRefresh();
+          setTimeout(() => {
+            setIsExpanded(false);
+            setStatus(null);
+            setMessage('');
+          }, 2000);
         }
       }
     } catch {
@@ -68,7 +99,7 @@ const QuickAddExpense = ({ onRefresh }) => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     if (!text && !image) return;
 
     setIsSubmitting(true);
@@ -81,29 +112,25 @@ const QuickAddExpense = ({ onRefresh }) => {
         setStatus('error');
         setMessage(result.message || 'Submission failed');
       } else {
-        // Detect if the result indicates incomplete information
         const isIncomplete = result.status === 'incomplete' || result.needs_input;
         setStatus(isIncomplete ? 'warning' : 'success');
         
-        // Use the dynamic message from the webhook node
         const displayMsg = result.message || result.output || (isIncomplete ? 'Incomplete information.' : 'Expense tracked!');
         setMessage(displayMsg);
         setWebhookResult(result);
         
-        // Always clear image and text after a successful upload to prevent re-sending the same data
-        if (image) {
-          removeImage();
-        }
+        if (image) removeImage();
         setText('');
 
-        // If it was a full success, complete the cycle.
-        // For 'incomplete' results, we keep status/message so the user can see what's missing.
         if (!isIncomplete) {
           setWebhookResult(null);
           if (onRefresh) onRefresh();
+          setTimeout(() => {
+            setIsExpanded(false);
+            setStatus(null);
+            setMessage('');
+          }, 2000);
         }
-        
-        // Status remains visible until manually dismissed
       }
     } catch {
       setStatus('error');
@@ -113,151 +140,124 @@ const QuickAddExpense = ({ onRefresh }) => {
     }
   };
 
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   return (
-    <Card className="quick-add-card">
-      <div className="quick-add-header">
-        <h3 className="quick-add-title">Quick Entry</h3>
-        <span className="quick-add-subtitle">Track expense via text or image</span>
+    <div className="quick-add-container" ref={containerRef}>
+      {/* Collapsed State Bar */}
+      <div className="quick-add-bar" onClick={toggleExpand}>
+        <div className="bar-icon">
+          <Pencil size={16} />
+        </div>
+        <input 
+          type="text" 
+          className="bar-input"
+          placeholder="e.g., GitHub Copilot $10, AWS $150..."
+          value={text}
+          onChange={(e) => {
+            setText(e.target.value);
+            if (!isExpanded) setIsExpanded(true);
+          }}
+          onFocus={() => setIsExpanded(true)}
+          onClick={(e) => e.stopPropagation()}
+        />
+        <div className="bar-divider"></div>
+        <button className={`bar-toggle-btn ${isExpanded ? 'expanded' : ''}`}>
+          <ChevronRight size={20} />
+        </button>
       </div>
-      
-      <form onSubmit={handleSubmit} className="quick-add-form">
-        <div className="input-container">
-          {!preview && (
-            <textarea
-              placeholder="e.g., GitHub Copilot $10, AWS Bill $150 or just paste merchant details..."
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              disabled={isSubmitting}
-              className="quick-add-textarea"
-            />
-          )}
-          
-          {preview && (
-            <div className="image-preview-container">
-              <img src={preview} alt="Receipt preview" className="image-preview" />
+
+      {/* Expanded Panel */}
+      {isExpanded && (
+        <div className="quick-add-panel">
+          <div className="panel-header">
+            <span className="panel-title">Quick Entry</span>
+            <span className="panel-subtitle">Track expense via text or image</span>
+          </div>
+
+          <form onSubmit={handleSubmit} className="panel-form">
+            <div className="panel-textarea-wrapper">
+              <textarea
+                className="panel-textarea"
+                placeholder="e.g., GitHub Copilot $10, AWS Bill $150 or just paste merchant details..."
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                autoFocus
+              />
+              
+              {preview && (
+                <div className="image-preview-mini">
+                  <img src={preview} alt="Receipt" />
+                  <button type="button" className="remove-img-mini" onClick={removeImage}>
+                    <X size={10} />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="panel-actions">
               <button 
                 type="button" 
-                onClick={removeImage}
-                className="remove-image-btn"
-                aria-label="Remove image"
+                className="btn-attach"
+                onClick={() => fileInputRef.current.click()}
               >
-                <X size={14} />
+                <ImageIcon size={18} />
+                <span>Attach Receipt</span>
               </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageChange}
+                accept="image/*"
+                style={{ display: 'none' }}
+              />
+
+              <button 
+                type="submit" 
+                className="btn-track"
+                disabled={isSubmitting || (!text && !image)}
+              >
+                {isSubmitting ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : (
+                  <>
+                    <Send size={18} />
+                    <span>Track Expense</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+
+          {status && (
+            <div className={`panel-status ${status}`}>
+              <div className="panel-status-header">
+                {status === 'success' ? <Check size={14} /> : <AlertCircle size={14} />}
+                <span>{status === 'success' ? 'Success' : status === 'warning' ? 'Information Needed' : 'Error'}</span>
+              </div>
+              <p>{message}</p>
+              
+              {status === 'warning' && webhookResult?.missing_fields?.includes('Type') && (
+                <div className="quick-options-grid" style={{ marginTop: '10px', paddingLeft: '0' }}>
+                  {['Salary', 'One-time', 'Tools', 'Subscriptions', 'Ads', 'Overheads'].map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => handleQuickComplete(option)}
+                      className="quick-option-btn"
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
-
-        <div className="quick-add-actions">
-          <div className="attachment-actions">
-            <button
-              type="button"
-              onClick={() => fileInputRef.current.click()}
-              disabled={isSubmitting}
-              className={`action-btn attachment-btn ${image ? 'active' : ''}`}
-              title="Add image/receipt"
-            >
-              <ImageIcon size={20} />
-              <span>{image ? 'Image Attached' : 'Attach Receipt'}</span>
-            </button>
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleImageChange}
-              accept="image/*"
-              style={{ display: 'none' }}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={isSubmitting || (!text && !image)}
-            className="submit-btn"
-          >
-            {isSubmitting ? (
-              <Loader2 size={20} className="animate-spin" />
-            ) : status === 'success' ? (
-              <Check size={20} />
-            ) : (
-              <Send size={20} />
-            )}
-            <span>Track Expense</span>
-          </button>
-        </div>
-
-        {status && (
-          <div className={`status-message-container ${status}`}>
-            <div className="status-message-header">
-              {status === 'error' || status === 'warning' ? <AlertCircle size={20} /> : <Check size={20} />}
-              <span className="status-title">
-                {status === 'success' ? 'Processing Complete' : status === 'warning' ? 'Information Needed' : 'Submission Error'}
-              </span>
-            </div>
-            
-            <div className="status-content-wrapper">
-              {message && message.split('\n').filter(l => l.trim()).filter(l => !l.toLowerCase().includes('if any details are incorrect')).map((line, idx) => {
-                const isBullet = line.trim().startsWith('•') || line.trim().startsWith('*') || line.trim().startsWith('-');
-                const cleanLine = isBullet ? line.trim().substring(1).trim() : line.trim();
-                
-                if (isBullet) {
-                  const colonIndex = cleanLine.indexOf(':');
-                  if (colonIndex !== -1) {
-                    const key = cleanLine.substring(0, colonIndex).trim();
-                    const value = cleanLine.substring(colonIndex + 1).trim();
-                    return (
-                      <div key={idx} className="status-detail-row">
-                        <span className="detail-label">{key}</span>
-                        <span className="detail-value">{value}</span>
-                      </div>
-                    );
-                  }
-                  return <div key={idx} className="status-detail-text">{cleanLine}</div>;
-                }
-                
-                return <div key={idx} className={`status-primary-text ${idx === 0 ? 'highlight' : ''}`}>{cleanLine}</div>;
-              })}
-            </div>
-
-            {status === 'warning' && webhookResult?.missing_fields?.length === 1 && webhookResult?.missing_fields?.includes('Type') && (
-              <div className="quick-options-grid">
-                {[
-                  'Recurring Monthly', 
-                  'Recurring Weekly', 
-                  'One Time', 
-                  'Salaries', 
-                  'Commision'
-                ].map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    onClick={() => handleQuickComplete(option)}
-                    disabled={isSubmitting}
-                    className="quick-option-btn"
-                  >
-                    {option}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            <div className="status-actions" style={{ marginTop: '0.5rem', display: 'flex', justifyContent: 'flex-end' }}>
-              <button
-                type="button"
-                onClick={() => {
-                  if (status === 'success' && onRefresh) onRefresh();
-                  setStatus(null);
-                  setMessage('');
-                  setWebhookResult(null);
-                }}
-                className="submit-btn"
-                style={{ padding: '0.5rem 1.5rem' }}
-              >
-                Okay
-              </button>
-            </div>
-          </div>
-        )}
-      </form>
-    </Card>
+      )}
+    </div>
   );
 };
 

@@ -12,6 +12,7 @@ const Layout = () => {
 
   return (
     <div className="app-layout">
+      <div className="ambient-blob-3"></div>
       <Sidebar isOpen={isSidebarOpen} closeSidebar={closeSidebar} />
       
       {/* Mobile overlay */}
