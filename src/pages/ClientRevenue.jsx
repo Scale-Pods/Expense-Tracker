@@ -241,11 +241,11 @@ const ClientRevenue = () => {
   const totalExpenses = useMemo(() => expenseData.reduce((sum, item) => sum + item.amount, 0), [expenseData]);
 
   const chartConfig = useMemo(() => ({
-    gridStroke: theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
-    tooltipBg: theme === 'dark' ? 'rgba(15,23,42,0.9)' : 'rgba(255,255,255,0.9)',
-    tooltipBorder: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-    tickColor: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
-    textColor: theme === 'dark' ? '#FFFFFF' : '#1F2937'
+    gridStroke: theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.1)',
+    tooltipBg: theme === 'dark' ? 'rgba(15,23,42,0.9)' : 'rgba(255,255,255,0.95)',
+    tooltipBorder: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.15)',
+    tickColor: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.6)',
+    textColor: theme === 'dark' ? '#FFFFFF' : '#111827',
   }), [theme]);
 
   const profitPieData = useMemo(() => [
@@ -486,7 +486,7 @@ const ClientRevenue = () => {
                   {pieData.map(d => (
                     <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: d.color }}></div>
-                      <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '10px' }}>{d.name}</span>
+                      <span style={{ color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)', fontSize: '10px', fontWeight: 'bold' }}>{d.name}</span>
                     </div>
                   ))}
                 </div>

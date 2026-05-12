@@ -151,11 +151,11 @@ const Overview = () => {
         padding: '12px',
         boxShadow: '0 10px 30px rgba(0,0,0,0.15)'
       },
-      itemStyle: { color: isDark ? 'white' : '#1F2937', fontSize: '13px', fontFamily: 'DM Sans' },
-      labelStyle: { color: isDark ? 'rgba(255,255,255,0.5)' : '#6B7280', marginBottom: '4px', fontSize: '11px' }
+      itemStyle: { color: isDark ? 'white' : '#111827', fontSize: '13px', fontFamily: 'DM Sans' },
+      labelStyle: { color: isDark ? 'rgba(255,255,255,0.5)' : '#4B5563', marginBottom: '4px', fontSize: '11px' }
     },
-    text: isDark ? 'rgba(255,255,255,0.4)' : '#6B7280',
-    grid: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'
+    text: isDark ? 'rgba(255,255,255,0.4)' : '#374151',
+    grid: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.1)'
   };
 
   return (

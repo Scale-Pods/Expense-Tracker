@@ -33,10 +33,10 @@ const Reports = () => {
 
   const chartConfig = useMemo(() => ({
     gridStroke: theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
-    tooltipBg: theme === 'dark' ? 'rgba(15,23,42,0.9)' : 'rgba(255,255,255,0.9)',
-    tooltipBorder: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-    tickColor: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
-    textColor: theme === 'dark' ? '#FFFFFF' : '#1F2937',
+    tooltipBg: theme === 'dark' ? 'rgba(15,23,42,0.9)' : 'rgba(255,255,255,0.95)',
+    tooltipBorder: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.15)',
+    tickColor: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.6)',
+    textColor: theme === 'dark' ? '#FFFFFF' : '#111827',
   }), [theme]);
 
   const {
@@ -382,7 +382,7 @@ const Reports = () => {
                 {comparisonPieData.map(d => (
                   <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: d.color }}></div>
-                    <span style={{ color: 'rgba(255,255,255,0.6)' }}>{d.name}</span>
+                    <span style={{ color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)', fontWeight: 'bold' }}>{d.name}</span>
                   </div>
                 ))}
             </div>

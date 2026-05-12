@@ -266,12 +266,12 @@ const Investments = () => {
                       dataKey="date" 
                       axisLine={false} 
                       tickLine={false} 
-                      tick={{ fontSize: 12, fill: 'rgba(255,255,255,0.4)' }}
+                      tick={{ fontSize: 12, fill: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.6)' }}
                     />
                     <YAxis 
                       axisLine={false} 
                       tickLine={false} 
-                      tick={{ fontSize: 12, fill: 'rgba(255,255,255,0.4)' }}
+                      tick={{ fontSize: 12, fill: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.6)' }}
                       tickFormatter={(value) => `₹${value >= 1000 ? (value/1000).toFixed(1) + 'k' : value}`}
                     />
                     <Tooltip 
@@ -294,7 +294,7 @@ const Investments = () => {
                           position="top" 
                           offset={12}
                           formatter={(v) => `₹${v >= 1000 ? Math.round(v/1000) + 'k' : Math.round(v)}`}
-                          style={{ fill: 'rgba(255,255,255,0.4)', fontSize: '10px', fontWeight: 'bold' }}
+                          style={{ fill: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.6)', fontSize: '10px', fontWeight: 'bold' }}
                         />
                       )}
                     </Area>

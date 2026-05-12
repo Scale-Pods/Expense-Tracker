@@ -144,10 +144,11 @@ const CategoryAnalysis = () => {
   }, [loading, webhookResponse, activeTab]);
 
   const chartConfig = {
-    gridStroke: theme === 'dark' ? '#334155' : '#E5E7EB',
+    gridStroke: theme === 'dark' ? '#334155' : '#CBD5E1',
     tooltipBg: theme === 'dark' ? '#1E293B' : '#FFFFFF',
-    tooltipBorder: theme === 'dark' ? '#334155' : '#E5E7EB',
+    tooltipBorder: theme === 'dark' ? '#334155' : '#CBD5E1',
     tooltipText: theme === 'dark' ? '#F8FAFC' : '#111827',
+    tickColor: theme === 'dark' ? '#94A3B8' : '#475569',
   };
 
   const { spendByCategory, categoryTrendData, allFoundCategories } = useMemo(() => {
@@ -271,12 +272,12 @@ const CategoryAnalysis = () => {
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={convertedTrendData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartConfig.gridStroke} />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: chartConfig.tooltipText }} />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: chartConfig.tickColor, fontSize: 11 }} />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
                   tickFormatter={(value) => `${symbol}${value >= 1000 ? (value/1000).toFixed(0) + 'k' : value}`} 
-                  tick={{ fill: chartConfig.tooltipText }} 
+                  tick={{ fill: chartConfig.tickColor, fontSize: 11 }} 
                 />
                 <Tooltip 
                   formatter={(value) => `${symbol}${Number(value).toLocaleString()}`}

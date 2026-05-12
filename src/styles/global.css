@@ -17,8 +17,8 @@
   --color-danger: #EF4444;
 
   --color-text-main: #0F172A;
-  --color-text-secondary: #64748B;
-  --color-text-muted: #94A3B8;
+  --color-text-secondary: #475569; /* Darkened from #64748B */
+  --color-text-muted: #64748B;    /* Darkened from #94A3B8 */
 
   --spacing-xs: 4px;
   --spacing-sm: 8px;
