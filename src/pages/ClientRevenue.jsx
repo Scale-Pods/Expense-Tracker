@@ -562,18 +562,98 @@ const ClientRevenue = () => {
           {isClientView && (
             <div className="premium-form-card">
               <div className="form-head">
-                <div className="form-icon"><Plus size={24} /></div>
-                <div><h3>Add Revenue</h3><p>New billing record</p></div>
+                <div className="form-icon" style={{ background: 'rgba(20, 184, 166, 0.1)', color: '#14b8a6' }}>
+                  <TrendingUp size={24} />
+                </div>
+                <div>
+                  <h3>Add Revenue</h3>
+                  <p>New billing record</p>
+                </div>
               </div>
+              
               <form onSubmit={handleAddRevenue} className="reminder-form-redesign">
                 <div className="redesign-group">
                   <label>Client Name</label>
-                  <div className="input-with-icon">
-                    <Briefcase size={16} className="icon" />
-                    <input type="text" placeholder="Client Name" value={newRevenue.clientName} onChange={(e) => setNewRevenue({...newRevenue, clientName: e.target.value})} required />
+                  <div className="premium-input-field">
+                    <Briefcase size={16} className="icon-prefix" />
+                    <input 
+                      type="text" 
+                      placeholder="e.g. Acme Corp" 
+                      value={newRevenue.clientName} 
+                      onChange={(e) => setNewRevenue({...newRevenue, clientName: e.target.value})} 
+                      required 
+                    />
                   </div>
                 </div>
-                <button type="submit" className="btn-submit-redesign" disabled={submitting}>
+
+                <div className="redesign-group">
+                  <label>Total Value (INR)</label>
+                  <div className="premium-input-field">
+                    <IndianRupee size={16} className="icon-prefix" />
+                    <input 
+                      type="number" 
+                      placeholder="0.00" 
+                      value={newRevenue.incomeAmount} 
+                      onChange={(e) => setNewRevenue({...newRevenue, incomeAmount: e.target.value})} 
+                      required 
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row-compact" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div className="redesign-group">
+                    <label>Realised (Paid)</label>
+                    <div className="premium-input-field">
+                      <Wallet size={16} className="icon-prefix text-emerald-400" />
+                      <input 
+                        type="number" 
+                        placeholder="0" 
+                        value={newRevenue.realisedRevenue} 
+                        onChange={(e) => setNewRevenue({...newRevenue, realisedRevenue: e.target.value})} 
+                      />
+                    </div>
+                  </div>
+                  <div className="redesign-group">
+                    <label>Receivables</label>
+                    <div className="premium-input-field">
+                      <Clock size={16} className="icon-prefix text-rose-400" />
+                      <input 
+                        type="number" 
+                        placeholder="0" 
+                        value={newRevenue.receivables} 
+                        onChange={(e) => setNewRevenue({...newRevenue, receivables: e.target.value})} 
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="redesign-group">
+                  <label>Realised Date</label>
+                  <div className="premium-input-field">
+                    <Calendar size={16} className="icon-prefix" />
+                    <input 
+                      type="date" 
+                      value={newRevenue.realisedDate} 
+                      onChange={(e) => setNewRevenue({...newRevenue, realisedDate: e.target.value})} 
+                      style={{ paddingLeft: '40px' }}
+                    />
+                  </div>
+                </div>
+
+                <div className="redesign-group">
+                  <label>Client Email</label>
+                  <div className="premium-input-field">
+                    <Mail size={16} className="icon-prefix" />
+                    <input 
+                      type="email" 
+                      placeholder="client@example.com" 
+                      value={newRevenue.clientEmail} 
+                      onChange={(e) => setNewRevenue({...newRevenue, clientEmail: e.target.value})} 
+                    />
+                  </div>
+                </div>
+
+                <button type="submit" className="btn-submit-redesign" disabled={submitting} style={{ background: '#14b8a6', marginTop: '0.5rem' }}>
                   {submitting ? <RefreshCw size={20} className="animate-spin" /> : <><Send size={18} /> Add Entry</>}
                 </button>
               </form>
