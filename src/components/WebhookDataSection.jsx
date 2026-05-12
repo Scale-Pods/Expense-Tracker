@@ -170,31 +170,7 @@ const WebhookDataSection = ({
 
   return (
     <div className="recent-transactions-section" style={{ marginTop: '3rem', paddingBottom: '2rem' }}>
-      <div className="section-header flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        <div className="flex items-center gap-3">
-           <div className="p-2 bg-primary/10 rounded-lg text-primary">
-             <Database size={20} />
-           </div>
-           <div>
-             <h3 className="text-xl font-bold">Fetched Webhook Data</h3>
-             <p className="text-sm text-muted">Raw records being ingested and analyzed in real-time</p>
-           </div>
-        </div>
-        
-        <div className="flex items-center gap-2 self-end md:self-auto">
-          <div className="flex items-center gap-2 text-xs font-medium text-muted bg-glass-bg px-3 py-1.5 rounded-full border border-glass-border mr-2">
-            <Clock size={12} />
-            Last Synced: {format(lastUpdated, 'HH:mm:ss')}
-          </div>
-          <button 
-            onClick={() => refetch()} 
-            className="p-2 bg-glass-bg border border-glass-border rounded-lg hover:bg-glass-highlight transition-all hover:scale-105 active:scale-95 group"
-            title="Refresh active stream"
-          >
-            <RefreshCw size={16} className={`text-primary ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
-          </button>
-        </div>
-      </div>
+
 
       <div className="tab-switcher-container mb-6">
         <div className="tab-switcher-wrapper">
