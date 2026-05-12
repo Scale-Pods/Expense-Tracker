@@ -4,7 +4,7 @@ import ChartCard from '../components/charts/ChartCard';
 import { useWebhookData } from '../hooks/useWebhookData';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell 
+  PieChart, Pie, Cell, LabelList
 } from 'recharts';
 import { format } from 'date-fns';
 import { useTheme } from '../hooks/ThemeContext';
@@ -132,6 +132,9 @@ const CategoryAnalysis = () => {
   const { currency, symbol, formatAmount, convert, exchangeRate } = useCurrency();
   const [activeTab, setActiveTab] = useState('Expense');
   const { data: webhookResponse, loading, error, refetch } = useWebhookData(activeTab);
+
+  const [activePieIndex, setActivePieIndex] = useState(null);
+  const [hoveredBarIndex, setHoveredBarIndex] = useState(null);
 
   const [dataTab, setDataTab] = useState('Expense');
   useEffect(() => {
@@ -283,7 +286,25 @@ const CategoryAnalysis = () => {
                 />
                 <Legend iconType="circle" />
                 {allFoundCategories.map((cat, i) => (
-                  <Bar key={cat} dataKey={cat} stackId="a" fill={COLORS[i % COLORS.length]} radius={[4, 4, 0, 0]} name={cat} />
+                  <Bar 
+                    key={cat} 
+                    dataKey={cat} 
+                    stackId="a" 
+                    fill={COLORS[i % COLORS.length]} 
+                    radius={[4, 4, 0, 0]} 
+                    name={cat}
+                    onMouseEnter={() => setHoveredBarIndex(i)}
+                    onMouseLeave={() => setHoveredBarIndex(null)}
+                  >
+                    {hoveredBarIndex !== i && (
+                      <LabelList 
+                        dataKey={cat} 
+                        position="center" 
+                        formatter={(v) => v > 0 ? `${symbol}${v >= 1000 ? Math.round(v/1000) + 'k' : Math.round(v)}` : ''}
+                        style={{ fill: '#fff', fontSize: '9px', fontWeight: 'bold', pointerEvents: 'none' }}
+                      />
+                    )}
+                  </Bar>
                 ))}
               </BarChart>
             </ResponsiveContainer>
@@ -302,6 +323,20 @@ const CategoryAnalysis = () => {
                 <Pie
                   data={spendByCategory.map(d => ({ ...d, value: convert(d.value) }))}
                   cx="50%" cy="50%" innerRadius={70} outerRadius={90} paddingAngle={5} dataKey="value"
+                  onMouseEnter={(_, index) => setActivePieIndex(index)}
+                  onMouseLeave={() => setActivePieIndex(null)}
+                  label={({ cx, cy, midAngle, innerRadius, outerRadius, value, index }) => {
+                    if (activePieIndex === index) return null;
+                    const RADIAN = Math.PI / 180;
+                    const radius = outerRadius + 25;
+                    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                    return (
+                      <text x={x} y={y} fill={theme === 'dark' ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)"} textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" className="text-[10px] font-bold">
+                        {symbol}{value >= 1000 ? Math.round(value/1000) + 'k' : Math.round(value)}
+                      </text>
+                    );
+                  }}
                 >
                   {spendByCategory.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />

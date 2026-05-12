@@ -3,7 +3,7 @@ import Card from '../components/common/Card';
 import ChartCard from '../components/charts/ChartCard';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  BarChart, Bar, PieChart, Pie, Cell
+  BarChart, Bar, PieChart, Pie, Cell, LabelList
 } from 'recharts';
 import { Download, Loader, AlertCircle, Info, ArrowUpDown } from 'lucide-react';
 import { useTheme } from '../hooks/ThemeContext';
@@ -22,6 +22,11 @@ const Reports = () => {
   const [isCustomRangeActive, setIsCustomRangeActive] = useState(false);
   const [customRange, setCustomRange] = useState({ start: '', end: '' });
   const [isMonthSelectOpen, setIsMonthSelectOpen] = useState(false);
+  
+  // Hover tracking states for labels
+  const [activePieIndex, setActivePieIndex] = useState(null);
+  const [isAreaHovered, setIsAreaHovered] = useState(false);
+  const [hoveredBarKey, setHoveredBarKey] = useState(null);
 
   const loading = expLoading || revLoading;
   const error = expError || revError;
@@ -256,7 +261,25 @@ const Reports = () => {
                 <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: chartConfig.tickColor }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: chartConfig.tickColor }} tickFormatter={(val) => `${symbol}${val>=1000?(val/1000).toFixed(0)+'k':val}`} />
                 <Tooltip contentStyle={{ borderRadius: '12px', background: chartConfig.tooltipBg, border: `1px solid ${chartConfig.tooltipBorder}`, color: chartConfig.textColor }} />
-                <Area type="monotone" dataKey="Actual" stroke="#14B8A6" fill="rgba(20, 184, 166, 0.1)" strokeWidth={2} />
+                <Area 
+                  type="monotone" 
+                  dataKey="Actual" 
+                  stroke="#14B8A6" 
+                  fill="rgba(20, 184, 166, 0.1)" 
+                  strokeWidth={2}
+                  onMouseEnter={() => setIsAreaHovered(true)}
+                  onMouseLeave={() => setIsAreaHovered(false)}
+                >
+                  {!isAreaHovered && (
+                    <LabelList 
+                      dataKey="Actual" 
+                      position="top" 
+                      offset={10}
+                      formatter={(v) => v > 0 ? `${symbol}${v >= 1000 ? Math.round(v/1000) + 'k' : Math.round(v)}` : ''}
+                      style={{ fill: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)', fontSize: '9px', fontWeight: 'bold' }}
+                    />
+                  )}
+                </Area>
                 <Area type="monotone" dataKey="Projected" stroke="#9CA3AF" fill="transparent" strokeDasharray="5 5" strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
@@ -275,8 +298,40 @@ const Reports = () => {
                 <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: chartConfig.tickColor }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: chartConfig.tickColor }} tickFormatter={(val) => `${symbol}${val>=1000?(val/1000).toFixed(0)+'k':val}`} />
                 <Tooltip cursor={{ fill: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }} contentStyle={{ borderRadius: '12px', background: chartConfig.tooltipBg, border: `1px solid ${chartConfig.tooltipBorder}`, color: chartConfig.textColor }} />
-                <Bar dataKey="Recurring" stackId="a" fill="#10B981" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="OneTime" stackId="a" fill="#F59E0B" radius={[0, 0, 0, 0]} />
+                <Bar 
+                  dataKey="Recurring" 
+                  stackId="a" 
+                  fill="#10B981" 
+                  radius={[4, 4, 0, 0]} 
+                  onMouseEnter={() => setHoveredBarKey('Recurring')}
+                  onMouseLeave={() => setHoveredBarKey(null)}
+                >
+                  {hoveredBarKey !== 'Recurring' && (
+                    <LabelList 
+                      dataKey="Recurring" 
+                      position="center" 
+                      formatter={(v) => v > 0 ? `${symbol}${v >= 1000 ? Math.round(v/1000) + 'k' : Math.round(v)}` : ''}
+                      style={{ fill: '#fff', fontSize: '8px', fontWeight: 'bold', pointerEvents: 'none' }}
+                    />
+                  )}
+                </Bar>
+                <Bar 
+                  dataKey="OneTime" 
+                  stackId="a" 
+                  fill="#F59E0B" 
+                  radius={[0, 0, 0, 0]} 
+                  onMouseEnter={() => setHoveredBarKey('OneTime')}
+                  onMouseLeave={() => setHoveredBarKey(null)}
+                >
+                  {hoveredBarKey !== 'OneTime' && (
+                    <LabelList 
+                      dataKey="OneTime" 
+                      position="center" 
+                      formatter={(v) => v > 0 ? `${symbol}${v >= 1000 ? Math.round(v/1000) + 'k' : Math.round(v)}` : ''}
+                      style={{ fill: '#fff', fontSize: '8px', fontWeight: 'bold', pointerEvents: 'none' }}
+                    />
+                  )}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -295,7 +350,28 @@ const Reports = () => {
             <div className="compact-donut-container">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={comparisonPieData.map(d => ({ ...d, value: convert(d.value) }))} cx="50%" cy="50%" innerRadius={45} outerRadius={60} paddingAngle={5} dataKey="value">
+                  <Pie 
+                    data={comparisonPieData.map(d => ({ ...d, value: convert(d.value) }))} 
+                    cx="50%" cy="50%" 
+                    innerRadius={45} 
+                    outerRadius={60} 
+                    paddingAngle={5} 
+                    dataKey="value"
+                    onMouseEnter={(_, index) => setActivePieIndex(index)}
+                    onMouseLeave={() => setActivePieIndex(null)}
+                    label={({ cx, cy, midAngle, innerRadius, outerRadius, value, index }) => {
+                      if (activePieIndex === index) return null;
+                      const RADIAN = Math.PI / 180;
+                      const radius = outerRadius + 18;
+                      const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                      const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                      return (
+                        <text x={x} y={y} fill={theme === 'dark' ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"} textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" style={{ fontSize: '9px', fontWeight: 'bold' }}>
+                          {symbol}{value >= 1000 ? Math.round(value/1000) + 'k' : Math.round(value)}
+                        </text>
+                      );
+                    }}
+                  >
                     {comparisonPieData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
                   </Pie>
                   <Tooltip formatter={(val) => `${symbol}${val.toLocaleString()}`} />

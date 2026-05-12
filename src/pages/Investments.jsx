@@ -33,7 +33,8 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  ResponsiveContainer 
+  ResponsiveContainer,
+  LabelList
 } from 'recharts';
 import WebhookDataSection from '../components/WebhookDataSection';
 import '../styles/reminders.css'; // Reuse these styles
@@ -55,6 +56,8 @@ const Investments = () => {
   // Lifted state for data switcher
   const [activeTab, setActiveTab] = useState('Investment');
   const { data: webhookResponse, loading, error, refetch } = useWebhookData(activeTab);
+
+  const [isAreaHovered, setIsAreaHovered] = useState(false);
 
   const [dataTab, setDataTab] = useState('Investment');
   useEffect(() => {
@@ -281,8 +284,20 @@ const Investments = () => {
                       stroke="#10b981" 
                       strokeWidth={3}
                       fillOpacity={1} 
-                      fill="url(#colorTotal)" 
-                    />
+                      fill="url(#colorTotal)"
+                      onMouseEnter={() => setIsAreaHovered(true)}
+                      onMouseLeave={() => setIsAreaHovered(false)}
+                    >
+                      {!isAreaHovered && (
+                        <LabelList 
+                          dataKey="total" 
+                          position="top" 
+                          offset={12}
+                          formatter={(v) => `₹${v >= 1000 ? Math.round(v/1000) + 'k' : Math.round(v)}`}
+                          style={{ fill: 'rgba(255,255,255,0.4)', fontSize: '10px', fontWeight: 'bold' }}
+                        />
+                      )}
+                    </Area>
                   </AreaChart>
                 </ResponsiveContainer>
               </div>

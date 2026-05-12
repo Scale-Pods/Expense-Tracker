@@ -6,7 +6,7 @@ import { useWebhookData } from '../hooks/useWebhookData';
 import { 
   PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  LineChart, Line, AreaChart, Area
+  LineChart, Line, AreaChart, Area, LabelList
 } from 'recharts';
 import { DollarSign, Calendar, RefreshCw, Layers, AlertCircle, Loader } from 'lucide-react';
 import { format } from 'date-fns';
@@ -21,6 +21,9 @@ const Overview = () => {
   const { currency, symbol, formatAmount, convert, exchangeRate } = useCurrency();
   const { data: webhookResponse, loading, error, refetch: refetchExpenses } = useWebhookData();
   const { data: remindersResponse, refetch: refetchReminders } = useWebhookData('Reminder');
+
+  const [activePieIndex, setActivePieIndex] = React.useState(null);
+  const [isAreaHovered, setIsAreaHovered] = React.useState(false);
 
   const handleRefresh = React.useCallback(() => {
     refetchExpenses();
@@ -218,6 +221,20 @@ const Overview = () => {
                   data={spendByCategory.map(d => ({ ...d, value: convert(d.value) }))}
                   cx="50%" cy="50%" innerRadius={70} outerRadius={90} paddingAngle={8} dataKey="value"
                   stroke="none"
+                  onMouseEnter={(_, index) => setActivePieIndex(index)}
+                  onMouseLeave={() => setActivePieIndex(null)}
+                  label={({ cx, cy, midAngle, innerRadius, outerRadius, value, index }) => {
+                    if (activePieIndex === index) return null;
+                    const RADIAN = Math.PI / 180;
+                    const radius = outerRadius + 25;
+                    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                    return (
+                      <text x={x} y={y} fill={isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)"} textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" className="text-[10px] font-bold">
+                        {symbol}{value >= 1000 ? Math.round(value/1000) + 'k' : Math.round(value)}
+                      </text>
+                    );
+                  }}
                 >
                   {spendByCategory.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} style={{ filter: isDark ? `drop-shadow(0 0 6px ${entry.color})` : 'none' }} />
@@ -232,7 +249,11 @@ const Overview = () => {
           <div className="chart-card">
             <h3 className="text-white mb-6 font-semibold">Monthly Spend Trend</h3>
             <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={monthlySpendTrend.map(d => ({ ...d, amount: convert(d.amount) }))}>
+              <AreaChart 
+                data={monthlySpendTrend.map(d => ({ ...d, amount: convert(d.amount) }))}
+                onMouseEnter={() => setIsAreaHovered(true)}
+                onMouseLeave={() => setIsAreaHovered(false)}
+              >
                 <defs>
                   <linearGradient id="cyanGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#00E5CC" stopOpacity={isDark ? 0.3 : 0.6}/>
@@ -243,7 +264,17 @@ const Overview = () => {
                 <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: chartTheme.text, fontSize: 11 }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: chartTheme.text, fontSize: 11 }} tickFormatter={(v) => `${symbol}${v >= 1000 ? (v/1000).toFixed(0) + 'k' : v}`} />
                 <Tooltip {...chartTheme.tooltip} formatter={(v) => `${symbol}${Number(v).toLocaleString()}`} />
-                <Area type="monotone" dataKey="amount" stroke="#00E5CC" strokeWidth={3} fillOpacity={1} fill="url(#cyanGradient)" filter={isDark ? "drop-shadow(0 0 8px #00E5CC)" : "none"} dot={{ r: 4, fill: '#00E5CC', strokeWidth: 0 }} />
+                <Area type="monotone" dataKey="amount" stroke="#00E5CC" strokeWidth={3} fillOpacity={1} fill="url(#cyanGradient)" filter={isDark ? "drop-shadow(0 0 8px #00E5CC)" : "none"} dot={{ r: 4, fill: '#00E5CC', strokeWidth: 0 }}>
+                   {!isAreaHovered && (
+                     <LabelList 
+                       dataKey="amount" 
+                       position="top" 
+                       offset={10}
+                       formatter={(v) => `${symbol}${v >= 1000 ? Math.round(v/1000) + 'k' : Math.round(v)}`}
+                       style={{ fill: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)', fontSize: '10px', fontWeight: 'bold' }}
+                     />
+                   )}
+                </Area>
               </AreaChart>
             </ResponsiveContainer>
           </div>

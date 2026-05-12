@@ -39,7 +39,8 @@ import {
   Cell,
   Legend,
   BarChart,
-  Bar
+  Bar,
+  LabelList
 } from 'recharts';
 import { useWebhookData } from '../hooks/useWebhookData';
 import { useTheme } from '../hooks/ThemeContext';
@@ -73,6 +74,10 @@ const ClientRevenue = () => {
   
   // Also need Expense data for P&L comparison (only used when on Client tab)
   const { data: expenseDataRaw } = useWebhookData('Expense');
+
+  const [activePieIndex, setActivePieIndex] = useState(null);
+  const [isAreaHovered, setIsAreaHovered] = useState(false);
+  const [hoveredBarKey, setHoveredBarKey] = useState(null);
 
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const navigate = useNavigate();
@@ -416,7 +421,25 @@ const ClientRevenue = () => {
                     <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: chartConfig.tickColor }} />
                     <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: chartConfig.tickColor }} tickFormatter={(val) => `₹${val>=1000?(val/1000).toFixed(0)+'k' : val}`} />
                     <Tooltip contentStyle={{ borderRadius: '12px', background: chartConfig.tooltipBg, border: `1px solid ${chartConfig.tooltipBorder}`, color: chartConfig.textColor }} />
-                    <Area type="monotone" dataKey="amount" stroke="#14b8a6" strokeWidth={2} fill="url(#colorRev)" />
+                    <Area 
+                      type="monotone" 
+                      dataKey="amount" 
+                      stroke="#14b8a6" 
+                      strokeWidth={2} 
+                      fill="url(#colorRev)"
+                      onMouseEnter={() => setIsAreaHovered(true)}
+                      onMouseLeave={() => setIsAreaHovered(false)}
+                    >
+                      {!isAreaHovered && (
+                        <LabelList 
+                          dataKey="amount" 
+                          position="top" 
+                          offset={10}
+                          formatter={(v) => `₹${v >= 1000 ? Math.round(v/1000) + 'k' : Math.round(v)}`}
+                          style={{ fill: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)', fontSize: '9px', fontWeight: 'bold' }}
+                        />
+                      )}
+                    </Area>
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -431,7 +454,28 @@ const ClientRevenue = () => {
                 <div className="compact-donut-container">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <Pie data={pieData} cx="50%" cy="50%" innerRadius={45} outerRadius={60} paddingAngle={5} dataKey="value">
+                      <Pie 
+                        data={pieData} 
+                        cx="50%" cy="50%" 
+                        innerRadius={45} 
+                        outerRadius={60} 
+                        paddingAngle={5} 
+                        dataKey="value"
+                        onMouseEnter={(_, index) => setActivePieIndex(index)}
+                        onMouseLeave={() => setActivePieIndex(null)}
+                        label={({ cx, cy, midAngle, innerRadius, outerRadius, value, index }) => {
+                          if (activePieIndex === index) return null;
+                          const RADIAN = Math.PI / 180;
+                          const radius = outerRadius + 18;
+                          const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                          const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                          return (
+                            <text x={x} y={y} fill={theme === 'dark' ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"} textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" style={{ fontSize: '9px', fontWeight: 'bold' }}>
+                              ₹{value >= 1000 ? Math.round(value/1000) + 'k' : Math.round(value)}
+                            </text>
+                          );
+                        }}
+                      >
                         {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
                       </Pie>
                       <Tooltip formatter={(val) => `₹${val.toLocaleString()}`} />
@@ -461,8 +505,40 @@ const ClientRevenue = () => {
                     <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: chartConfig.tickColor }} />
                     <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: chartConfig.tickColor }} tickFormatter={(val) => `₹${val>=1000?(val/1000).toFixed(0)+'k' : val}`} />
                     <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} contentStyle={{ borderRadius: '12px', background: chartConfig.tooltipBg, border: `1px solid ${chartConfig.tooltipBorder}`, color: chartConfig.textColor }} />
-                    <Bar dataKey="revenue" fill="#14b8a6" radius={[4, 4, 0, 0]} name={activeTab} />
-                    <Bar dataKey="expense" fill="#f59e0b" radius={[4, 4, 0, 0]} name="Expense" />
+                    <Bar 
+                      dataKey="revenue" 
+                      fill="#14b8a6" 
+                      radius={[4, 4, 0, 0]} 
+                      name={activeTab}
+                      onMouseEnter={() => setHoveredBarKey('revenue')}
+                      onMouseLeave={() => setHoveredBarKey(null)}
+                    >
+                      {hoveredBarKey !== 'revenue' && (
+                        <LabelList 
+                          dataKey="revenue" 
+                          position="top" 
+                          formatter={(v) => v > 0 ? `₹${v >= 1000 ? Math.round(v/1000) + 'k' : Math.round(v)}` : ''}
+                          style={{ fill: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)', fontSize: '8px', fontWeight: 'bold' }}
+                        />
+                      )}
+                    </Bar>
+                    <Bar 
+                      dataKey="expense" 
+                      fill="#f59e0b" 
+                      radius={[4, 4, 0, 0]} 
+                      name="Expense"
+                      onMouseEnter={() => setHoveredBarKey('expense')}
+                      onMouseLeave={() => setHoveredBarKey(null)}
+                    >
+                      {hoveredBarKey !== 'expense' && (
+                        <LabelList 
+                          dataKey="expense" 
+                          position="top" 
+                          formatter={(v) => v > 0 ? `₹${v >= 1000 ? Math.round(v/1000) + 'k' : Math.round(v)}` : ''}
+                          style={{ fill: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)', fontSize: '8px', fontWeight: 'bold' }}
+                        />
+                      )}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
