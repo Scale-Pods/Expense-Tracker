@@ -14,6 +14,7 @@ import Login from './pages/Login';
 import ClientRevenue from './pages/ClientRevenue';
 import Investments from './pages/Investments';
 import Invoices from './pages/Invoices';
+import AllInvoices from './pages/AllInvoices';
 
 import { useAuth } from './hooks/AuthContext';
 
@@ -63,6 +64,7 @@ function App() {
           <Route path="settings" element={<Settings />} />
           <Route path="revenue" element={<ClientRevenue />} />
           <Route path="invoice" element={<Invoices />} />
+          <Route path="invoices" element={<AllInvoices />} />
           <Route path="investments" element={<Investments />} />
         </Route>
 

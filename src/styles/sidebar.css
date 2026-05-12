@@ -156,6 +156,73 @@
   color: var(--color-danger);
 }
 
+/* ── Collapsible Nav Groups ── */
+.nav-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-item {
+  width: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  justify-content: flex-start;
+}
+
+.settings-item .chevron {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  opacity: 0.5;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.settings-item:hover .chevron {
+  opacity: 1;
+}
+
+.nav-group.open > .settings-item {
+  color: var(--color-text-main);
+  font-weight: 600;
+}
+
+.sub-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 12px;
+  margin-top: 2px;
+  border-left: 2px solid rgba(0, 229, 204, 0.15);
+  margin-left: 26px;
+  animation: slideDown 0.2s ease;
+}
+
+.sub-item {
+  font-size: 12px !important;
+  padding: 8px 14px !important;
+  gap: 10px !important;
+  border-radius: 10px !important;
+}
+
+.sub-item.active {
+  background: rgba(0, 229, 204, 0.15) !important;
+  color: var(--color-primary) !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 1024px) {
   .sidebar {
     transform: translateX(-110%);

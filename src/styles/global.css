@@ -277,3 +277,63 @@ body::after {
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(128, 128, 128, 0.2); border-radius: 10px; }
+
+/* Tab Switcher / Segmented Control */
+.tab-switcher-container {
+  margin-top: 8px;
+}
+
+.tab-switcher-wrapper {
+  display: inline-flex;
+  padding: 4px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: var(--font-main);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+}
+
+.tab-btn:hover {
+  color: var(--color-text-main);
+  background: var(--glass-highlight);
+}
+
+.tab-btn.active {
+  background: var(--color-primary);
+  color: #FFFFFF;
+  box-shadow: 0 8px 24px rgba(20, 184, 166, 0.3);
+  transform: translateY(-1px);
+}
+
+.tab-btn.active svg {
+  animation: bounceMini 0.5s ease-out;
+}
+
+@keyframes bounceMini {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+[data-theme='dark'] .tab-btn.active {
+  color: #0F172A;
+  background: #00E5CC;
+  box-shadow: 0 8px 30px rgba(0, 229, 204, 0.4);
+}

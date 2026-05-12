@@ -18,8 +18,14 @@ import {
   Trash2,
   Calendar,
   Mail,
-  Phone
+  Phone,
+  Database,
+  RefreshCw,
+  ArrowRight,
+  IndianRupee
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { format } from 'date-fns';
 import { 
   AreaChart, 
   Area, 
@@ -38,11 +44,11 @@ import {
 import { useWebhookData } from '../hooks/useWebhookData';
 import { useTheme } from '../hooks/ThemeContext';
 import CubeLoader from '../components/ui/cube-loader';
+import WebhookDataSection from '../components/WebhookDataSection';
 import '../styles/payments.css';
 import '../styles/reminders.css';
 
 const WEBHOOK_URL = `${import.meta.env.VITE_N8N_BASE_URL}/${import.meta.env.VITE_WEBHOOK_ID_GENERAL}`;
-const DATA_WEBHOOK_URL = `${import.meta.env.VITE_N8N_BASE_URL}/${import.meta.env.VITE_WEBHOOK_ID_DATA}`;
 
 const CURRENCIES = [
   { code: 'INR', symbol: '₹' },
@@ -59,33 +65,23 @@ const CURRENCIES = [
 const ClientRevenue = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: 'clientName', direction: 'desc' });
-  const [rawData, setRawData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { theme } = useTheme();
+  
+  // Lifted state for reactive switching
+  const [activeTab, setActiveTab] = useState('Client');
+  const { data: webhookResponse, loading, error, refetch } = useWebhookData(activeTab);
+  
+  // Also need Expense data for P&L comparison (only used when on Client tab)
   const { data: expenseDataRaw } = useWebhookData('Expense');
 
-  const fetchRevenueData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(`${DATA_WEBHOOK_URL}?action=Client`);
-      if (!res.ok) throw new Error(`Server error: ${res.status}`);
-      const json = await res.json();
-      if (Array.isArray(json)) {
-        setRawData(json[0]?.data ?? json);
-      } else if (json?.data && Array.isArray(json.data)) {
-        setRawData(json.data);
-      } else {
-        setRawData([]);
-      }
-    } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const [lastUpdated, setLastUpdated] = useState(new Date());
+  const navigate = useNavigate();
 
-  useEffect(() => { fetchRevenueData(); }, [fetchRevenueData]);
+  useEffect(() => {
+    if (webhookResponse) {
+      setLastUpdated(new Date());
+    }
+  }, [webhookResponse]);
 
   const [newRevenue, setNewRevenue] = useState({
     clientName: '',
@@ -101,82 +97,81 @@ const ClientRevenue = () => {
   });
   const [submitting, setSubmitting] = useState(false);
   const [confirmation, setConfirmation] = useState({ show: false, title: '', message: '' });
-  const [clients, setClients] = useState([]);
-  const [loadingClients, setLoadingClients] = useState(false);
-  const [isAddClientModalOpen, setIsAddClientModalOpen] = useState(false);
-  const [newClientName, setNewClientName] = useState('');
-  const [submittingClient, setSubmittingClient] = useState(false);
 
-  const fetchClients = async () => {
-    setLoadingClients(true);
-    try {
-      const response = await fetch(`${import.meta.env.VITE_N8N_BASE_URL}/${import.meta.env.VITE_WEBHOOK_ID_DATA}?action=Client`);
-      const result = await response.json();
-      if (result && result.data && Array.isArray(result.data)) {
-        setClients(result.data);
-      }
-    } catch (err) {
-      console.error('Failed to fetch clients:', err);
-    } finally {
-      setLoadingClients(false);
+  const isClientView = activeTab === 'Client';
+  const isInvestmentView = activeTab === 'Investment';
+  const isExpenseView = activeTab === 'Expense';
+
+  const [dataTab, setDataTab] = useState('Client');
+  useEffect(() => {
+    if (!loading && webhookResponse) {
+      setDataTab(activeTab);
     }
-  };
+  }, [loading, webhookResponse, activeTab]);
 
-  React.useEffect(() => {
-    fetchClients();
-  }, []);
-
-  React.useEffect(() => {
-    const total = newRevenue.services.reduce((sum, s) => sum + (parseFloat(s.amount) || 0), 0);
-    if (total > 0) {
-      setNewRevenue(prev => ({ ...prev, incomeAmount: total.toString() }));
-    }
-  }, [newRevenue.services]);
-
-  React.useEffect(() => {
-    const income = parseFloat(newRevenue.incomeAmount) || 0;
-    const realised = parseFloat(newRevenue.realisedRevenue) || 0;
-    const calculated = (income - realised).toFixed(2);
-    
-    setNewRevenue(prev => ({
-      ...prev,
-      receivables: calculated > 0 ? calculated : (calculated < 0 ? calculated : '0.00')
-    }));
-  }, [newRevenue.incomeAmount, newRevenue.realisedRevenue]);
+  const rawData = useMemo(() => {
+    if (activeTab !== dataTab) return [];
+    return webhookResponse?.data || [];
+  }, [webhookResponse, activeTab, dataTab]);
 
   const revenueData = useMemo(() => {
-    if (!rawData || !Array.isArray(rawData)) return [];
+    if (!Array.isArray(rawData)) return [];
+    
     return rawData.map((item, idx) => {
       const getVal = (keys) => {
         for (const k of keys) if (item[k] !== undefined) return item[k];
         return null;
       };
-      const income   = getVal(['Income Amount', 'IncomeAmount', 'Income', 'incomeAmount']) ?? 0;
-      const realised = getVal(['Realised Revenue', 'RealisedRevenue', 'Realised', 'realisedRevenue']) ?? 0;
-      const recv     = getVal(['Receivables', 'receivables', 'Receivable']) ?? 0;
-      const servicesRaw = getVal(['Service', 'service', 'Service Type', 'Services']);
-      let displayService = 'N/A';
-      if (Array.isArray(servicesRaw)) {
-        displayService = servicesRaw.map(s => typeof s === 'object' ? s.name : s).filter(Boolean).join(', ');
-      } else if (servicesRaw) {
-        displayService = servicesRaw;
-      }
 
-      return {
-        id:             item.UniqueID || item.id || idx,
-        clientName:     getVal(['Client Name', 'ClientName', 'Client', 'clientName']) || 'Unknown Client',
-        service:        displayService,
-        incomeAmount:   parseFloat(String(income).replace(/[^0-9.-]/g, ''))   || 0,
-        realisedRevenue:parseFloat(String(realised).replace(/[^0-9.-]/g, '')) || 0,
-        receivables:    parseFloat(String(recv).replace(/[^0-9.-]/g, ''))     || 0,
-        realisedDate:   getVal(['Realised Date', 'realisedDate', 'RealisedDate', 'Date of Realisation']) || '',
-        receivableDate: getVal(['Receivable Date', 'receivableDate', 'ReceivableDate', 'Expected Date']) || '',
-        currency:       getVal(['Currency', 'currency']) || 'INR',
-        status:         item.Status || item.status || 'Active',
-        rowNumber:      item.row_number || (idx + 1)
-      };
+      if (isClientView) {
+        const income   = getVal(['Income Amount', 'IncomeAmount', 'Income', 'incomeAmount']) ?? 0;
+        const realised = getVal(['Realised Revenue', 'RealisedRevenue', 'Realised', 'realisedRevenue']) ?? 0;
+        const recv     = getVal(['Receivables', 'receivables', 'Receivable']) ?? 0;
+        const servicesRaw = getVal(['Service', 'service', 'Service Type', 'Services']);
+        let displayService = 'N/A';
+        if (Array.isArray(servicesRaw)) {
+          displayService = servicesRaw.map(s => typeof s === 'object' ? s.name : s).filter(Boolean).join(', ');
+        } else if (servicesRaw) {
+          displayService = servicesRaw;
+        }
+
+        return {
+          id:             item.UniqueID || item.id || idx,
+          clientName:     getVal(['Client Name', 'ClientName', 'Client', 'clientName']) || 'Unknown Client',
+          service:        displayService,
+          incomeAmount:   parseFloat(String(income).replace(/[^0-9.-]/g, ''))   || 0,
+          realisedRevenue:parseFloat(String(realised).replace(/[^0-9.-]/g, '')) || 0,
+          receivables:    parseFloat(String(recv).replace(/[^0-9.-]/g, ''))     || 0,
+          realisedDate:   getVal(['Realised Date', 'realisedDate', 'RealisedDate', 'Date of Realisation']) || '',
+          receivableDate: getVal(['Receivable Date', 'receivableDate', 'ReceivableDate', 'Expected Date']) || '',
+          currency:       getVal(['Currency', 'currency']) || 'INR',
+          status:         item.Status || item.status || 'Active',
+          rowNumber:      item.row_number || (idx + 1)
+        };
+      } else {
+        // Generic mapping for other streams
+        let amount = 0;
+        if (isInvestmentView) {
+          amount = parseFloat(String(item.Amount || item.Value || 0).replace(/[^0-9.-]/g, ''));
+        } else {
+          amount = parseFloat(String(item["Amount in ₹"] || item.Amount || 0).replace(/[^0-9.-]/g, ''));
+        }
+
+        return {
+          id: item.UniqueID || item.id || idx,
+          clientName: item["Spent On"] || item.Name || item.Category || 'Unknown',
+          service: item.Category || item.Note || item["Note / Platform"] || 'N/A',
+          incomeAmount: amount,
+          realisedRevenue: amount,
+          receivables: 0,
+          realisedDate: item.Date || item.date || '',
+          currency: 'INR',
+          status: 'Active',
+          rowNumber: item.row_number || (idx + 1)
+        };
+      }
     });
-  }, [rawData]);
+  }, [rawData, isClientView, isInvestmentView]);
 
   const filteredData = useMemo(() => {
     let data = [...revenueData];
@@ -207,9 +202,9 @@ const ClientRevenue = () => {
   }, [filteredData]);
 
   const pieData = useMemo(() => [
-    { name: 'Realised', value: stats.totalRealised, color: '#10b981' },
-    { name: 'Receivables', value: stats.totalReceivables, color: '#f43f5e' }
-  ], [stats]);
+    { name: isClientView ? 'Realised' : 'Total', value: stats.totalRealised, color: '#10b981' },
+    { name: isClientView ? 'Receivables' : 'Remaining', value: stats.totalReceivables, color: '#f43f5e' }
+  ], [stats, isClientView]);
 
   const timeData = useMemo(() => {
     const groups = revenueData.reduce((acc, curr) => {
@@ -240,8 +235,6 @@ const ClientRevenue = () => {
 
   const totalExpenses = useMemo(() => expenseData.reduce((sum, item) => sum + item.amount, 0), [expenseData]);
 
-  const { theme } = useTheme();
-
   const chartConfig = useMemo(() => ({
     gridStroke: theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
     tooltipBg: theme === 'dark' ? 'rgba(15,23,42,0.9)' : 'rgba(255,255,255,0.9)',
@@ -251,9 +244,9 @@ const ClientRevenue = () => {
   }), [theme]);
 
   const profitPieData = useMemo(() => [
-    { name: 'Revenue', value: stats.totalIncome, color: '#14b8a6' },
-    { name: 'Expenses', value: totalExpenses, color: '#f59e0b' }
-  ], [stats, totalExpenses]);
+    { name: isClientView ? 'Revenue' : activeTab, value: stats.totalIncome, color: '#14b8a6' },
+    { name: 'Global Expenses', value: totalExpenses, color: '#f59e0b' }
+  ], [stats, totalExpenses, isClientView, activeTab]);
 
   const comparisonData = useMemo(() => {
     const months = {};
@@ -284,64 +277,23 @@ const ClientRevenue = () => {
     setSortConfig({ key, direction });
   };
 
-  const handleAddService = () => {
-    setNewRevenue({
-      ...newRevenue,
-      services: [...newRevenue.services, { name: '', amount: '' }]
-    });
-  };
-
-  const handleServiceChange = (index, field, value) => {
-    const updatedServices = [...newRevenue.services];
-    updatedServices[index] = { ...updatedServices[index], [field]: value };
-    setNewRevenue({
-      ...newRevenue,
-      services: updatedServices
-    });
-  };
-
-  const handleRemoveService = (index) => {
-    if (newRevenue.services.length <= 1) return;
-    const updatedServices = newRevenue.services.filter((_, i) => i !== index);
-    setNewRevenue({
-      ...newRevenue,
-      services: updatedServices
-    });
-  };
-
   const handleAddRevenue = async (e) => {
     e.preventDefault();
     if (!newRevenue.clientName) return;
     setSubmitting(true);
     try {
-      const payload = {
-        ...newRevenue,
-        realisedDate: newRevenue.realisedDate || new Date().toISOString().split('T')[0],
-        timestamp: new Date().toISOString()
-      };
       const response = await fetch(`${WEBHOOK_URL}?action=RE`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          ...newRevenue,
+          realisedDate: newRevenue.realisedDate || new Date().toISOString().split('T')[0],
+          timestamp: new Date().toISOString()
+        })
       });
       if (response.ok) {
-        setNewRevenue({ 
-          clientName: '', 
-          clientEmail: '',
-          clientPhone: '',
-          services: [{ name: '', amount: '' }], 
-          currency: 'INR',
-          incomeAmount: '', 
-          realisedRevenue: '', 
-          realisedDate: '', 
-          receivables: '', 
-          receivableDate: ''
-        });
-        setConfirmation({
-          show: true,
-          title: 'Revenue Entry Added',
-          message: 'The new revenue data has been successfully synced with the backend.'
-        });
+        setConfirmation({ show: true, title: 'Revenue Entry Added', message: 'The new revenue data has been successfully synced.' });
+        setNewRevenue({ clientName: '', clientEmail: '', clientPhone: '', services: [{ name: '', amount: '' }], currency: 'INR', incomeAmount: '', realisedRevenue: '', realisedDate: '', receivables: '', receivableDate: '' });
       }
     } catch (error) {
       console.error('Failed to add revenue:', error);
@@ -350,38 +302,9 @@ const ClientRevenue = () => {
     }
   };
 
-  const handleCloseConfirmation = () => {
-    setConfirmation({ ...confirmation, show: false });
-    fetchRevenueData();
-  };
-
-  const handleDeleteRevenue = async (id) => {
-    const itemToDelete = revenueData.find(r => r.id === id);
-    if (!itemToDelete) return;
-    try {
-      const response = await fetch(`${WEBHOOK_URL}?action=DLRevenue`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...itemToDelete,
-          row: itemToDelete.rowNumber
-        })
-      });
-      if (response.ok) {
-        setConfirmation({
-          show: true,
-          title: 'Entry Deleted',
-          message: 'The revenue record has been successfully removed.'
-        });
-      }
-    } catch (error) {
-      console.error('Failed to delete revenue:', error);
-    }
-  };
-
   const columns = [
     { 
-      header: <div className="sort-header" onClick={() => requestSort('clientName')}>Client Name <ArrowUpDown size={14} /></div>, 
+      header: <div className="sort-header" onClick={() => requestSort('clientName')}>{isClientView ? 'Client Name' : 'Description'} <ArrowUpDown size={14} /></div>, 
       accessor: 'clientName',
       align: 'left',
       render: (row) => (
@@ -392,10 +315,10 @@ const ClientRevenue = () => {
       )
     },
     { 
-      header: <div className="sort-header" onClick={() => requestSort('incomeAmount')}>Income <ArrowUpDown size={14} /></div>, 
+      header: <div className="sort-header" onClick={() => requestSort('incomeAmount')}>Value <ArrowUpDown size={14} /></div>, 
       accessor: 'incomeAmount',
       align: 'right',
-      render: (row) => <span className="font-medium text-white/80">{CURRENCIES.find(c => c.code === row.currency)?.symbol || '₹'}{row.incomeAmount.toLocaleString()}</span>
+      render: (row) => <span className="font-medium text-white/80">₹{row.incomeAmount.toLocaleString()}</span>
     },
     { 
       header: <div className="sort-header" onClick={() => requestSort('realisedRevenue')}>Realised <ArrowUpDown size={14} /></div>, 
@@ -403,67 +326,42 @@ const ClientRevenue = () => {
       align: 'right',
       render: (row) => (
         <div className="flex flex-col">
-          <span className="font-bold text-emerald-400">{CURRENCIES.find(c => c.code === row.currency)?.symbol || '₹'}{row.realisedRevenue.toLocaleString()}</span>
-          {row.realisedDate && (
-            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-tight">
-              {row.realisedDate}
-            </span>
-          )}
+          <span className="font-bold text-emerald-400">₹{row.realisedRevenue.toLocaleString()}</span>
+          {row.realisedDate && <span className="text-[10px] text-gray-500 font-bold uppercase tracking-tight">{row.realisedDate}</span>}
         </div>
       )
     },
     { 
-      header: <div className="sort-header" onClick={() => requestSort('receivables')}>Receivables <ArrowUpDown size={14} /></div>, 
+      header: 'Receivables', 
       accessor: 'receivables',
       align: 'right',
-      render: (row) => (
-        <div className="flex flex-col">
-          <span className="font-bold text-rose-400">{CURRENCIES.find(c => c.code === row.currency)?.symbol || '₹'}{row.receivables.toLocaleString()}</span>
-          {row.receivableDate && (
-            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-tight">
-              Due: {row.receivableDate}
-            </span>
-          )}
-        </div>
-      )
-    },
-    {
-      header: 'Actions',
-      accessor: 'id',
-      align: 'center',
-      render: (row) => (
-        <button onClick={() => handleDeleteRevenue(row.id)} className="btn-delete-task" style={{ padding: '8px' }}>
-          <Trash2 size={16} />
-        </button>
-      )
+      render: (row) => <span className="font-bold text-rose-400">₹{row.receivables.toLocaleString()}</span>
     }
   ];
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <CubeLoader />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="services-container">
-        <div className="p-6 bg-red-50/5 rounded-xl border border-red-500/20 flex items-center shadow-sm">
-          <AlertCircle className="text-red-500 mr-4" size={32} />
-          <p className="text-red-400">Failed to load client revenue data. {error?.message}</p>
-        </div>
-      </div>
-    );
+  if (loading && !webhookResponse) {
+    return <div className="flex items-center justify-center min-h-[60vh]"><CubeLoader /></div>;
   }
 
   return (
     <div className="payments-container redesigned">
-      <div className="payments-header">
+      <div className="payments-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div className="header-title-group">
-          <p className="top-tagline">Real-time client income and receivable analytics</p>
-          <h1>Revenue Tracking</h1>
+          <p className="top-tagline">Real-time {activeTab.toLowerCase()} analytics and monitoring</p>
+          <h1>{isClientView ? 'Revenue Tracking' : `${activeTab} Analysis`}</h1>
+        </div>
+
+        <div className="flex items-center gap-3 mb-2">
+          <div className="flex flex-col items-end mr-2">
+            <span className="text-[10px] text-muted font-bold uppercase tracking-widest mb-1">Live Sync Status</span>
+            <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-full">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className="text-xs font-bold text-emerald-500">Connected · {activeTab}</span>
+            </div>
+          </div>
+          <button onClick={() => refetch()} className="p-3 bg-glass-bg border border-glass-border rounded-xl hover:bg-glass-highlight transition-all shadow-sm group">
+            <RefreshCw size={18} className={`text-primary ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
+          </button>
         </div>
       </div>
 
@@ -474,7 +372,7 @@ const ClientRevenue = () => {
               <div className="stat-flex">
                 <div className="stat-icon-box"><TrendingUp size={20} /></div>
                 <div>
-                  <p className="stat-label">Total Income</p>
+                  <p className="stat-label">Total Value</p>
                   <h2 className="stat-value">₹{stats.totalIncome.toLocaleString()}</h2>
                 </div>
               </div>
@@ -492,7 +390,7 @@ const ClientRevenue = () => {
               <div className="stat-flex">
                 <div className="stat-icon-box" style={{ color: '#f43f5e', background: 'rgba(244, 63, 94, 0.1)' }}><Clock size={20} /></div>
                 <div>
-                  <p className="stat-label">Receivables</p>
+                  <p className="stat-label">Pending / Recv</p>
                   <h2 className="stat-value" style={{ color: '#f43f5e' }}>₹{stats.totalReceivables.toLocaleString()}</h2>
                 </div>
               </div>
@@ -502,8 +400,8 @@ const ClientRevenue = () => {
           <div className="charts-carousel-revenue">
             <Card className="chart-card-premium accent-cyan">
               <div className="chart-header">
-                <h3>Revenue Flow</h3>
-                <p>Realised income over time</p>
+                <h3>Trend Analysis</h3>
+                <p>{isClientView ? 'Realised income' : activeTab} over time</p>
               </div>
               <div style={{ height: '180px', width: '100%' }}>
                 <ResponsiveContainer width="100%" height="100%">
@@ -516,7 +414,7 @@ const ClientRevenue = () => {
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartConfig.gridStroke} />
                     <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: chartConfig.tickColor }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: chartConfig.tickColor }} tickFormatter={(val) => `₹${val>=1000?(val/1000).toFixed(0)+'k':val}`} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: chartConfig.tickColor }} tickFormatter={(val) => `₹${val>=1000?(val/1000).toFixed(0)+'k' : val}`} />
                     <Tooltip contentStyle={{ borderRadius: '12px', background: chartConfig.tooltipBg, border: `1px solid ${chartConfig.tooltipBorder}`, color: chartConfig.textColor }} />
                     <Area type="monotone" dataKey="amount" stroke="#14b8a6" strokeWidth={2} fill="url(#colorRev)" />
                   </AreaChart>
@@ -526,8 +424,8 @@ const ClientRevenue = () => {
 
             <Card className="chart-card-premium accent-pink">
               <div className="chart-header">
-                <h3>Collection Status</h3>
-                <p>Realised vs. Pending</p>
+                <h3>Collection Ratio</h3>
+                <p>Status distribution</p>
               </div>
               <div className="donut-legend-row">
                 <div className="compact-donut-container">
@@ -544,7 +442,7 @@ const ClientRevenue = () => {
                   {pieData.map(d => (
                     <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: d.color }}></div>
-                      <span style={{ color: 'rgba(255,255,255,0.6)' }}>{d.name}</span>
+                      <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '10px' }}>{d.name}</span>
                     </div>
                   ))}
                 </div>
@@ -553,51 +451,20 @@ const ClientRevenue = () => {
 
             <Card className="chart-card-premium accent-yellow">
               <div className="chart-header">
-                <h3>P&L Comparison</h3>
-                <p>Monthly distribution</p>
+                <h3>Comparison</h3>
+                <p>Stream vs Expenses</p>
               </div>
               <div style={{ height: '180px', width: '100%' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={comparisonData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }} barSize={20}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartConfig.gridStroke} />
                     <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: chartConfig.tickColor }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: chartConfig.tickColor }} tickFormatter={(val) => `₹${val>=1000?(val/1000).toFixed(0)+'k':val}`} />
-                    <Tooltip cursor={{ fill: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }} contentStyle={{ borderRadius: '12px', background: chartConfig.tooltipBg, border: `1px solid ${chartConfig.tooltipBorder}`, color: chartConfig.textColor }} />
-                    <Bar dataKey="revenue" fill="#14b8a6" radius={[4, 4, 0, 0]} name="Revenue" />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: chartConfig.tickColor }} tickFormatter={(val) => `₹${val>=1000?(val/1000).toFixed(0)+'k' : val}`} />
+                    <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} contentStyle={{ borderRadius: '12px', background: chartConfig.tooltipBg, border: `1px solid ${chartConfig.tooltipBorder}`, color: chartConfig.textColor }} />
+                    <Bar dataKey="revenue" fill="#14b8a6" radius={[4, 4, 0, 0]} name={activeTab} />
                     <Bar dataKey="expense" fill="#f59e0b" radius={[4, 4, 0, 0]} name="Expense" />
                   </BarChart>
                 </ResponsiveContainer>
-              </div>
-              <div className="horizontal-legend">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width: '8px', height: '8px', background: '#14b8a6' }}></div> Revenue</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width: '8px', height: '8px', background: '#f59e0b' }}></div> Expense</div>
-              </div>
-            </Card>
-
-            <Card className="chart-card-premium accent-green">
-              <div className="chart-header">
-                <h3>Operational Margin</h3>
-                <p>Expense vs Revenue ratio</p>
-              </div>
-              <div className="donut-legend-row">
-                <div className="compact-donut-container">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie data={profitPieData} cx="50%" cy="50%" innerRadius={45} outerRadius={60} paddingAngle={5} dataKey="value">
-                        {profitPieData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
-                      </Pie>
-                      <Tooltip formatter={(val) => `₹${val.toLocaleString()}`} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="compact-legend">
-                  {profitPieData.map(d => (
-                    <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: d.color }}></div>
-                      <span style={{ color: 'rgba(255,255,255,0.6)' }}>{d.name}</span>
-                    </div>
-                  ))}
-                </div>
               </div>
             </Card>
           </div>
@@ -606,173 +473,50 @@ const ClientRevenue = () => {
             <div className="table-controls">
               <div className="payments-search-wrapper">
                 <Search size={18} className="payments-search-icon" />
-                <input 
-                  type="text" 
-                  placeholder="Search client..." 
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="payments-search-input"
-                />
+                <input type="text" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="payments-search-input" />
               </div>
             </div>
             <div className="table-responsive">
-              <Table columns={columns} data={filteredData} emptyMessage="No revenue data found." />
+              <Table columns={columns} data={filteredData} emptyMessage="No data found." />
             </div>
           </Card>
         </div>
 
         <aside className="reminder-sidebar">
-          <div className="premium-form-card">
-            <div className="form-head">
-              <div className="form-icon"><Plus size={24} /></div>
-              <div>
-                <h3>Add Revenue Entry</h3>
-                <p>New client billing record</p>
+          {isClientView && (
+            <div className="premium-form-card">
+              <div className="form-head">
+                <div className="form-icon"><Plus size={24} /></div>
+                <div><h3>Add Revenue</h3><p>New billing record</p></div>
               </div>
+              <form onSubmit={handleAddRevenue} className="reminder-form-redesign">
+                <div className="redesign-group">
+                  <label>Client Name</label>
+                  <div className="input-with-icon">
+                    <Briefcase size={16} className="icon" />
+                    <input type="text" placeholder="Client Name" value={newRevenue.clientName} onChange={(e) => setNewRevenue({...newRevenue, clientName: e.target.value})} required />
+                  </div>
+                </div>
+                <button type="submit" className="btn-submit-redesign" disabled={submitting}>
+                  {submitting ? <RefreshCw size={20} className="animate-spin" /> : <><Send size={18} /> Add Entry</>}
+                </button>
+              </form>
             </div>
-            <form onSubmit={handleAddRevenue} className="reminder-form-redesign">
-              <div className="redesign-group">
-                <label>Client Details</label>
-                <div className="input-with-icon">
-                  <Briefcase size={16} className="icon" />
-                  <input 
-                    type="text" 
-                    placeholder="Client Name" 
-                    value={newRevenue.clientName} 
-                    onChange={(e) => setNewRevenue({...newRevenue, clientName: e.target.value})} 
-                    required 
-                  />
-                </div>
-                <div className="input-row-multi">
-                  <div className="input-with-icon">
-                    <Mail size={14} className="icon" />
-                    <input 
-                      type="email" 
-                      placeholder="Email Address" 
-                      value={newRevenue.clientEmail} 
-                      onChange={(e) => setNewRevenue({...newRevenue, clientEmail: e.target.value})} 
-                    />
-                  </div>
-                  <div className="input-with-icon">
-                    <Phone size={14} className="icon" />
-                    <input 
-                      type="text" 
-                      placeholder="Phone Number" 
-                      value={newRevenue.clientPhone} 
-                      onChange={(e) => setNewRevenue({...newRevenue, clientPhone: e.target.value})} 
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="redesign-group">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <label style={{ margin: 0 }}>Services / Line Items</label>
-                  <button type="button" onClick={handleAddService} className="btn-add-mini">
-                    <Plus size={14} /> Add Item
-                  </button>
-                </div>
-                <div className="services-list-container">
-                  {newRevenue.services.map((service, index) => (
-                    <div key={index} className="service-entry-row animate-in">
-                      <input 
-                        type="text" 
-                        placeholder="Service name..." 
-                        value={service.name} 
-                        onChange={(e) => handleServiceChange(index, 'name', e.target.value)}
-                        className="service-name-input"
-                      />
-                      <div className="amount-input-wrapper">
-                        <span className="currency-prefix">{CURRENCIES.find(c => c.code === newRevenue.currency)?.symbol || '₹'}</span>
-                        <input 
-                          type="number" 
-                          placeholder="0.00" 
-                          value={service.amount} 
-                          onChange={(e) => handleServiceChange(index, 'amount', e.target.value)}
-                          className="service-amount-input"
-                        />
-                      </div>
-                      {newRevenue.services.length > 1 && (
-                        <button type="button" onClick={() => handleRemoveService(index)} className="btn-remove-service">
-                          <Trash2 size={14} />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="redesign-group">
-                <div className="input-row-multi">
-                  <div className="field-block">
-                    <label>Currency</label>
-                    <select 
-                      value={newRevenue.currency} 
-                      onChange={(e) => setNewRevenue({...newRevenue, currency: e.target.value})}
-                      className="form-select-premium"
-                    >
-                      {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.code} ({c.symbol})</option>)}
-                    </select>
-                  </div>
-                  <div className="field-block">
-                    <label>Total Income</label>
-                    <div className="input-with-icon read-only">
-                      <IndianRupee size={16} className="icon" />
-                      <input type="text" value={newRevenue.incomeAmount} readOnly placeholder="0.00" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="redesign-group">
-                <label>Realised Revenue</label>
-                <div className="input-row-multi">
-                  <div className="input-with-icon">
-                    <IndianRupee size={16} className="icon" />
-                    <input 
-                      type="number" 
-                      placeholder="Amount realised" 
-                      value={newRevenue.realisedRevenue} 
-                      onChange={(e) => setNewRevenue({...newRevenue, realisedRevenue: e.target.value})} 
-                    />
-                  </div>
-                  <div className="input-with-icon">
-                    <Calendar size={16} className="icon" />
-                    <input 
-                      type="date" 
-                      value={newRevenue.realisedDate} 
-                      onChange={(e) => setNewRevenue({...newRevenue, realisedDate: e.target.value})} 
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="redesign-group">
-                <label>Receivables Info</label>
-                <div className="input-row-multi">
-                  <div className="input-with-icon read-only">
-                    <IndianRupee size={16} className="icon" />
-                    <input type="text" value={newRevenue.receivables} readOnly placeholder="Balance" />
-                  </div>
-                  <div className="input-with-icon">
-                    <Clock size={16} className="icon" />
-                    <input 
-                      type="date" 
-                      value={newRevenue.receivableDate} 
-                      onChange={(e) => setNewRevenue({...newRevenue, receivableDate: e.target.value})} 
-                      placeholder="Due Date"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <button type="submit" className="btn-submit-redesign" disabled={submitting}>
-                {submitting ? 'Syncing...' : 'Track Revenue'}
-              </button>
-            </form>
+          )}
+          <div className="info-card-modern">
+            <div className="info-icon"><Info size={18} /></div>
+            <div className="info-text"><h4>Real-time Sync</h4><p>Data is instantly updated across the platform.</p></div>
           </div>
         </aside>
       </div>
+
+      <WebhookDataSection 
+        activeTab={activeTab} 
+        onTabChange={setActiveTab}
+        externalData={webhookResponse}
+        externalLoading={loading}
+        externalRefetch={refetch}
+      />
 
       {confirmation.show && (
         <div className="modal-overlay">
@@ -780,14 +524,12 @@ const ClientRevenue = () => {
             <div className="modal-icon success"><CheckCircle size={40} /></div>
             <h2>{confirmation.title}</h2>
             <p>{confirmation.message}</p>
-            <button className="btn-modal-ok" onClick={handleCloseConfirmation}>OK</button>
+            <button className="btn-modal-ok" onClick={() => setConfirmation({show: false})}>OK</button>
           </div>
         </div>
       )}
     </div>
   );
 };
-
-const IndianRupee = ({ size, className }) => <span className={className} style={{ fontSize: size }}>₹</span>;
 
 export default ClientRevenue;

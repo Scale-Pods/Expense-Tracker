@@ -2,9 +2,9 @@
 
 import React from 'react'
 
-export default function CubeLoader() {
+export default function CubeLoader({ isInline = false }) {
   return (
-    <div className='cube-wrapper-fullscreen'>
+    <div className={isInline ? 'cube-wrapper-inline' : 'cube-wrapper-fullscreen'}>
       <div className='cube-loader-container perspective-container'>
         
         {/* 3D Scene Wrapper */}
@@ -71,8 +71,20 @@ export default function CubeLoader() {
           background: rgba(10, 15, 25, 0.4);
           backdrop-filter: blur(12px);
           pointer-events: none;
-          /* Center in the content area by offsetting the sidebar width */
           padding-left: 280px; 
+        }
+
+        .cube-wrapper-inline {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: transparent;
+          padding: 2rem;
+          min-height: 300px;
+          transform: scale(0.6); /* Scale down for inline use */
         }
 
         @media (max-width: 1024px) {

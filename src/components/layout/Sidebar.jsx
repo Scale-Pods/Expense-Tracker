@@ -15,7 +15,9 @@ import {
   LogOut,
   KeyRound,
   Briefcase,
-  TrendingUp
+  TrendingUp,
+  FilePlus,
+  List
 } from 'lucide-react';
 
 import Logo from '../common/Logo';
@@ -28,6 +30,9 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(
     location.pathname === '/webhook' || location.pathname === '/settings'
   );
+  const [isInvoiceOpen, setIsInvoiceOpen] = useState(
+    location.pathname === '/invoice' || location.pathname === '/invoices'
+  );
 
   const navItems = [
     { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} /> },
@@ -35,7 +40,7 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
     { name: 'Monthly Payments', path: '/monthly', icon: <Calendar size={20} /> },
     { name: 'Category Analysis', path: '/categories', icon: <PieChart size={20} /> },
     { name: 'Reports', path: '/reports', icon: <FileText size={20} /> },
-    { name: 'Invoice', path: '/invoice', icon: <Receipt size={20} /> },
+
     { name: 'Client Revenue', path: '/revenue', icon: <Briefcase size={20} /> },
     { name: 'Investments', path: '/investments', icon: <TrendingUp size={20} /> },
   ];
@@ -43,6 +48,11 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
   const handleSettingsToggle = (e) => {
     e.preventDefault();
     setIsSettingsOpen(!isSettingsOpen);
+  };
+
+  const handleInvoiceToggle = (e) => {
+    e.preventDefault();
+    setIsInvoiceOpen(!isInvoiceOpen);
   };
 
   const [showMobileLogout, setShowMobileLogout] = useState(false);
@@ -67,6 +77,41 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
             <span>{item.name}</span>
           </NavLink>
         ))}
+
+        {/* Invoice Group */}
+        <div className={`nav-group ${isInvoiceOpen ? 'open' : ''}`}>
+          <button 
+            className={`nav-item settings-item ${isInvoiceOpen ? 'active' : ''}`} 
+            onClick={handleInvoiceToggle}
+          >
+            <Receipt size={20} />
+            <span>Invoice</span>
+            <div className="chevron">
+              {isInvoiceOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+          </button>
+          
+          {isInvoiceOpen && (
+            <div className="sub-nav">
+              <NavLink 
+                to="/invoice"
+                className={({ isActive }) => `nav-item sub-item ${isActive ? 'active' : ''}`}
+                onClick={closeSidebar}
+              >
+                <FilePlus size={18} />
+                <span>Create Invoice</span>
+              </NavLink>
+              <NavLink 
+                to="/invoices"
+                className={({ isActive }) => `nav-item sub-item ${isActive ? 'active' : ''}`}
+                onClick={closeSidebar}
+              >
+                <List size={18} />
+                <span>All Invoices</span>
+              </NavLink>
+            </div>
+          )}
+        </div>
 
         <div className={`nav-group ${isSettingsOpen ? 'open' : ''}`}>
           <button 

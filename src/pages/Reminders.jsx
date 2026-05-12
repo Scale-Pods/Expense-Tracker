@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Card from '../components/common/Card';
 import Badge from '../components/common/Badge';
 import { useWebhookData } from '../hooks/useWebhookData';
+import { useNavigate } from 'react-router-dom';
+import { format } from 'date-fns';
 import { 
   Bell, 
   Calendar, 
@@ -17,9 +19,13 @@ import {
   AlertCircle,
   IndianRupee,
   Tag,
-  CreditCard
+  CreditCard,
+  RefreshCw,
+  Database,
+  ArrowRight
 } from 'lucide-react';
 import CubeLoader from '../components/ui/cube-loader';
+import WebhookDataSection from '../components/WebhookDataSection';
 import '../styles/reminders.css';
 
 const WEBHOOK_URL = `${import.meta.env.VITE_N8N_BASE_URL}/${import.meta.env.VITE_WEBHOOK_ID_GENERAL}`;
@@ -30,6 +36,7 @@ const Reminders = () => {
     description: '',
     amount: '',
     costType: 'Salary',
+    classification: 'Fixed Cost',
     debitDate: '1',
     mode: ''
   });
@@ -40,8 +47,16 @@ const Reminders = () => {
   const [submittingCard, setSubmittingCard] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [confirmation, setConfirmation] = useState({ show: false, title: '', message: '' });
+  const [lastUpdated, setLastUpdated] = useState(new Date());
+  const navigate = useNavigate();
   
   const { data: webhookResponse, loading, error, refetch } = useWebhookData('Reminder');
+
+  useEffect(() => {
+    if (webhookResponse) {
+      setLastUpdated(new Date());
+    }
+  }, [webhookResponse]);
 
   const [manualReminders, setManualReminders] = useState([]);
   const [expandedTasks, setExpandedTasks] = useState({});
@@ -127,7 +142,7 @@ const Reminders = () => {
       });
       if (response.ok) {
         setNewReminder({ 
-          title: '', description: '', amount: '', costType: 'Fixed', debitDate: '1',
+          title: '', description: '', amount: '', costType: 'Salary', classification: 'Fixed Cost', debitDate: '1',
           mode: cards.length > 0 ? `${cards[0].Authorizer || cards[0].CardName || 'Card'}${cards[0]["Card Number"] ? ` - ${cards[0]["Card Number"]}` : ''}` : ''
         });
         setConfirmation({
@@ -206,30 +221,35 @@ const Reminders = () => {
     );
   }
 
-  if (error || (webhookResponse && webhookResponse.error)) {
-    return (
-      <div className="reminders-container redesigned">
-        <div className="p-6 bg-red-50/10 rounded-xl border border-red-500/20 flex items-start shadow-sm max-w-2xl mx-auto mt-20">
-          <AlertCircle className="text-red-500 mr-4 mt-1" size={32} />
-          <div>
-            <h3 className="text-xl font-bold text-red-500">Sync Failed</h3>
-            <p className="text-red-500/80">{error?.message || webhookResponse?.message || 'Could not synchronize.'}</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="reminders-container redesigned stagger-load">
       <div className="reminders-grid">
         <div className="main-tasks">
-          <div className="reminders-welcome">
-            <div className="welcome-tag">
-              <Sparkles size={14} /> Powering Financial Clarity
+          <div className="flex justify-between items-end mb-8">
+            <div className="reminders-welcome">
+              <div className="welcome-tag">
+                <Sparkles size={14} /> Powering Financial Clarity
+              </div>
+              <p className="top-tagline">Intelligence-driven reminders to keep your spend tracking precise.</p>
+              <h1>Action Center & Tasks</h1>
             </div>
-            <p className="top-tagline">Intelligence-driven reminders to keep your spend tracking precise.</p>
-            <h1>Action Center & Tasks</h1>
+
+            <div className="flex items-center gap-3 mb-2">
+              <div className="flex flex-col items-end mr-2">
+                <span className="text-[10px] text-muted font-bold uppercase tracking-widest mb-1">Live Sync Status</span>
+                <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-full">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span className="text-xs font-bold text-emerald-500">Connected to Sheets</span>
+                </div>
+              </div>
+              <button 
+                onClick={() => refetch()} 
+                className="p-3 bg-glass-bg border border-glass-border rounded-xl hover:bg-glass-highlight transition-all hover:scale-105 active:scale-95 group shadow-sm"
+                title="Force Refresh Data"
+              >
+                <RefreshCw size={18} className={`text-primary ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
+              </button>
+            </div>
           </div>
 
           <section className="task-section">
@@ -338,6 +358,21 @@ const Reminders = () => {
               </div>
 
               <div className="redesign-group">
+                <label>Cost Classification</label>
+                <div className="input-with-icon">
+                  <Database size={16} className="icon" />
+                  <select 
+                    value={newReminder.classification}
+                    onChange={(e) => setNewReminder({...newReminder, classification: e.target.value})}
+                    required
+                  >
+                    <option value="Fixed Cost">Fixed Cost</option>
+                    <option value="Variable Cost">Variable Cost</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="redesign-group">
                 <label>Date of Debit (Day of Month)</label>
                 <div className="calendar-mini-grid">
                   {[...Array(31)].map((_, i) => {
@@ -421,6 +456,8 @@ const Reminders = () => {
           </div>
         </aside>
       </div>
+
+      <WebhookDataSection initialType="Expense" />
 
       {confirmation.show && (
         <div className="modal-overlay">

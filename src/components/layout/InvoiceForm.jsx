@@ -6,7 +6,7 @@ import BillingQueue from './BillingQueue';
 const CACHE_KEY = 'invoice_form_cache';
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour
 
-const InvoiceForm = ({ onGenerate, onUpdate }) => {
+const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
   const [activeTab, setActiveTab] = useState('create'); // 'create' or 'queue'
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -39,6 +39,7 @@ const InvoiceForm = ({ onGenerate, onUpdate }) => {
   };
 
   const [formData, setFormData] = useState(() => {
+    if (prefill) return { ...initialData, ...prefill };
     const cached = localStorage.getItem(CACHE_KEY);
     if (cached) {
       try {
