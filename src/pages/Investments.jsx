@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useWebhookData } from '../hooks/useWebhookData';
 import { useAuth } from '../hooks/AuthContext';
+import { useTheme } from '../hooks/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import Badge from '../components/common/Badge';
@@ -51,6 +52,7 @@ const Investments = () => {
   const [confirmation, setConfirmation] = useState({ show: false, title: '', message: '' });
   const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'desc' });
   const { currentUser } = useAuth();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   
   // Lifted state for data switcher
