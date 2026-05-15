@@ -21,7 +21,7 @@ export const IndiaTaxInvoice = ({ data }) => {
           <img src="https://res.cloudinary.com/dc3a1bfvk/image/upload/v1777098139/ScalePods_-_Logo-_FINAL_----1-01_1_-min_hvvqyt.png" width="180" alt="Logo" style={{ marginBottom: '4px' }} />
           <div style={{ fontSize: '12px', lineHeight: '1.2' }}>
             <strong style={{ fontSize: '15px', display: 'block', marginBottom: '4px' }}>SCALEPODS LLP</strong>
-            503-A Crescent House, 159/161 Crescent House, Mumbai, Maharashtra, India<br />
+            503-A Crescent House, 159/161 Crescent House, Mumbai, Maharashtra, India - 400009<br />
             <strong>GSTIN:</strong> {data.myGstin || "27AALFS4567J1Z3"}<br />
             <strong>State:</strong> Maharashtra (27)
           </div>
@@ -161,7 +161,7 @@ export const UAETaxInvoice = ({ data }) => {
           <img src="https://res.cloudinary.com/dc3a1bfvk/image/upload/v1777098139/ScalePods_-_Logo-_FINAL_----1-01_1_-min_hvvqyt.png" width="180" alt="Logo" style={{ marginBottom: '4px' }} />
           <div style={{ fontSize: '12px', lineHeight: '1.2' }}>
             <strong style={{ fontSize: '15px', display: 'block', marginBottom: '4px' }}>SCALEPODS LLP</strong>
-            503-A Crescent House, 159/161 Crescent House, Mumbai, Maharashtra, India<br />
+            503-A Crescent House, 159/161 Crescent House, Mumbai, Maharashtra, India - 400009<br />
           </div>
         </div>
         <div style={{ flex: '0 1 280px', minWidth: '200px', padding: '10px', background: '#fafafa', fontSize: '12px', lineHeight: '1.2' }}>
@@ -272,7 +272,7 @@ export const IndiaProformaInvoice = ({ data }) => {
           <img src="https://res.cloudinary.com/dc3a1bfvk/image/upload/v1777098139/ScalePods_-_Logo-_FINAL_----1-01_1_-min_hvvqyt.png" alt="Logo" width="180" style={{ marginBottom: '15px' }} />
           <div style={{ lineHeight: '1.4' }}>
             <strong style={{ fontSize: '16px' }}>SCALEPODS LLP</strong><br />
-            503-A Floor-5th, 159/161, Crescent house, Mumbai, Maharashtra, India
+            503-A Floor-5th, 159/161, Crescent house, Mumbai, Maharashtra, India - 400009
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
@@ -375,7 +375,7 @@ export const UAEProformaInvoice = ({ data }) => {
           <img src="https://res.cloudinary.com/dc3a1bfvk/image/upload/v1777098139/ScalePods_-_Logo-_FINAL_----1-01_1_-min_hvvqyt.png" alt="ScalePods Logo" style={{ width: '180px' }} />
           <div className="company-address" style={{ fontSize: '12px', lineHeight: '1.2', marginTop: '8px' }}>
             <strong>SCALEPODS LLP</strong><br />
-            503-A Floor-5th, 159/161, Crescent house, Mumbai, Maharashtra, India
+            503-A Floor-5th, 159/161, Crescent house, Mumbai, Maharashtra, India - 400009
           </div>
         </div>
         
