@@ -300,6 +300,16 @@ form {
   transform: translateX(0%);
 }
 
+/* GST Slider */
+.gst-slider.on .slider-thumb {
+  transform: translateX(0%);
+}
+
+.gst-slider.off .slider-thumb {
+  transform: translateX(100%);
+  background: #64748b; /* Grayish for OFF state */
+}
+
 /* View Toggle Slider */
 .view-toggle-slider {
   position: relative;

@@ -35,6 +35,7 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
     amountInWords: '',
     paymentTerm: 'One Time',
     sacCode: '998313',
+    showGst: true,
     originalDetails: null
   };
 
@@ -263,6 +264,30 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
                   onClick={() => setFormData(prev => ({ ...prev, region: 'UAE' }))}
                 >
                   UAE
+                </button>
+                <div className="slider-thumb"></div>
+              </div>
+            </div>
+
+            <div className="form-section compact">
+              <div className="section-title">
+                <FileCheck size={18} />
+                <span>GST (18%)</span>
+              </div>
+              <div className={`region-slider type-slider gst-slider ${formData.showGst ? 'on' : 'off'}`}>
+                <button 
+                  type="button" 
+                  className={formData.showGst ? 'active' : ''}
+                  onClick={() => setFormData(prev => ({ ...prev, showGst: true }))}
+                >
+                  On
+                </button>
+                <button 
+                  type="button" 
+                  className={!formData.showGst ? 'active' : ''}
+                  onClick={() => setFormData(prev => ({ ...prev, showGst: false }))}
+                >
+                  Off
                 </button>
                 <div className="slider-thumb"></div>
               </div>
