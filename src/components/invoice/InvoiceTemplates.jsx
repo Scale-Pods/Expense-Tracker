@@ -22,7 +22,7 @@ export const IndiaTaxInvoice = ({ data }) => {
           <div style={{ fontSize: '12px', lineHeight: '1.2' }}>
             <strong style={{ fontSize: '15px', display: 'block', marginBottom: '4px' }}>SCALEPODS LLP</strong>
             503-A Crescent House, 159/161 Crescent House, Mumbai, MH - 400009<br />
-            {showGst && <><strong>GSTIN:</strong> {data.myGstin || "27AALFS4567J1Z3"}<br /></>}
+            <strong>GSTIN:</strong> {data.myGstin || "27AALFS4567J1Z3"}<br />
             <strong>State:</strong> Maharashtra (27)
           </div>
         </div>
@@ -54,7 +54,7 @@ export const IndiaTaxInvoice = ({ data }) => {
               i === 0 ? <strong key={i} style={{ fontSize: '15px', display: 'block', marginBottom: '2px' }}>{line}</strong> : <span key={i} style={{ display: 'block' }}>{line}</span>
             ))}
             {data.email && <div style={{ color: '#555' }}>{data.email}</div>}
-            {showGst && data.clientGstin && <div style={{ marginTop: '8px' }}>
+            {data.clientGstin && <div style={{ marginTop: '8px' }}>
               <strong>GSTIN:</strong> {data.clientGstin}<br />
               <strong>State:</strong> {data.clientState}
             </div>}
