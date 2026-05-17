@@ -13,8 +13,7 @@ import { submitExpense } from '../../utils/api';
 import { useAuth } from '../../hooks/AuthContext';
 import './QuickEntryDrawer.css';
 
-const QuickEntryDrawer = ({ onRefresh }) => {
-  const [isOpen, setIsOpen] = useState(false);
+const QuickEntryDrawer = ({ onRefresh, isOpen, setIsOpen }) => {
   const [text, setText] = useState('');
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -194,23 +193,37 @@ const QuickEntryDrawer = ({ onRefresh }) => {
         {status && (
           <div className={`drawer-status ${status}`}>
             <div className="drawer-status-header">
-              {status === 'success' ? <Check size={16} /> : <AlertCircle size={16} />}
+              {status === 'success' ? <Check size={18} /> : 
+               status === 'warning' ? <AlertCircle size={18} /> : 
+               <X size={18} />}
               <span>{status === 'success' ? 'Success' : status === 'warning' ? 'Details Needed' : 'Error'}</span>
             </div>
-            <p>{message}</p>
+            <div className="drawer-status-body">
+              {message.split('\n').flatMap((line, i) => {
+                if (line.includes('•')) {
+                  return line.split('•').filter(p => p.trim()).map((p, idx) => (
+                    <p key={`bullet-${i}-${idx}`} className="missing-field-line">• {p.trim()}</p>
+                  ));
+                }
+                return <p key={`line-${i}`}>{line}</p>;
+              })}
+            </div>
             
             {status === 'warning' && webhookResult?.missing_fields?.includes('Type') && (
-              <div className="drawer-options-grid">
-                {['Salary', 'One-time', 'Tools', 'Subscriptions', 'Ads', 'Overheads'].map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    onClick={() => handleQuickComplete(option)}
-                    className="drawer-option-btn"
-                  >
-                    {option}
-                  </button>
-                ))}
+              <div className="drawer-options-container">
+                <span className="options-label">Select Category:</span>
+                <div className="drawer-options-grid">
+                  {['Salary', 'One-time', 'Tools', 'Subscriptions', 'Ads', 'Overheads', 'Incentive'].map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => handleQuickComplete(option)}
+                      className="drawer-option-btn"
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>

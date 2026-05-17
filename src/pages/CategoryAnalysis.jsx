@@ -6,7 +6,8 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, LabelList
 } from 'recharts';
-import { format } from 'date-fns';
+import { format, subDays, subMonths, subYears, startOfDay, endOfDay, isAfter, isBefore } from 'date-fns';
+import CustomSelect from '../components/common/CustomSelect';
 import { useTheme } from '../hooks/ThemeContext';
 import { useCurrency } from '../hooks/CurrencyContext';
 import CubeLoader from '../components/ui/cube-loader';
@@ -17,29 +18,46 @@ import '../styles/categories.css';
 const COLORS = ['#14B8A6', '#10B981', '#F59E0B', '#EF4444', '#0D9488', '#EC4899', '#2DD4BF', '#8B5CF6', '#F97316'];
 
 const processExpense = (data, exchangeRate) => {
-  const categoryMap = {};
+  const categoryStats = {};
   const trendMap = {};
   const categoriesSet = new Set();
   const displayNames = {};
+
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
 
   (data || []).forEach(exp => {
     let amt = 0;
     const usdStr = String(exp['Amount in $ (If Applicable)'] || '');
     const inrStr = String(exp['Amount in ₹'] || '');
-    if (usdStr && usdStr !== '0' && usdStr !== 'INR Not Available') {
-      amt = parseFloat(usdStr.replace(/[^0-9.]/g, '')) || 0;
-    } else if (inrStr && inrStr !== '0' && inrStr !== 'INR Not Available') {
+    if (inrStr && inrStr !== '0' && inrStr !== 'INR Not Available') {
       amt = (parseFloat(inrStr.replace(/[^0-9.]/g, '')) || 0) / exchangeRate;
+    } else if (usdStr && usdStr !== '0' && usdStr !== 'INR Not Available') {
+      amt = parseFloat(usdStr.replace(/[^0-9.]/g, '')) || 0;
     }
 
-    const rawName = exp.Category || exp.Type || 'Uncategorized';
-    const nameKey = rawName.toLowerCase().trim();
-    if (!displayNames[nameKey]) displayNames[nameKey] = rawName;
+    let rawName = exp.Type || exp.Category || 'Uncategorized';
+    let nameKey = rawName.toLowerCase().trim();
+    
+    // Normalize plural/singular names to match EXACT_EXPENSE_CATS
+    if (nameKey === 'salaries') nameKey = 'salary';
+    if (nameKey === 'tool') nameKey = 'tools';
+    if (nameKey === 'subscription') nameKey = 'subscriptions';
+    if (nameKey === 'ad') nameKey = 'ads';
+    if (nameKey === 'overhead') nameKey = 'overheads';
+    if (nameKey === 'incentives') nameKey = 'incentive';
+
+    if (!displayNames[nameKey]) displayNames[nameKey] = nameKey.charAt(0).toUpperCase() + nameKey.slice(1);
     const cat = displayNames[nameKey];
     categoriesSet.add(cat);
 
+    if (!categoryStats[cat]) {
+      categoryStats[cat] = { value: 0, thisYear: 0, thisMonth: 0, topExpenseThisMonth: null };
+    }
+
     if (amt > 0) {
-      categoryMap[cat] = (categoryMap[cat] || 0) + amt;
+      categoryStats[cat].value += amt;
       if (exp.Date) {
         try {
           const parts = exp.Date.split('/');
@@ -49,27 +67,48 @@ const processExpense = (data, exchangeRate) => {
             if (!trendMap[monthStr]) trendMap[monthStr] = {};
             trendMap[monthStr][cat] = (trendMap[monthStr][cat] || 0) + amt;
             trendMap[monthStr].dt = dt;
+
+            if (dt.getFullYear() === currentYear) {
+              categoryStats[cat].thisYear += amt;
+              if (dt.getMonth() === currentMonth) {
+                categoryStats[cat].thisMonth += amt;
+                if (!categoryStats[cat].topExpenseThisMonth || amt > categoryStats[cat].topExpenseThisMonth.amt) {
+                  categoryStats[cat].topExpenseThisMonth = {
+                    amt,
+                    name: exp['Spent On'] || exp.Service || exp.Title || exp.Vendor || 'Unknown'
+                  };
+                }
+              }
+            }
           }
         } catch { /* ignore */ }
       }
     }
   });
 
-  return { categoryMap, trendMap, categoriesSet };
+  return { categoryStats, trendMap, categoriesSet };
 };
 
 const processInvestment = (data) => {
-  const categoryMap = {};
+  const categoryStats = {};
   const trendMap = {};
   const categoriesSet = new Set();
+
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
 
   (data || []).forEach(item => {
     const amt = parseFloat(String(item.Amount || item.Value || 0).replace(/[^0-9.-]/g, '')) || 0;
     const cat = item.Note || item['Note / Platform'] || item.Name || 'General';
     categoriesSet.add(cat);
 
+    if (!categoryStats[cat]) {
+      categoryStats[cat] = { value: 0, thisYear: 0, thisMonth: 0, topExpenseThisMonth: null };
+    }
+
     if (amt > 0) {
-      categoryMap[cat] = (categoryMap[cat] || 0) + amt;
+      categoryStats[cat].value += amt;
       const dateStr = item.Date || item.date || '';
       if (dateStr) {
         try {
@@ -80,19 +119,36 @@ const processInvestment = (data) => {
             if (!trendMap[monthStr]) trendMap[monthStr] = {};
             trendMap[monthStr][cat] = (trendMap[monthStr][cat] || 0) + amt;
             trendMap[monthStr].dt = dt;
+
+            if (dt.getFullYear() === currentYear) {
+              categoryStats[cat].thisYear += amt;
+              if (dt.getMonth() === currentMonth) {
+                categoryStats[cat].thisMonth += amt;
+                if (!categoryStats[cat].topExpenseThisMonth || amt > categoryStats[cat].topExpenseThisMonth.amt) {
+                  categoryStats[cat].topExpenseThisMonth = {
+                    amt,
+                    name: item['Asset Name'] || item.Name || item.Asset || 'Unknown'
+                  };
+                }
+              }
+            }
           }
         } catch { /* ignore */ }
       }
     }
   });
 
-  return { categoryMap, trendMap, categoriesSet };
+  return { categoryStats, trendMap, categoriesSet };
 };
 
 const processClient = (data) => {
-  const categoryMap = {};
+  const categoryStats = {};
   const trendMap = {};
   const categoriesSet = new Set();
+
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
 
   (data || []).forEach(item => {
     const getVal = (keys) => { for (const k of keys) if (item[k] !== undefined) return item[k]; return null; };
@@ -100,8 +156,12 @@ const processClient = (data) => {
     const cat = getVal(['Client Name', 'ClientName', 'Client', 'clientName']) || 'Unknown Client';
     categoriesSet.add(cat);
 
+    if (!categoryStats[cat]) {
+      categoryStats[cat] = { value: 0, thisYear: 0, thisMonth: 0, topExpenseThisMonth: null };
+    }
+
     if (realised > 0) {
-      categoryMap[cat] = (categoryMap[cat] || 0) + realised;
+      categoryStats[cat].value += realised;
       const dateStr = getVal(['Realised Date', 'realisedDate', 'RealisedDate']) || '';
       if (dateStr) {
         try {
@@ -112,13 +172,26 @@ const processClient = (data) => {
             if (!trendMap[monthStr]) trendMap[monthStr] = {};
             trendMap[monthStr][cat] = (trendMap[monthStr][cat] || 0) + realised;
             trendMap[monthStr].dt = dt;
+
+            if (dt.getFullYear() === currentYear) {
+              categoryStats[cat].thisYear += realised;
+              if (dt.getMonth() === currentMonth) {
+                categoryStats[cat].thisMonth += realised;
+                if (!categoryStats[cat].topExpenseThisMonth || realised > categoryStats[cat].topExpenseThisMonth.amt) {
+                  categoryStats[cat].topExpenseThisMonth = {
+                    amt: realised,
+                    name: getVal(['Invoice Number', 'Invoice', 'Description', 'Item']) || 'Payment'
+                  };
+                }
+              }
+            }
           }
         } catch { /* ignore */ }
       }
     }
   });
 
-  return { categoryMap, trendMap, categoriesSet };
+  return { categoryStats, trendMap, categoriesSet };
 };
 
 const TAB_LABELS = {
@@ -132,9 +205,17 @@ const CategoryAnalysis = () => {
   const { currency, symbol, formatAmount, convert, exchangeRate } = useCurrency();
   const [activeTab, setActiveTab] = useState('Expense');
   const { data: webhookResponse, loading, error, refetch } = useWebhookData(activeTab);
+  const { data: cardsResponse } = useWebhookData('Cards');
 
   const [activePieIndex, setActivePieIndex] = useState(null);
   const [hoveredBarIndex, setHoveredBarIndex] = useState(null);
+
+  // Filtering state
+  const [dateFilter, setDateFilter] = useState('1 month'); // Default
+  const [customRange, setCustomRange] = useState({ start: '', end: '' });
+  const [cardFilter, setCardFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [paidByFilter, setPaidByFilter] = useState('all');
 
   const [dataTab, setDataTab] = useState('Expense');
   useEffect(() => {
@@ -142,6 +223,94 @@ const CategoryAnalysis = () => {
       setDataTab(activeTab);
     }
   }, [loading, webhookResponse, activeTab]);
+
+  // Extract unique filter options from raw data
+  const filterOptions = useMemo(() => {
+    const cards = new Set();
+    const types = new Set();
+    const people = new Set();
+    
+    if (cardsResponse?.data && Array.isArray(cardsResponse.data)) {
+      cardsResponse.data.forEach(item => {
+        const auth = item.Authorizer || '';
+        const num = item["Card Number"] || '';
+        const cardStr = num ? `${auth} - ${num}` : auth;
+        if (cardStr) cards.add(cardStr);
+      });
+    }
+
+    if (webhookResponse?.data && Array.isArray(webhookResponse.data)) {
+      webhookResponse.data.forEach(item => {
+        const card = item["Paid Via"] || item.PaidVia || item.Card;
+        const type = item.Type;
+        const person = item["Paid By"] || item.PaidBy;
+        if (card) cards.add(card);
+        if (type) types.add(type);
+        if (person) people.add(person);
+      });
+    }
+    
+    return {
+      cards: Array.from(cards).sort(),
+      types: Array.from(types).sort(),
+      people: Array.from(people).sort()
+    };
+  }, [webhookResponse, cardsResponse]);
+
+  const filteredRawData = useMemo(() => {
+    if (!webhookResponse?.data || !Array.isArray(webhookResponse.data)) return [];
+    
+    return webhookResponse.data.filter(exp => {
+      // 1. Date Filter
+      let dt = null;
+      if (exp.Date || exp.date) {
+        const dStr = exp.Date || exp.date;
+        const parts = dStr.split('/');
+        if (parts.length === 3) dt = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+        else dt = new Date(dStr);
+      } else if (exp["Realised Date"] || exp.realisedDate || exp.RealisedDate) {
+        const dStr = exp["Realised Date"] || exp.realisedDate || exp.RealisedDate;
+        const parts = dStr.split('/');
+        if (parts.length === 3) dt = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+        else dt = new Date(dStr);
+      }
+      
+      if (dt && !isNaN(dt.getTime())) {
+        const now = new Date();
+        let startDate = null;
+        if (dateFilter === '7 days') startDate = subDays(now, 7);
+        else if (dateFilter === '3 weeks') startDate = subDays(now, 21);
+        else if (dateFilter === '1 month') startDate = subMonths(now, 1);
+        else if (dateFilter === '3 month') startDate = subMonths(now, 3);
+        else if (dateFilter === '6 month') startDate = subMonths(now, 6);
+        else if (dateFilter === '1 year') startDate = subYears(now, 1);
+        else if (dateFilter === 'custom' && customRange.start) startDate = new Date(customRange.start);
+        
+        if (startDate && isBefore(dt, startOfDay(startDate))) return false;
+        if (dateFilter === 'custom' && customRange.end && isAfter(dt, endOfDay(new Date(customRange.end)))) return false;
+      }
+
+      // 2. Card Filter
+      if (cardFilter !== 'all') {
+        const card = (exp["Paid Via"] || exp.PaidVia || exp.Card || '').toLowerCase();
+        if (card !== cardFilter.toLowerCase()) return false;
+      }
+
+      // 3. Type Filter
+      if (typeFilter !== 'all') {
+        const type = (exp.Type || '').toLowerCase();
+        if (type !== typeFilter.toLowerCase()) return false;
+      }
+
+      // 4. Paid By Filter
+      if (paidByFilter !== 'all') {
+        const person = (exp["Paid By"] || exp.PaidBy || '').toLowerCase();
+        if (person !== paidByFilter.toLowerCase()) return false;
+      }
+
+      return true;
+    });
+  }, [webhookResponse, dateFilter, customRange, cardFilter, typeFilter, paidByFilter]);
 
   const chartConfig = {
     gridStroke: theme === 'dark' ? '#334155' : '#CBD5E1',
@@ -156,7 +325,7 @@ const CategoryAnalysis = () => {
       return { spendByCategory: [], categoryTrendData: [], allFoundCategories: [] };
     }
 
-    const rawData = webhookResponse.data;
+    const rawData = filteredRawData;
     let result;
     if (activeTab === 'Investment') {
       result = processInvestment(rawData);
@@ -166,12 +335,22 @@ const CategoryAnalysis = () => {
       result = processExpense(rawData, exchangeRate);
     }
 
-    const { categoryMap, trendMap, categoriesSet } = result;
+    const { categoryStats, trendMap, categoriesSet } = result;
 
-    const sortedCats = Object.keys(categoryMap)
-      .map(k => ({ name: k, value: categoryMap[k] }))
-      .sort((a, b) => b.value - a.value);
-    const topCats = sortedCats.map((c, i) => ({ ...c, color: COLORS[i % COLORS.length] }));
+    let topCats = [];
+    if (activeTab === 'Expense') {
+      const EXACT_EXPENSE_CATS = ['Salary', 'One-time', 'Tools', 'Subscriptions', 'Ads', 'Overheads', 'Incentive'];
+      topCats = EXACT_EXPENSE_CATS.map((catName, i) => {
+        const matchKey = Object.keys(categoryStats).find(k => k.toLowerCase() === catName.toLowerCase());
+        const stat = matchKey ? categoryStats[matchKey] : { value: 0, thisYear: 0, thisMonth: 0, topExpenseThisMonth: null };
+        return { name: catName, ...stat, color: COLORS[i % COLORS.length] };
+      });
+    } else {
+      const sortedCats = Object.keys(categoryStats)
+        .map(k => ({ name: k, ...categoryStats[k] }))
+        .sort((a, b) => b.value - a.value);
+      topCats = sortedCats.map((c, i) => ({ ...c, color: COLORS[i % COLORS.length] }));
+    }
 
     const trendArray = Object.keys(trendMap)
       .map(monthStr => ({ month: monthStr, ...trendMap[monthStr] }))
@@ -182,7 +361,7 @@ const CategoryAnalysis = () => {
       categoryTrendData: trendArray,
       allFoundCategories: Array.from(categoriesSet),
     };
-  }, [webhookResponse, activeTab, dataTab, exchangeRate]);
+  }, [filteredRawData, webhookResponse, activeTab, dataTab, exchangeRate]);
 
   const convertedTrendData = useMemo(() => {
     return categoryTrendData.map(monthData => {
@@ -245,23 +424,131 @@ const CategoryAnalysis = () => {
         </div>
       </div>
 
+      <div className="dashboard-filter-bar-sleek stagger-load">
+        <div className="filter-row-flush">
+          <CustomSelect 
+            label="Date Range"
+            value={dateFilter} 
+            onChange={setDateFilter} 
+            options={[
+              { label: 'All Time', value: 'all time' },
+              { label: '7 Days', value: '7 days' },
+              { label: '3 Weeks', value: '3 weeks' },
+              { label: '1 Month', value: '1 month' },
+              { label: '3 Months', value: '3 month' },
+              { label: '6 Months', value: '6 month' },
+              { label: '1 Year', value: '1 year' },
+              { label: 'Custom', value: 'custom' }
+            ]} 
+          />
+
+          {dateFilter === 'custom' && (
+            <div className="custom-filter-pill custom-range-pills">
+              <input 
+                type="date" 
+                className="date-pill-input"
+                value={customRange.start}
+                onChange={e => setCustomRange(p => ({ ...p, start: e.target.value }))}
+              />
+              <span className="pill-separator">to</span>
+              <input 
+                type="date" 
+                className="date-pill-input"
+                value={customRange.end}
+                onChange={e => setCustomRange(p => ({ ...p, end: e.target.value }))}
+              />
+            </div>
+          )}
+
+          <CustomSelect 
+            label="Card / Paid Via"
+            value={cardFilter} 
+            onChange={setCardFilter} 
+            options={[
+              { label: 'All Cards', value: 'all' },
+              ...filterOptions.cards.map(card => ({ label: card, value: card }))
+            ]} 
+          />
+
+          <CustomSelect 
+            label="Type"
+            value={typeFilter} 
+            onChange={setTypeFilter} 
+            options={[
+              { label: 'All Types', value: 'all' },
+              ...['Salary', 'One-time', 'Tools', 'Subscriptions', 'Ads', 'Overheads', 'Incentive'].map(type => ({ label: type, value: type.toLowerCase() }))
+            ]} 
+          />
+
+          <CustomSelect 
+            label="Paid By"
+            value={paidByFilter} 
+            onChange={setPaidByFilter} 
+            options={[
+              { label: 'Everyone', value: 'all' },
+              ...filterOptions.people.map(person => ({ label: person, value: person }))
+            ]} 
+          />
+
+          <button 
+            className="reset-btn-minimal"
+            onClick={() => {
+              setDateFilter('1 month');
+              setCardFilter('all');
+              setTypeFilter('all');
+              setPaidByFilter('all');
+              setCustomRange({ start: '', end: '' });
+            }}
+          >
+            <RefreshCw size={14} />
+            <span>Reset</span>
+          </button>
+        </div>
+      </div>
+
       <div className="category-cards-grid">
         {spendByCategory.map((cat, index) => (
           <Card key={index} className="category-summary-card">
-            <div className="category-header">
+            <div className="category-header" style={{ marginBottom: '20px' }}>
               <span className="category-dot" style={{ backgroundColor: cat.color }}></span>
-              <h4 className="category-name">{cat.name}</h4>
+              <h4 className="category-name truncate pr-2" title={cat.name}>{cat.name}</h4>
             </div>
-            <div className="category-stats">
-              <div className="stat-item">
-                <p className="stat-label">Total {isRevenue ? 'Realised' : 'Spend'}</p>
-                <p className="stat-value">{formatAmount(cat.value)}</p>
+            
+            <div className="flex justify-between items-end mb-8">
+              <div className="stat-item flex-1">
+                <p className="text-[10px] uppercase font-bold text-muted tracking-widest mb-1">This Year</p>
+                <p className="text-lg font-bold text-primary truncate w-full" title={formatAmount(cat.thisYear)}>{formatAmount(cat.thisYear)}</p>
               </div>
-              <div className="stat-item">
-                <p className="stat-label">Avg. Monthly</p>
-                <p className="stat-value">{formatAmount(Math.round(cat.value / Math.max(categoryTrendData.length, 1)))}</p>
+              <div className="stat-item flex-1 text-right flex flex-col items-end">
+                <p className="text-[10px] uppercase font-bold text-muted tracking-widest mb-1">This Month</p>
+                <p className="text-lg font-bold text-primary truncate w-full text-right" title={formatAmount(cat.thisMonth)}>{formatAmount(cat.thisMonth)}</p>
               </div>
             </div>
+
+            {cat.topExpenseThisMonth ? (
+              <div className="mt-auto pt-5 border-t border-glass-border">
+                <p className="text-[9px] uppercase font-bold text-amber-500/80 tracking-widest mb-2.5 flex items-center gap-1.5">
+                  <Sparkles size={12} /> Top {isRevenue ? 'Payment' : 'Expense'} This Month
+                </p>
+                <div className="flex justify-between items-center bg-black/20 rounded-md p-2.5">
+                  <p className="text-[11px] text-muted truncate max-w-[110px]" title={cat.topExpenseThisMonth.name}>
+                    {cat.topExpenseThisMonth.name}
+                  </p>
+                  <p className="text-[11px] font-bold text-primary text-right pl-2">
+                    {formatAmount(cat.topExpenseThisMonth.amt)}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-auto pt-5 border-t border-glass-border">
+                <p className="text-[9px] uppercase font-bold text-muted tracking-widest mb-2.5 flex items-center gap-1.5">
+                  <Sparkles size={12} className="opacity-50" /> Top {isRevenue ? 'Payment' : 'Expense'} This Month
+                </p>
+                <div className="flex justify-between items-center bg-black/10 rounded-md p-2.5">
+                  <p className="text-[11px] text-muted opacity-50 italic">No activity</p>
+                </div>
+              </div>
+            )}
           </Card>
         ))}
       </div>
@@ -310,9 +597,9 @@ const CategoryAnalysis = () => {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full w-full gap-4">
-              <RefreshCw size={32} className="text-primary animate-spin opacity-50" />
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted animate-pulse">Aggregating Data...</p>
+            <div className="flex flex-col items-center justify-center h-full w-full gap-3 opacity-50 py-10">
+              <Database size={32} className="text-muted" />
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted">No Data Found</p>
             </div>
           )}
         </ChartCard>
@@ -352,9 +639,9 @@ const CategoryAnalysis = () => {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full w-full gap-4">
-              <RefreshCw size={32} className="text-primary animate-spin opacity-50" />
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted animate-pulse">Analyzing Distribution...</p>
+            <div className="flex flex-col items-center justify-center h-full w-full gap-3 opacity-50 py-10">
+              <Database size={32} className="text-muted" />
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted">No Distribution Data</p>
             </div>
           )}
         </ChartCard>

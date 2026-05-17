@@ -68,10 +68,10 @@ const Reports = () => {
       let amt = 0;
       const usd = String(exp["Amount in $ (If Applicable)"] || "0");
       const inr = String(exp["Amount in ₹"] || "0");
-      if (usd && usd !== "0" && usd !== "INR Not Available") {
+      if (inr && inr !== "0" && inr !== "INR Not Available") {
+        amt = (parseFloat(inr.replace(/[^0-9.]/g, '')) || 0) / (exchangeRate || 1);
+      } else if (usd && usd !== "0" && usd !== "INR Not Available") {
         amt = parseFloat(usd.replace(/[^0-9.]/g, '')) || 0;
-      } else if (inr && inr !== "0" && inr !== "INR Not Available") {
-        amt = (parseFloat(inr.replace(/[^0-9.]/g, '')) || 0) / (exchangeRate || 83.5);
       }
       let dt = null;
       if (exp.Date) {
@@ -157,7 +157,7 @@ const Reports = () => {
         const p = dateStr.split('/');
         dt = new Date(`${p[2]}-${p[1]}-${p[0]}`);
       }
-      return { ...item, amt: amt / (exchangeRate || 83.5), dt };
+      return { ...item, amt: amt / (exchangeRate || 1), dt };
     }).filter(r => r.dt && isWithinInterval(r.dt, { start, end }));
     const totalRev = monthlyRev.reduce((sum, r) => sum + r.amt, 0);
     return { revenue: totalRev, expense: totalExp, profit: totalRev - totalExp, revenueItems: monthlyRev, expenseItems: monthlyExp };
@@ -343,78 +343,77 @@ const Reports = () => {
 
         <Card className="chart-card-premium accent-pink">
           <div className="chart-header">
-            <h3>Collection Health</h3>
-            <p>Revenue vs Expense ratio</p>
+            <h3>Financial Health</h3>
+            <p>Revenue vs Expense & Profitability</p>
           </div>
-          <div className="donut-legend-row">
-            <div className="compact-donut-container">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie 
-                    data={comparisonPieData.map(d => ({ ...d, value: convert(d.value) }))} 
-                    cx="50%" cy="50%" 
-                    innerRadius={45} 
-                    outerRadius={60} 
-                    paddingAngle={5} 
-                    dataKey="value"
-                    onMouseEnter={(_, index) => setActivePieIndex(index)}
-                    onMouseLeave={() => setActivePieIndex(null)}
-                    label={({ cx, cy, midAngle, innerRadius, outerRadius, value, index }) => {
-                      if (activePieIndex === index) return null;
-                      const RADIAN = Math.PI / 180;
-                      const radius = outerRadius + 18;
-                      const x = cx + radius * Math.cos(-midAngle * RADIAN);
-                      const y = cy + radius * Math.sin(-midAngle * RADIAN);
-                      return (
-                        <text x={x} y={y} fill={theme === 'dark' ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"} textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" style={{ fontSize: '9px', fontWeight: 'bold' }}>
-                          {symbol}{value >= 1000 ? Math.round(value/1000) + 'k' : Math.round(value)}
-                        </text>
-                      );
-                    }}
-                  >
-                    {comparisonPieData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
-                  </Pie>
-                  <Tooltip formatter={(val) => `${symbol}${val.toLocaleString()}`} />
-                </PieChart>
-              </ResponsiveContainer>
+          <div style={{ display: 'flex', width: '100%', height: '180px', gap: '1rem' }}>
+            <div style={{ flex: '1', display: 'flex', flexDirection: 'column' }}>
+              <div className="donut-legend-row" style={{ height: '100%', margin: 0 }}>
+                <div className="compact-donut-container" style={{ flex: 1, minHeight: 0 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie 
+                        data={comparisonPieData.map(d => ({ ...d, value: convert(d.value) }))} 
+                        cx="50%" cy="50%" 
+                        innerRadius={35} 
+                        outerRadius={50} 
+                        paddingAngle={5} 
+                        dataKey="value"
+                        onMouseEnter={(_, index) => setActivePieIndex(index)}
+                        onMouseLeave={() => setActivePieIndex(null)}
+                        label={({ cx, cy, midAngle, outerRadius, value, index }) => {
+                          if (activePieIndex === index) return null;
+                          const RADIAN = Math.PI / 180;
+                          const radius = outerRadius + 15;
+                          const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                          const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                          return (
+                            <text x={x} y={y} fill={theme === 'dark' ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"} textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" style={{ fontSize: '9px', fontWeight: 'bold' }}>
+                              {symbol}{value >= 1000 ? Math.round(value/1000) + 'k' : Math.round(value)}
+                            </text>
+                          );
+                        }}
+                      >
+                        {comparisonPieData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                      </Pie>
+                      <Tooltip formatter={(val) => `${symbol}${val.toLocaleString()}`} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="compact-legend" style={{ alignSelf: 'center' }}>
+                    {comparisonPieData.map(d => (
+                      <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <div style={{ width: '6px', height: '6px', borderRadius: '2px', background: d.color }}></div>
+                        <span style={{ color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)', fontWeight: 'bold', fontSize: '10px' }}>{d.name}</span>
+                      </div>
+                    ))}
+                </div>
+              </div>
             </div>
-            <div className="compact-legend">
-                {comparisonPieData.map(d => (
-                  <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: d.color }}></div>
-                    <span style={{ color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)', fontWeight: 'bold' }}>{d.name}</span>
-                  </div>
-                ))}
+            <div style={{ flex: '1', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', borderLeft: theme === 'dark' ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)', paddingLeft: '1rem' }}>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: filteredStats.profit >= 0 ? '#10B981' : '#F43F5E', margin: 0 }}>
+                {filteredStats.profit >= 0 ? '+' : ''}{symbol}{Math.round(convert(filteredStats.profit)).toLocaleString()}
+              </h2>
+              <div style={{ width: '100%', display: 'flex', gap: '0.25rem', marginTop: '0.5rem' }}>
+                <div style={{ flex: 1, padding: '0.25rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '8px', textAlign: 'center', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
+                  <p style={{ fontSize: '9px', color: '#10B981', margin: 0, fontWeight: '700' }}>REV</p>
+                  <p style={{ fontSize: '10px', fontWeight: '800', margin: 0 }}>{symbol}{Math.round(convert(filteredStats.revenue)).toLocaleString()}</p>
+                </div>
+                <div style={{ flex: 1, padding: '0.25rem', background: 'rgba(245, 158, 11, 0.05)', borderRadius: '8px', textAlign: 'center', border: '1px solid rgba(245, 158, 11, 0.1)' }}>
+                  <p style={{ fontSize: '9px', color: '#F59E0B', margin: 0, fontWeight: '700' }}>EXP</p>
+                  <p style={{ fontSize: '10px', fontWeight: '800', margin: 0 }}>{symbol}{Math.round(convert(filteredStats.expense)).toLocaleString()}</p>
+                </div>
+              </div>
             </div>
           </div>
         </Card>
 
-        <Card className="chart-card-premium accent-green">
+        <Card className="chart-card-premium accent-cyan" style={{ display: 'flex', flexDirection: 'column' }}>
           <div className="chart-header">
-            <h3>Profitability</h3>
-            <p>Current month net performance</p>
+            <h3>Monthly Burn Summary</h3>
+            <p>Trajectory and runway analysis</p>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center', alignItems: 'center', padding: '0.5rem' }}>
-            <h2 style={{ fontSize: '1.8rem', fontWeight: '800', color: filteredStats.profit >= 0 ? '#10B981' : '#F43F5E', margin: 0 }}>
-              {filteredStats.profit >= 0 ? '+' : ''}{symbol}{Math.round(convert(filteredStats.profit)).toLocaleString()}
-            </h2>
-            <div style={{ width: '100%', display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
-              <div style={{ flex: 1, padding: '0.5rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
-                <p style={{ fontSize: '10px', color: '#10B981', margin: 0, fontWeight: '700' }}>REV</p>
-                <p style={{ fontSize: '12px', fontWeight: '800', margin: 0 }}>{symbol}{Math.round(convert(filteredStats.revenue)).toLocaleString()}</p>
-              </div>
-              <div style={{ flex: 1, padding: '0.5rem', background: 'rgba(245, 158, 11, 0.05)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(245, 158, 11, 0.1)' }}>
-                <p style={{ fontSize: '10px', color: '#F59E0B', margin: 0, fontWeight: '700' }}>EXP</p>
-                <p style={{ fontSize: '12px', fontWeight: '800', margin: 0 }}>{symbol}{Math.round(convert(filteredStats.expense)).toLocaleString()}</p>
-              </div>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      <div className="summary-section">
-        <Card title="Monthly Burn Summary">
-          <div className="burn-stats-compact">
+          <div className="burn-stats-compact" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div className="burn-item-compact">
               <span className="burn-label-compact">Monthly Burn</span>
               <span className="burn-value-compact">{formatAmount(currentBurn)}</span>

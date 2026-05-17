@@ -12,7 +12,7 @@ export const CurrencyProvider = ({ children }) => {
 
   // Calculate dynamic exchange rate from real data
   const exchangeRate = useMemo(() => {
-    if (!webhookResponse?.data || !Array.isArray(webhookResponse.data)) return 83.5; // fallback
+    if (!webhookResponse?.data || !Array.isArray(webhookResponse.data)) return 1; // leave it at 1 if no data
     
     // Find first record with both USD and INR
     const validRecord = webhookResponse.data.find(exp => {
@@ -29,7 +29,7 @@ export const CurrencyProvider = ({ children }) => {
       }
     }
 
-    return 83.5; // default if no dual-currency record found
+    return 1; // default to 1 if no dual-currency record found in sheet
   }, [webhookResponse]);
 
   const formats = {

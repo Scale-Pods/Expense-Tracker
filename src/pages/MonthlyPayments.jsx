@@ -4,24 +4,24 @@ import Table from '../components/common/Table';
 import Badge from '../components/common/Badge';
 import { useWebhookData } from '../hooks/useWebhookData';
 import { useCurrency } from '../hooks/CurrencyContext';
-import { Search, Calendar, ArrowUpDown, Loader, AlertCircle, Filter, Tag, X } from 'lucide-react';
-import { format, parse, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
+import { Search, Calendar, ArrowUpDown, Loader, AlertCircle, Filter, Tag, X, ChevronDown } from 'lucide-react';
+import { format, parse, isWithinInterval, startOfDay, endOfDay, subDays, subMonths, subYears, isBefore, isAfter } from 'date-fns';
 import CubeLoader from '../components/ui/cube-loader';
+import CustomSelect from '../components/common/CustomSelect';
 import '../styles/payments.css';
+import '../styles/dashboard.css';
 
 const MonthlyPayments = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'desc' });
-  const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [isMonthSelectOpen, setIsMonthSelectOpen] = useState(false);
-  const [isCategorySelectOpen, setIsCategorySelectOpen] = useState(false);
-  
-  // Custom Range State
-  const [isCustomRange, setIsCustomRange] = useState(false);
-  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [dateFilter, setDateFilter] = useState('1 month');
+  const [customRange, setCustomRange] = useState({ start: '', end: '' });
+  const [cardFilter, setCardFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [paidByFilter, setPaidByFilter] = useState('all');
 
   const { data: webhookResponse, loading, error } = useWebhookData();
+  const { data: cardsResponse } = useWebhookData('Cards');
   const { currency, symbol, convert, formatAmount, exchangeRate } = useCurrency();
 
   const paymentsData = useMemo(() => {
@@ -31,14 +31,14 @@ const MonthlyPayments = () => {
 
     const displayNames = {};
     return webhookResponse.data.map((exp, idx) => {
-      let amtStr = String(exp["Amount in $ (If Applicable)"] || "0");
+      const inrStr = String(exp["Amount in ₹"] || "0");
       let costVal = 0;
-      if (amtStr !== "0" && amtStr !== "INR Not Available") {
-         costVal = parseFloat(amtStr.replace(/[^0-9.]/g, '')) || 0;
+      if (inrStr !== "0" && inrStr !== "INR Not Available") {
+         costVal = (parseFloat(inrStr.replace(/[^0-9.]/g, '')) || 0) / exchangeRate; 
       } else {
-         const inrStr = String(exp["Amount in ₹"] || "0");
-         if (inrStr !== "0" && inrStr !== "INR Not Available") {
-            costVal = (parseFloat(inrStr.replace(/[^0-9.]/g, '')) || 0) / exchangeRate; 
+         let amtStr = String(exp["Amount in $ (If Applicable)"] || "0");
+         if (amtStr !== "0" && amtStr !== "INR Not Available") {
+            costVal = parseFloat(amtStr.replace(/[^0-9.]/g, '')) || 0;
          }
       }
 
@@ -69,55 +69,77 @@ const MonthlyPayments = () => {
          cost: costVal,
          date: date,
          dateStr: exp.Date || 'No Date',
-         status: exp.Status ? 'Cleared' : 'Pending'
+         status: exp.Status ? 'Cleared' : 'Pending',
+         card: exp["Paid Via"] || exp.PaidVia || exp.Card || '',
+         paidBy: exp["Paid By"] || exp.PaidBy || ''
       };
     }).filter(s => s.cost > 0 && s.date);
   }, [webhookResponse, exchangeRate]);
 
-  const months = useMemo(() => {
-    const monthSet = new Set();
-    paymentsData.forEach(p => {
-      if (p.date) {
-        monthSet.add(format(p.date, 'yyyy-MM'));
-      }
-    });
-    return Array.from(monthSet).sort((a, b) => b.localeCompare(a));
-  }, [paymentsData]);
+  const filterOptions = useMemo(() => {
+    const cards = new Set();
+    const types = new Set();
+    const people = new Set();
+    
+    if (cardsResponse?.data && Array.isArray(cardsResponse.data)) {
+      cardsResponse.data.forEach(item => {
+        const auth = item.Authorizer || '';
+        const num = item["Card Number"] || '';
+        const cardStr = num ? `${auth} - ${num}` : auth;
+        if (cardStr) cards.add(cardStr);
+      });
+    }
 
-  const categories = useMemo(() => {
-    const catSet = new Set(['All']);
-    let relevantData = paymentsData;
-    if (isCustomRange) {
-        if (dateRange.start && dateRange.end) {
-            const start = startOfDay(new Date(dateRange.start));
-            const end = endOfDay(new Date(dateRange.end));
-            relevantData = relevantData.filter(p => isWithinInterval(p.date, { start, end }));
-        }
-    } else {
-        relevantData = relevantData.filter(p => p.date && format(p.date, 'yyyy-MM') === selectedMonth);
+    if (webhookResponse?.data && Array.isArray(webhookResponse.data)) {
+      webhookResponse.data.forEach(item => {
+        const card = item["Paid Via"] || item.PaidVia || item.Card;
+        const type = item.Type;
+        const person = item["Paid By"] || item.PaidBy;
+        if (card) cards.add(card);
+        if (type) types.add(type);
+        if (person) people.add(person);
+      });
     }
     
-    relevantData.forEach(p => catSet.add(p.category));
-    return Array.from(catSet).sort();
-  }, [paymentsData, selectedMonth, isCustomRange, dateRange]);
+    return {
+      cards: Array.from(cards).sort(),
+      types: Array.from(types).sort(),
+      people: Array.from(people).sort()
+    };
+  }, [webhookResponse, cardsResponse]);
 
   const filteredData = useMemo(() => {
     let data = paymentsData;
 
-    if (isCustomRange) {
-      if (dateRange.start && dateRange.end) {
-        const start = startOfDay(new Date(dateRange.start));
-        const end = endOfDay(new Date(dateRange.end));
-        data = data.filter(p => isWithinInterval(p.date, { start, end }));
-      } else {
-        return []; // Don't show data until both dates are set
-      }
-    } else {
-      data = data.filter(p => p.date && format(p.date, 'yyyy-MM') === selectedMonth);
+    if (dateFilter !== 'all time') {
+        const now = new Date();
+        let startDate = null;
+        if (dateFilter === '7 days') startDate = subDays(now, 7);
+        else if (dateFilter === '3 weeks') startDate = subDays(now, 21);
+        else if (dateFilter === '1 month') startDate = subMonths(now, 1);
+        else if (dateFilter === '3 month') startDate = subMonths(now, 3);
+        else if (dateFilter === '6 month') startDate = subMonths(now, 6);
+        else if (dateFilter === '1 year') startDate = subYears(now, 1);
+        else if (dateFilter === 'custom' && customRange.start) startDate = new Date(customRange.start);
+        
+        data = data.filter(p => {
+          if (!p.date) return false;
+          if (startDate && isBefore(p.date, startOfDay(startDate))) return false;
+          if (dateFilter === 'custom' && customRange.end && isAfter(p.date, endOfDay(new Date(customRange.end)))) return false;
+          return true;
+        });
     }
 
-    if (selectedCategory !== 'All') {
-      data = data.filter(p => p.category === selectedCategory);
+    if (cardFilter !== 'all') {
+      data = data.filter(p => p.card.toLowerCase() === cardFilter.toLowerCase());
+    }
+
+    if (typeFilter !== 'all') {
+      data = data.filter(p => p.type.toLowerCase() === typeFilter.toLowerCase());
+    }
+
+    if (paidByFilter !== 'all') {
+      data = data.filter(p => p.paidBy.toLowerCase() === paidByFilter.toLowerCase());
     }
 
     if (searchTerm) {
@@ -137,7 +159,7 @@ const MonthlyPayments = () => {
     }
 
     return data;
-  }, [searchTerm, sortConfig, selectedMonth, selectedCategory, isCustomRange, dateRange, paymentsData, convert]);
+  }, [searchTerm, sortConfig, dateFilter, customRange, cardFilter, typeFilter, paidByFilter, paymentsData, convert]);
 
   const totalMonthly = useMemo(() => {
     return filteredData.reduce((sum, item) => sum + item.cost, 0);
@@ -205,120 +227,102 @@ const MonthlyPayments = () => {
     );
   }
 
-  const handleMonthSelect = (month) => {
-    setIsCustomRange(false);
-    setSelectedMonth(month);
-    setIsMonthSelectOpen(false);
-    setSelectedCategory('All');
-  };
 
-  const handleCategorySelect = (cat) => {
-    setSelectedCategory(cat);
-    setIsCategorySelectOpen(false);
-  };
 
   return (
     <div className="payments-container redesigned">
-      <div className="payments-header">
-        <div className="header-title-group">
-          <p className="top-tagline">
-            {isCustomRange 
-              ? `Range: ${dateRange.start || '...'} to ${dateRange.end || '...'}`
-              : `Track expenses for ${format(parse(selectedMonth, 'yyyy-MM', new Date()), 'MMMM yyyy')}`
-            }
-          </p>
-          <h1>Monthly Payments</h1>
-        </div>
-        
-        <div className="header-filters">
-          <div className="custom-dropdown-container">
-            <button 
-              className={`custom-dropdown-trigger ${isMonthSelectOpen ? 'active' : ''}`}
-              onClick={() => { setIsMonthSelectOpen(!isMonthSelectOpen); setIsCategorySelectOpen(false); }}
-            >
-              <Calendar size={18} />
-              <span>{isCustomRange ? 'Custom Range' : format(parse(selectedMonth, 'yyyy-MM', new Date()), 'MMMM yyyy')}</span>
-              <ArrowUpDown size={14} className={`chevron ${isMonthSelectOpen ? 'rotate' : ''}`} />
-            </button>
-            
-            {isMonthSelectOpen && (
-              <div className="custom-dropdown-menu animate-dropdown">
-                <button 
-                    className={`dropdown-item ${isCustomRange ? 'selected' : ''}`}
-                    onClick={() => { setIsCustomRange(true); setIsMonthSelectOpen(false); setSelectedCategory('All'); }}
-                >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Filter size={14} /> Custom Date Range...
-                    </div>
-                </button>
-                <div className="menu-divider" />
-                {months.map(m => (
-                  <button 
-                    key={m} 
-                    className={`dropdown-item ${(!isCustomRange && selectedMonth === m) ? 'selected' : ''}`}
-                    onClick={() => handleMonthSelect(m)}
-                  >
-                    {format(parse(m, 'yyyy-MM', new Date()), 'MMMM yyyy')}
-                    {(!isCustomRange && selectedMonth === m) && <div className="dot"></div>}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="custom-dropdown-container">
-            <button 
-              className={`custom-dropdown-trigger ${isCategorySelectOpen ? 'active' : ''}`}
-              onClick={() => { setIsCategorySelectOpen(!isCategorySelectOpen); setIsMonthSelectOpen(false); }}
-            >
-              <Filter size={18} />
-              <span>{selectedCategory}</span>
-              <ArrowUpDown size={14} className={`chevron ${isCategorySelectOpen ? 'rotate' : ''}`} />
-            </button>
-            
-            {isCategorySelectOpen && (
-              <div className="custom-dropdown-menu animate-dropdown">
-                {categories.map(cat => (
-                  <button 
-                    key={cat} 
-                    className={`dropdown-item ${selectedCategory === cat ? 'selected' : ''}`}
-                    onClick={() => handleCategorySelect(cat)}
-                  >
-                    {cat}
-                    {selectedCategory === cat && <div className="dot"></div>}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+      <div className="dashboard-header-sleek stagger-load flex justify-between items-end mb-8">
+        <div className="header-text-group">
+          <p className="subtitle-muted">Detailed view of your expenditures</p>
+          <h1 className="title-bold">Monthly Payments</h1>
         </div>
       </div>
 
-      {isCustomRange && (
-        <div className="custom-range-bar animate-slide-down">
-            <div className="range-inputs">
-                <div className="range-field">
-                    <label>Start Date</label>
-                    <input 
-                        type="date" 
-                        value={dateRange.start} 
-                        onChange={(e) => setDateRange({...dateRange, start: e.target.value})} 
-                    />
-                </div>
-                <div className="range-field">
-                    <label>End Date</label>
-                    <input 
-                        type="date" 
-                        value={dateRange.end} 
-                        onChange={(e) => setDateRange({...dateRange, end: e.target.value})} 
-                    />
-                </div>
+      <div className="dashboard-filter-bar-sleek stagger-load mb-6">
+        <div className="filter-row-flush">
+          <CustomSelect 
+            label="Date Range"
+            value={dateFilter} 
+            onChange={setDateFilter} 
+            options={[
+              { label: 'All Time', value: 'all time' },
+              { label: '7 Days', value: '7 days' },
+              { label: '3 Weeks', value: '3 weeks' },
+              { label: '1 Month', value: '1 month' },
+              { label: '3 Months', value: '3 month' },
+              { label: '6 Months', value: '6 month' },
+              { label: '1 Year', value: '1 year' },
+              { label: 'Custom', value: 'custom' }
+            ]} 
+          />
+
+          {dateFilter === 'custom' && (
+            <div className="custom-filter-pill custom-range-pills">
+              <div className="pill-input-wrapper">
+                <input 
+                  type="date" 
+                  value={customRange.start} 
+                  onChange={(e) => setCustomRange({...customRange, start: e.target.value})}
+                  className="date-pill-input"
+                />
+              </div>
+              <span className="pill-separator">to</span>
+              <div className="pill-input-wrapper">
+                <input 
+                  type="date" 
+                  value={customRange.end} 
+                  onChange={(e) => setCustomRange({...customRange, end: e.target.value})}
+                  className="date-pill-input"
+                />
+              </div>
             </div>
-            <button className="clear-range-btn" onClick={() => { setIsCustomRange(false); setSelectedMonth(months[0] || format(new Date(), 'yyyy-MM')); }}>
-                <X size={16} /> Exit Custom Range
-            </button>
+          )}
+
+          <CustomSelect 
+            label="Card / Paid Via"
+            value={cardFilter} 
+            onChange={setCardFilter} 
+            options={[
+              { label: 'All Cards', value: 'all' },
+              ...filterOptions.cards.map(card => ({ label: card, value: card }))
+            ]} 
+          />
+
+          <CustomSelect 
+            label="Type"
+            value={typeFilter} 
+            onChange={setTypeFilter} 
+            options={[
+              { label: 'All Types', value: 'all' },
+              ...['Salary', 'One-time', 'Tools', 'Subscriptions', 'Ads', 'Overheads', 'Incentive'].map(type => ({ label: type, value: type.toLowerCase() }))
+            ]} 
+          />
+
+          <CustomSelect 
+            label="Paid By"
+            value={paidByFilter} 
+            onChange={setPaidByFilter} 
+            options={[
+              { label: 'Everyone', value: 'all' },
+              ...filterOptions.people.map(person => ({ label: person, value: person }))
+            ]} 
+          />
+
+          <button 
+            className="reset-btn-minimal"
+            onClick={() => {
+              setDateFilter('1 month');
+              setCardFilter('all');
+              setTypeFilter('all');
+              setPaidByFilter('all');
+              setCustomRange({ start: '', end: '' });
+            }}
+          >
+            <X size={14} />
+            <span>Reset</span>
+          </button>
         </div>
-      )}
+      </div>
 
       <div className="stats-grid">
         <Card className="stat-card">

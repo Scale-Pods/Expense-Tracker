@@ -22,8 +22,12 @@ export const IndiaTaxInvoice = ({ data }) => {
           <div style={{ fontSize: '12px', lineHeight: '1.2' }}>
             <strong style={{ fontSize: '15px', display: 'block', marginBottom: '4px' }}>SCALEPODS LLP</strong>
             503-A Crescent House, 159/161 Crescent House, Mumbai, Maharashtra, India - 400009<br />
-            <strong>GSTIN:</strong> {data.myGstin || "27AALFS4567J1Z3"}<br />
-            <strong>State:</strong> Maharashtra (27)
+            {data.showMyGst !== false && (
+              <>
+                <strong>GSTIN:</strong> {data.myGstin || "27AALFS4567J1Z3"}<br />
+                <strong>State:</strong> Maharashtra (27)
+              </>
+            )}
           </div>
         </div>
         <div style={{ flex: '0 1 280px', minWidth: '200px', padding: '10px', background: '#fafafa', fontSize: '12px', lineHeight: '1.2' }}>

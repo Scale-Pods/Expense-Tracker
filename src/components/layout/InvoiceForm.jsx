@@ -36,6 +36,7 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
     paymentTerm: 'One Time',
     sacCode: '998313',
     showGst: true,
+    showMyGst: true,
     originalDetails: null
   };
 
@@ -183,6 +184,7 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
       clientGstin: '',
       clientState: region === 'India' ? (clientData['Client State'] || 'Maharashtra') : '',
       amountInWords: '',
+      showMyGst: true,
       originalDetails: clientData
     }));
 
@@ -511,9 +513,28 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
                     </div>
                   </div>
                   {formData.region === 'India' && (
-                    <div className="form-group">
-                      <label><FileCheck size={16} /> My GSTIN</label>
-                      <input type="text" name="myGstin" value={formData.myGstin} onChange={handleChange} />
+                    <div className="form-group" style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', gridColumn: '1 / -1' }}>
+                      <div style={{ flex: 1 }}>
+                        <label><FileCheck size={16} /> My GSTIN</label>
+                        <input type="text" name="myGstin" value={formData.myGstin} onChange={handleChange} disabled={!formData.showMyGst} style={{ opacity: formData.showMyGst ? 1 : 0.5 }} />
+                      </div>
+                      <div className={`region-slider type-slider gst-slider ${formData.showMyGst ? 'on' : 'off'}`} style={{ width: '140px', marginBottom: '2px', height: '42px' }}>
+                        <button 
+                          type="button" 
+                          className={formData.showMyGst ? 'active' : ''}
+                          onClick={() => setFormData(prev => ({ ...prev, showMyGst: true }))}
+                        >
+                          Show
+                        </button>
+                        <button 
+                          type="button" 
+                          className={!formData.showMyGst ? 'active' : ''}
+                          onClick={() => setFormData(prev => ({ ...prev, showMyGst: false }))}
+                        >
+                          Hide
+                        </button>
+                        <div className="slider-thumb"></div>
+                      </div>
                     </div>
                   )}
                 </div>

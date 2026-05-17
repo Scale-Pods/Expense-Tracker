@@ -3,7 +3,6 @@ import Card from '../components/common/Card';
 import Badge from '../components/common/Badge';
 import { useWebhookData } from '../hooks/useWebhookData';
 import { useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
 import { 
   Bell, 
   Calendar, 
@@ -16,7 +15,6 @@ import {
   Sparkles,
   Info,
   Trash2,
-  AlertCircle,
   IndianRupee,
   Tag,
   CreditCard,
@@ -26,6 +24,8 @@ import {
 } from 'lucide-react';
 import CubeLoader from '../components/ui/cube-loader';
 import WebhookDataSection from '../components/WebhookDataSection';
+import AddCardDialog from '../components/reminders/AddCardDialog';
+import ConfirmationPortal from '../components/reminders/ConfirmationPortal';
 import '../styles/reminders.css';
 
 const WEBHOOK_URL = `${import.meta.env.VITE_N8N_BASE_URL}/${import.meta.env.VITE_WEBHOOK_ID_GENERAL}`;
@@ -42,21 +42,15 @@ const Reminders = () => {
   });
   const [cards, setCards] = useState([]);
   const [loadingCards, setLoadingCards] = useState(false);
-  const [isAddCardModalOpen, setIsAddCardModalOpen] = useState(false);
-  const [newCard, setNewCard] = useState({ name: '', number: '' });
-  const [submittingCard, setSubmittingCard] = useState(false);
+  const [showAddCard, setShowAddCard] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [confirmation, setConfirmation] = useState({ show: false, title: '', message: '' });
-  const [lastUpdated, setLastUpdated] = useState(new Date());
   const navigate = useNavigate();
   
   const { data: webhookResponse, loading, error, refetch } = useWebhookData('Reminder');
 
-  useEffect(() => {
-    if (webhookResponse) {
-      setLastUpdated(new Date());
-    }
-  }, [webhookResponse]);
+
+
 
   const [manualReminders, setManualReminders] = useState([]);
   const [expandedTasks, setExpandedTasks] = useState({});
@@ -159,33 +153,15 @@ const Reminders = () => {
   };
 
   const handleCloseConfirmation = () => {
-    setConfirmation({ ...confirmation, show: false });
+    setConfirmation({ show: false, title: '', message: '' });
     refetch();
   };
 
-  const handleAddCard = async (e) => {
-    e.preventDefault();
-    if (!newCard.name) return;
-    setSubmittingCard(true);
-    try {
-      const response = await fetch(`${WEBHOOK_URL}?action=AddCard`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newCard)
-      });
-      if (response.ok) {
-        setIsAddCardModalOpen(false);
-        const addedCardDisplay = `${newCard.name}${newCard.number ? ` - ${newCard.number}` : ''}`;
-        setNewReminder(prev => ({ ...prev, mode: addedCardDisplay }));
-        setNewCard({ name: '', number: '' });
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        await fetchCards();
-      }
-    } catch (error) {
-      console.error('Failed to add card:', error);
-    } finally {
-      setSubmittingCard(false);
-    }
+  const handleCardSaved = async (displayName) => {
+    setShowAddCard(false);
+    // refresh the card list then auto-select the newly added card
+    await fetchCards();
+    setNewReminder(prev => ({ ...prev, mode: displayName }));
   };
 
   const resolveReminder = (id) => {
@@ -213,7 +189,7 @@ const Reminders = () => {
     }
   };
 
-  if (loading && !webhookResponse) {
+  if (loading && !webhookResponse && !manualReminders.length) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <CubeLoader />
@@ -392,15 +368,21 @@ const Reminders = () => {
               </div>
 
               <div className="redesign-group">
-                <label>Payment Mode (Cards)</label>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="mb-0">Payment Mode (Cards)</label>
+                  <button 
+                    type="button" 
+                    className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1"
+                    onClick={() => setShowAddCard(true)}
+                  >
+                    + Add New
+                  </button>
+                </div>
                 <div className="input-with-icon">
                   <CreditCard size={16} className="icon" />
                   <select 
                     value={newReminder.mode}
-                    onChange={(e) => {
-                      if (e.target.value === 'ADD_NEW') setIsAddCardModalOpen(true);
-                      else setNewReminder({...newReminder, mode: e.target.value});
-                    }}
+                    onChange={(e) => setNewReminder({...newReminder, mode: e.target.value})}
                     required
                     disabled={loadingCards}
                   >
@@ -408,11 +390,11 @@ const Reminders = () => {
                       <option>Loading cards...</option>
                     ) : (
                       <>
+                        <option value="">Select a card...</option>
                         {cards.map((card, idx) => {
                           const display = `${card.Authorizer || card.CardName || 'Card'}${card["Card Number"] ? ` - ${card["Card Number"]}` : ''}`;
                           return <option key={idx} value={display}>{display}</option>;
                         })}
-                        <option value="ADD_NEW">+ Add New Card...</option>
                       </>
                     )}
                   </select>
@@ -460,54 +442,24 @@ const Reminders = () => {
       <WebhookDataSection initialType="Expense" />
 
       {confirmation.show && (
-        <div className="modal-overlay">
-          <div className="confirmation-modal">
-            <CheckCircle size={40} className="modal-icon success" />
-            <h2>{confirmation.title}</h2>
-            <p>{confirmation.message}</p>
-            <button className="btn-modal-ok" onClick={handleCloseConfirmation}>OK</button>
-          </div>
-        </div>
+        <ConfirmationPortal
+          title={confirmation.title}
+          message={confirmation.message}
+          countdownSeconds={3}
+          onClose={handleCloseConfirmation}
+        />
       )}
 
-      <AddCardModal 
-        isOpen={isAddCardModalOpen}
-        onClose={() => setIsAddCardModalOpen(false)}
-        onSave={handleAddCard}
-        cardData={newCard}
-        setCardData={setNewCard}
-        submitting={submittingCard}
-      />
+      {showAddCard && (
+        <AddCardDialog
+          onSuccess={handleCardSaved}
+          onClose={() => setShowAddCard(false)}
+        />
+      )}
     </div>
   );
 };
 
-const AddCardModal = ({ isOpen, onClose, onSave, cardData, setCardData, submitting }) => {
-  if (!isOpen) return null;
-  return (
-    <div className="modal-overlay">
-      <div className="confirmation-modal">
-        <CreditCard size={40} className="modal-icon" />
-        <h2>Add New Card</h2>
-        <form onSubmit={onSave} className="reminder-form-redesign" style={{ textAlign: 'left', marginTop: '1rem' }}>
-          <div className="redesign-group">
-            <label>Card Name</label>
-            <input type="text" value={cardData.name} onChange={(e) => setCardData({...cardData, name: e.target.value})} required className="pwd-input" />
-          </div>
-          <div className="redesign-group">
-            <label>Last 4 Digits</label>
-            <input type="text" value={cardData.number} onChange={(e) => setCardData({...cardData, number: e.target.value})} maxLength={4} className="pwd-input" />
-          </div>
-          <div style={{ display: 'flex', gap: '12px', marginTop: '2rem' }}>
-            <button type="button" className="btn-modal-ok" style={{ background: 'var(--color-border)' }} onClick={onClose}>Cancel</button>
-            <button type="submit" className="btn-modal-ok" disabled={submitting}>
-              {submitting ? <Loader2 size={20} className="animate-spin" /> : 'Save Card'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
+
 
 export default Reminders;

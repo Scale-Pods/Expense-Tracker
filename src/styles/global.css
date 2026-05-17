@@ -72,6 +72,11 @@ select {
   backdrop-filter: blur(10px);
 }
 
+[data-theme='dark'] select option {
+  background-color: #0F172A !important;
+  color: #FFFFFF !important;
+}
+
 [data-theme='dark'] input::placeholder {
   color: rgba(255, 255, 255, 0.3);
 }

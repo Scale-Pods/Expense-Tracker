@@ -6,6 +6,7 @@ import {
 import html2pdf from 'html2pdf.js';
 import { reconstructInvoiceData } from '../utils/invoiceUtils';
 import { InvoicePaper } from '../components/invoice/InvoiceTemplates';
+import CustomSelect from '../components/common/CustomSelect';
 import '../styles/all-invoices.css';
 
 const AllInvoices = () => {
@@ -143,11 +144,15 @@ const AllInvoices = () => {
           <input type="text" placeholder="Search client or email..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
         </div>
         <div className="ai-filters">
-          <select value={filterType} onChange={e => setFilterType(e.target.value)}>
-            <option value="all">All Invoice Types</option>
-            <option value="tax">Tax Invoice</option>
-            <option value="proforma">Proforma Invoice</option>
-          </select>
+          <CustomSelect 
+            value={filterType} 
+            onChange={setFilterType} 
+            options={[
+              { label: 'All Invoice Types', value: 'all' },
+              { label: 'Tax Invoice', value: 'tax' },
+              { label: 'Proforma Invoice', value: 'proforma' }
+            ]}
+          />
         </div>
       </div>
 
