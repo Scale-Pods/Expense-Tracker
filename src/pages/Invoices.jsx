@@ -17,6 +17,7 @@ const Invoices = () => {
   const prefillData = location.state?.prefill || null;
   const autoGenerate = location.state?.autoGenerate || false;
   const [pdfUrl, setPdfUrl] = useState(null);
+  const [pdfBlob, setPdfBlob] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState(null);
   const [liveData, setLiveData] = useState(null);
@@ -54,6 +55,7 @@ const Invoices = () => {
       if (!rawBlob) throw new Error('Failed to capture PDF content');
       
       const blob = new Blob([rawBlob], { type: 'application/pdf' });
+      setPdfBlob(blob);
       const url = URL.createObjectURL(blob);
       setPdfUrl(url);
       return blob;
@@ -130,15 +132,29 @@ const Invoices = () => {
       return;
     }
 
+    let currentBlob = pdfBlob;
+    if (!currentBlob) {
+      currentBlob = await handleGenerate();
+      if (!currentBlob) {
+        alert('Failed to generate PDF. Please try again.');
+        return;
+      }
+    }
+
     setIsSending(true);
     try {
       const payload = buildWebhookPayload('send');
       const webhookUrl = `${import.meta.env.VITE_N8N_BASE_URL}/${import.meta.env.VITE_WEBHOOK_ID_INVOICE}`;
 
+      const formData = new FormData();
+      formData.append('file', currentBlob, `Invoice_${liveData.name?.split('\n')[0].replace(/\s+/g, '_')}.pdf`);
+      Object.entries(payload).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+
       const response = await fetch(webhookUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: formData
       });
 
       if (response.ok) {
@@ -203,7 +219,7 @@ const Invoices = () => {
                 <span>PDF Ready!</span>
               </div>
               <div className="button-group">
-                <button className="action-btn-premium secondary" onClick={() => { setPdfUrl(null); }} disabled={isSending}>
+                <button className="action-btn-premium secondary" onClick={() => { setPdfUrl(null); setPdfBlob(null); }} disabled={isSending}>
                   <Eye size={18} />
                   <span>Dismiss</span>
                 </button>
