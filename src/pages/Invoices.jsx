@@ -85,7 +85,7 @@ const Invoices = () => {
     const lineItemDescription = items.map(item => item.description).filter(Boolean).join(', ');
     const extraEmails = (liveData.extraEmails || []).filter(Boolean).join(', ');
 
-    return {
+    const payload = {
       event: eventType,
       invoiceType: `${(liveData.type || 'Proforma').toLowerCase().replace('proforma', 'performa')}-${(liveData.region || 'India').toLowerCase()}`,
       type: liveData.type || '',
@@ -94,7 +94,6 @@ const Invoices = () => {
       clientName,
       clientAddress,
       email: liveData.email || '',
-      extraEmails,
       lineItemDescription,
       currency: liveData.currency || '',
       amount: liveData.amount || '',
@@ -117,6 +116,12 @@ const Invoices = () => {
       accType: liveData.accType || '',
       terms: liveData.terms || '',
     };
+
+    if (extraEmails) {
+      payload.extraEmails = extraEmails;
+    }
+
+    return payload;
   };
 
   const handleSendToClient = async () => {
