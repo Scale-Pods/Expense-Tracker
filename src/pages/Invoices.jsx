@@ -126,6 +126,12 @@ const Invoices = () => {
     return payload;
   };
 
+  const getActionType = () => {
+    const typeKey = (liveData.type || 'Proforma').toLowerCase().replace('proforma', 'performa');
+    const regionKey = (liveData.region || 'India').toLowerCase();
+    return `${typeKey}${regionKey}`;
+  };
+
   const handleSendToClient = async () => {
     if (!liveData) {
       alert('Error: No data to send. Please ensure form is filled.');
@@ -144,7 +150,7 @@ const Invoices = () => {
     setIsSending(true);
     try {
       const payload = buildWebhookPayload('send');
-      const webhookUrl = `${import.meta.env.VITE_N8N_BASE_URL}/${import.meta.env.VITE_WEBHOOK_ID_INVOICE}`;
+      const webhookUrl = `${import.meta.env.VITE_N8N_BASE_URL}/${import.meta.env.VITE_WEBHOOK_ID_INVOICE}?action=${getActionType()}`;
 
       const formData = new FormData();
       formData.append('file', currentBlob, `Invoice_${liveData.name?.split('\n')[0].replace(/\s+/g, '_')}.pdf`);
@@ -179,7 +185,7 @@ const Invoices = () => {
     
     try {
       const payload = buildWebhookPayload('download');
-      const webhookUrl = `${import.meta.env.VITE_N8N_BASE_URL}/${import.meta.env.VITE_WEBHOOK_ID_INVOICE}`;
+      const webhookUrl = `${import.meta.env.VITE_N8N_BASE_URL}/${import.meta.env.VITE_WEBHOOK_ID_INVOICE}?action=${getActionType()}`;
       fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
