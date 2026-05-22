@@ -22,6 +22,7 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
     dueDate: '',
     invoiceDate: '',
     email: '',
+    extraEmails: [],
     terms: '1. Currency & Charges: Payments must be made in the currency mentioned. Any additional bank charges, conversion fees, or transaction fees are to be borne by the client.\n2. Scope of Work: The services covered under this invoice are as per the agreed discussion.\n3. Non-Refundable: Payments made are non-refundable unless otherwise agreed in writing.\n4. Confidentiality: Both parties agree to maintain the confidentiality of any business or project-related information shared during the engagement.\n5. Intellectual Property: All deliverables and work products remain the property of ScalePods LLP until full payment is received.\n6. Termination: Engagement can be terminated based on terms mentioned in the Service Level Agreement (SLA).\n7. Support: For any queries regarding this invoice, please contact info@scalepods.co',
     accHolder: 'SCALEPODS LLP',
     bankName: 'HDFC Bank Ltd',
@@ -58,12 +59,11 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
 
   React.useEffect(() => {
     onUpdate(formData);
-    // Save to cache
     localStorage.setItem(CACHE_KEY, JSON.stringify({
       data: formData,
       timestamp: Date.now()
     }));
-  }, [formData]);
+  }, [formData, onUpdate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -118,6 +118,26 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
     setFormData(prev => ({ ...prev, items: newItems }));
   };
 
+  const addExtraEmail = () => {
+    setFormData(prev => ({
+      ...prev,
+      extraEmails: [...(prev.extraEmails || []), '']
+    }));
+  };
+
+  const removeExtraEmail = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      extraEmails: prev.extraEmails.filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateExtraEmail = (index, value) => {
+    const newEmails = [...formData.extraEmails];
+    newEmails[index] = value;
+    setFormData(prev => ({ ...prev, extraEmails: newEmails }));
+  };
+
   React.useEffect(() => {
     const total = formData.items.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
     const paid = Number(formData.amountPaid) || 0;
@@ -128,7 +148,7 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
       amount: total.toString(),
       dueAmount: due.toString()
     }));
-  }, [formData.items]);
+  }, [formData.items, formData.amountPaid]);
 
   React.useEffect(() => {
     // Only auto-update currency if it's currently a default one that doesn't match the region
@@ -137,7 +157,7 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
     } else if (formData.region === 'India' && formData.currency === 'AED') {
       setFormData(prev => ({ ...prev, currency: 'INR' }));
     }
-  }, [formData.region]);
+  }, [formData.region, formData.currency]);
 
   // Convert DD/MM/YYYY to YYYY-MM-DD for HTML date inputs
   const convertDate = (dateStr) => {
@@ -360,14 +380,34 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
 
                 <div className="form-group flex-1">
                   <label><Mail size={16} /> Client Email</label>
-                  <input 
-                    type="email" 
-                    name="email" 
-                    placeholder="billing@acme.com" 
-                    value={formData.email}
-                    onChange={handleChange}
-                    required 
-                  />
+                  <div className="email-input-group">
+                    <input 
+                      type="email" 
+                      name="email" 
+                      placeholder="billing@acme.com" 
+                      value={formData.email}
+                      onChange={handleChange}
+                      required 
+                    />
+                    <button type="button" className="btn-add-email" onClick={addExtraEmail} title="Add extra email">
+                      <Plus size={14} />
+                    </button>
+                  </div>
+                  
+                  {formData.extraEmails && formData.extraEmails.map((extraEmail, index) => (
+                    <div key={index} className="extra-email-row">
+                      <input 
+                        type="email" 
+                        placeholder="extra@example.com" 
+                        value={extraEmail}
+                        onChange={(e) => updateExtraEmail(index, e.target.value)}
+                        required 
+                      />
+                      <button type="button" className="icon-btn-danger small" onClick={() => removeExtraEmail(index)}>
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ))}
                 </div>
               </div>
 
