@@ -267,7 +267,11 @@ export const UAETaxInvoice = ({ data }) => {
 export const IndiaProformaInvoice = ({ data }) => {
   if (!data) return null;
   const termsArray = data.terms ? data.terms.split('\n').filter(t => t.trim() !== '') : [];
-  const total = Number(data.amount) || 0;
+  const subtotal = Number(data.amount) || 0;
+  const showGst = data.showGst !== false;
+  const cgst = showGst ? subtotal * 0.09 : 0;
+  const sgst = showGst ? subtotal * 0.09 : 0;
+  const total = subtotal + cgst + sgst;
 
   return (
     <div className="india-proforma-invoice a4-container" style={{ padding: '40px', background: '#fff', width: '210mm', minHeight: '297mm', margin: '0 auto', color: '#333', fontSize: '13px' }}>
@@ -277,6 +281,12 @@ export const IndiaProformaInvoice = ({ data }) => {
           <div style={{ lineHeight: '1.4' }}>
             <strong style={{ fontSize: '16px' }}>SCALEPODS LLP</strong><br />
             503-A Floor-5th, 159/161, Crescent house, Mumbai, Maharashtra, India - 400009
+            {data.showMyGst !== false && (
+              <><br />
+                <strong>GSTIN:</strong> {data.myGstin || "27AALFS4567J1Z3"}<br />
+                <strong>State:</strong> Maharashtra (27)
+              </>
+            )}
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
@@ -304,6 +314,22 @@ export const IndiaProformaInvoice = ({ data }) => {
           <h3 style={{ borderBottom: '2px solid #333', paddingBottom: '5px', textTransform: 'uppercase', fontSize: '12px' }}>Payment Summary</h3>
           <div style={{ marginTop: '10px', padding: '15px', background: '#f9f9f9', borderRadius: '5px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+              <span>Subtotal:</span>
+              <strong>{data.currency} {subtotal.toLocaleString()}</strong>
+            </div>
+            {showGst && (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '12px', color: '#666' }}>
+                  <span>CGST (9%):</span>
+                  <span>{data.currency} {cgst.toLocaleString()}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '12px', color: '#666' }}>
+                  <span>SGST (9%):</span>
+                  <span>{data.currency} {sgst.toLocaleString()}</span>
+                </div>
+              </>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontWeight: 'bold', borderTop: '1px solid #ddd', paddingTop: '5px' }}>
               <span>Total Amount:</span>
               <strong>{data.currency} {total.toLocaleString()}</strong>
             </div>
@@ -334,7 +360,23 @@ export const IndiaProformaInvoice = ({ data }) => {
             </tr>
           ))}
           <tr>
-            <td colSpan="2" style={{ padding: '12px', textAlign: 'right', fontWeight: 'bold', fontSize: '16px' }}>Total</td>
+            <td colSpan="2" style={{ padding: '8px 12px', textAlign: 'right', color: '#666' }}>{showGst ? 'Subtotal (Taxable Value)' : 'Total Amount'}</td>
+            <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: '600' }}>{data.currency} {subtotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+          </tr>
+          {showGst && (
+            <>
+              <tr>
+                <td colSpan="2" style={{ padding: '5px 12px', textAlign: 'right', color: '#666' }}>CGST (9%)</td>
+                <td style={{ padding: '5px 12px', textAlign: 'right', fontWeight: '600' }}>{data.currency} {cgst.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+              </tr>
+              <tr>
+                <td colSpan="2" style={{ padding: '5px 12px', textAlign: 'right', color: '#666', borderBottom: '1px solid #eee' }}>SGST (9%)</td>
+                <td style={{ padding: '5px 12px', textAlign: 'right', fontWeight: '600', borderBottom: '1px solid #eee' }}>{data.currency} {sgst.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+              </tr>
+            </>
+          )}
+          <tr>
+            <td colSpan="2" style={{ padding: '12px', textAlign: 'right', fontWeight: 'bold', fontSize: '16px' }}>{showGst ? 'Grand Total (Incl. GST)' : 'Grand Total'}</td>
             <td style={{ padding: '12px', textAlign: 'right', fontWeight: '800', fontSize: '18px', background: '#f9f9f9' }}>{data.currency} {total.toLocaleString()}</td>
           </tr>
         </tbody>
