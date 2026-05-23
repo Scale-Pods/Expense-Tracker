@@ -294,7 +294,8 @@ export const IndiaProformaInvoice = ({ data }) => {
           <p style={{ margin: '5px 0', fontWeight: 'bold' }}>#SPx{data.name?.split('\n')[0].replace(/\s+/g, '')}-{(formatDate(data.invoiceDate)).replace(/-/g, '.')}</p>
           <div style={{ marginTop: '10px' }}>
             <strong>Date:</strong> {formatDate(data.invoiceDate)}<br />
-            <strong>Due Date:</strong> {formatDate(data.dueDate)}
+            <strong>Due Date:</strong> {formatDate(data.dueDate)}<br />
+            <strong>Payment Term:</strong> {data.paymentTerm || 'One Time'}
           </div>
         </div>
       </div>
