@@ -30,7 +30,7 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
     ifsc: 'HDFC0000060',
     branch: 'FORT',
     accType: 'Current Account',
-    myGstin: '27AALFS4567J1Z3',
+    myGstin: '27AFUFS0352J1Z1',
     clientGstin: '',
     clientState: 'Maharashtra',
     amountInWords: '',
@@ -48,6 +48,9 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
       try {
         const { data, timestamp } = JSON.parse(cached);
         if (Date.now() - timestamp < CACHE_DURATION) {
+          if (data.myGstin === '27AALFS4567J1Z3') {
+            data.myGstin = '27AFUFS0352J1Z1';
+          }
           return data;
         }
       } catch (e) {
