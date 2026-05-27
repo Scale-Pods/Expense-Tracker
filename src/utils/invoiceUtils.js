@@ -129,7 +129,7 @@ export const reconstructInvoiceData = (row) => {
     ifsc: row.ifsc || 'HDFC0000060',
     branch: row.branch || 'FORT',
     accType: row.accType || 'Current Account',
-    myGstin: row.myGstin || '27AFUFS0352J1Z1',
+    myGstin: row.myGstin || '27AFUFS0352J1ZI',
     clientGstin: String(row.clientGstin || ''),
     clientState: row.clientState || (region === 'India' ? 'Maharashtra' : ''),
     amountInWords: row.amountInWords || '',

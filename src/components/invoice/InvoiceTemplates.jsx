@@ -24,7 +24,7 @@ export const IndiaTaxInvoice = ({ data }) => {
             503-A Crescent House, 159/161 Crescent House, Mumbai, Maharashtra, India - 400009<br />
             {data.showMyGst !== false && (
               <>
-                <strong>GSTIN:</strong> {data.myGstin || "27AFUFS0352J1Z1"}<br />
+                <strong>GSTIN:</strong> {data.myGstin || "27AFUFS0352J1ZI"}<br />
                 <strong>State:</strong> Maharashtra (27)
               </>
             )}
@@ -283,7 +283,7 @@ export const IndiaProformaInvoice = ({ data }) => {
             503-A Floor-5th, 159/161, Crescent house, Mumbai, Maharashtra, India - 400009
             {data.showMyGst !== false && (
               <><br />
-                <strong>GSTIN:</strong> {data.myGstin || "27AFUFS0352J1Z1"}<br />
+                <strong>GSTIN:</strong> {data.myGstin || "27AFUFS0352J1ZI"}<br />
                 <strong>State:</strong> Maharashtra (27)
               </>
             )}

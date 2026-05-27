@@ -30,7 +30,7 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
     ifsc: 'HDFC0000060',
     branch: 'FORT',
     accType: 'Current Account',
-    myGstin: '27AFUFS0352J1Z1',
+    myGstin: '27AFUFS0352J1ZI',
     clientGstin: '',
     clientState: 'Maharashtra',
     amountInWords: '',
@@ -48,8 +48,8 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
       try {
         const { data, timestamp } = JSON.parse(cached);
         if (Date.now() - timestamp < CACHE_DURATION) {
-          if (data.myGstin === '27AALFS4567J1Z3') {
-            data.myGstin = '27AFUFS0352J1Z1';
+          if (data.myGstin === '27AALFS4567J1Z3' || data.myGstin === '27AFUFS0352J1Z1') {
+            data.myGstin = '27AFUFS0352J1ZI';
           }
           return data;
         }
@@ -559,7 +559,7 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
                     <div className="form-group" style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', gridColumn: '1 / -1' }}>
                       <div style={{ flex: 1 }}>
                         <label><FileCheck size={16} /> My GSTIN</label>
-                        <input type="text" name="myGstin" value={formData.myGstin} onChange={handleChange} disabled={!formData.showMyGst} style={{ opacity: formData.showMyGst ? 1 : 0.5 }} />
+                        <input type="text" name="myGstin" value={formData.myGstin} onChange={handleChange} disabled={!formData.showMyGst} placeholder="27AFUFS0352J1ZI" style={{ opacity: formData.showMyGst ? 1 : 0.5 }} />
                       </div>
                       <div className={`region-slider type-slider gst-slider ${formData.showMyGst ? 'on' : 'off'}`} style={{ width: '140px', marginBottom: '2px', height: '42px' }}>
                         <button 
