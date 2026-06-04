@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   FileText, RefreshCw, Search, Download, ArrowUpDown,
-  Calendar, User, DollarSign, Loader2, AlertCircle, Receipt, Eye, X
+  Calendar, User, DollarSign, Loader2, AlertCircle, Receipt, Eye, X, Send
 } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import { reconstructInvoiceData } from '../utils/invoiceUtils';
 import { InvoicePaper } from '../components/invoice/InvoiceTemplates';
+import EmailDialog from '../components/invoice/EmailDialog';
 import CustomSelect from '../components/common/CustomSelect';
 import '../styles/all-invoices.css';
 
@@ -22,6 +23,13 @@ const AllInvoices = () => {
   const [viewInvoice, setViewInvoice] = useState(null);
   const [isDownloading, setIsDownloading] = useState(null); // Row index
   const downloadContainerRef = useRef();
+
+  // Email state
+  const [showEmailDialog, setShowEmailDialog] = useState(false);
+  const [emailInvoiceData, setEmailInvoiceData] = useState(null);
+  const [emailPdfBlob, setEmailPdfBlob] = useState(null);
+  const [isEmailLoading, setIsEmailLoading] = useState(false);
+  const [isEmailSending, setIsEmailSending] = useState(false);
 
   const fetchInvoices = async () => {
     setLoading(true);
@@ -89,6 +97,118 @@ const AllInvoices = () => {
   const handleRowClick = (row) => {
     const data = reconstructInvoiceData(row);
     setViewInvoice(data);
+  };
+
+  const handleEmailClick = async (row, e) => {
+    e.stopPropagation();
+    setIsEmailLoading(true);
+    const data = reconstructInvoiceData(row);
+    setViewInvoice(data);
+
+    setTimeout(async () => {
+      try {
+        const opt = {
+          margin: 0,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['css'] }
+        };
+        const rawBlob = await html2pdf().set(opt).from(downloadContainerRef.current).output('blob');
+        const blob = new Blob([rawBlob], { type: 'application/pdf' });
+        setEmailPdfBlob(blob);
+        setEmailInvoiceData(data);
+        setShowEmailDialog(true);
+      } catch (err) {
+        console.error('PDF generation for email failed', err);
+        alert('Failed to generate PDF for email');
+      } finally {
+        setIsEmailLoading(false);
+      }
+    }, 500);
+  };
+
+  const handleEmailSend = async ({ subject, body }) => {
+    if (!emailInvoiceData || !emailPdfBlob) {
+      alert('Error: No data to send');
+      return;
+    }
+
+    setIsEmailSending(true);
+    try {
+      const data = emailInvoiceData;
+      const clientName = data.name?.split('\n')[0] || '';
+      const clientAddress = data.name?.split('\n').slice(1).join(', ') || '';
+      const items = data.items || [];
+      const itemsJson = JSON.stringify(items);
+      const lineItemDescription = items.map(item => item.description).filter(Boolean).join(', ');
+
+      const typeKey = (data.type || 'Proforma').toLowerCase().replace('proforma', 'performa');
+      const regionKey = (data.region || 'India').toLowerCase();
+      const actionType = `${typeKey}${regionKey}`;
+
+      const payload = {
+        event: 'send',
+        invoiceType: `${typeKey}-${regionKey}`,
+        type: data.type || '',
+        region: data.region || '',
+        name: data.name || '',
+        clientName,
+        clientAddress,
+        email: data.email || '',
+        lineItemDescription,
+        currency: data.currency || '',
+        amount: data.amount || '',
+        amountPaid: data.amountPaid || '',
+        dueAmount: data.dueAmount || '',
+        invoiceDate: data.invoiceDate || '',
+        dueDate: data.dueDate || '',
+        paymentTerm: data.paymentTerm || '',
+        items: itemsJson,
+        clientGstin: data.clientGstin || '',
+        clientState: data.clientState || '',
+        myGstin: data.myGstin || '',
+        sacCode: data.sacCode || '',
+        amountInWords: data.amountInWords || '',
+        accHolder: data.accHolder || '',
+        bankName: data.bankName || '',
+        accNo: data.accNo || '',
+        ifsc: data.ifsc || '',
+        branch: data.branch || '',
+        accType: data.accType || '',
+        terms: data.terms || '',
+        emailSubject: subject,
+        emailBody: body,
+      };
+
+      const webhookUrl = `${import.meta.env.VITE_N8N_BASE_URL}/${import.meta.env.VITE_WEBHOOK_ID_INVOICE}?action=${actionType}`;
+
+      const formData = new FormData();
+      formData.append('file', emailPdfBlob, `Invoice_${clientName.replace(/\s+/g, '_')}.pdf`);
+      Object.entries(payload).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (response.ok) {
+        setShowEmailDialog(false);
+        setEmailPdfBlob(null);
+        setEmailInvoiceData(null);
+        alert('Invoice sent successfully!');
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Webhook failed: ${errorText}`);
+      }
+    } catch (err) {
+      alert('Error: ' + err.message);
+      console.error('Email Send Error:', err);
+    } finally {
+      setIsEmailSending(false);
+    }
   };
 
   // Filtering
@@ -192,13 +312,24 @@ const AllInvoices = () => {
                       {Number(inv.amount || 0).toLocaleString()}
                     </td>
                     <td>
-                      <button 
-                        className="ai-download-btn" 
-                        onClick={(e) => handleDirectDownload(inv, e, idx)}
-                        disabled={isDownloading !== null}
-                      >
-                        {isDownloading === idx ? <Loader2 size={15} className="spin" /> : <Download size={15} />}
-                      </button>
+                      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                        <button 
+                          className="ai-download-btn" 
+                          onClick={(e) => handleDirectDownload(inv, e, idx)}
+                          disabled={isDownloading !== null || isEmailLoading}
+                          title="Download PDF"
+                        >
+                          {isDownloading === idx ? <Loader2 size={15} className="spin" /> : <Download size={15} />}
+                        </button>
+                        <button 
+                          className="ai-download-btn ai-email-btn" 
+                          onClick={(e) => handleEmailClick(inv, e)}
+                          disabled={isEmailLoading || isDownloading !== null}
+                          title="Send via email"
+                        >
+                          {isEmailLoading ? <Loader2 size={15} className="spin" /> : <Send size={15} />}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -209,7 +340,7 @@ const AllInvoices = () => {
       </div>
 
       {/* View Modal */}
-      {viewInvoice && !isDownloading && (
+      {viewInvoice && !isDownloading && !isEmailLoading && !showEmailDialog && (
         <div className="ai-modal-overlay" onClick={() => setViewInvoice(null)}>
           <div className="ai-modal-content" onClick={e => e.stopPropagation()}>
             <div className="ai-modal-header">
@@ -225,6 +356,14 @@ const AllInvoices = () => {
           </div>
         </div>
       )}
+
+      <EmailDialog
+        isOpen={showEmailDialog}
+        onClose={() => { setShowEmailDialog(false); setEmailPdfBlob(null); }}
+        onSend={handleEmailSend}
+        invoiceData={emailInvoiceData}
+        isSending={isEmailSending}
+      />
 
       {/* Hidden container for background PDF generation */}
       <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>

@@ -433,6 +433,16 @@
   border-color: var(--color-primary);
 }
 
+.ai-email-btn {
+  color: var(--color-text-muted);
+}
+
+.ai-email-btn:hover {
+  background: #6366f1 !important;
+  color: #fff;
+  border-color: #6366f1;
+}
+
 /* Table Interactions */
 .clickable-row {
   cursor: pointer;
