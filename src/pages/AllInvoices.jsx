@@ -301,10 +301,12 @@ const AllInvoices = () => {
                 {sorted.map((inv, idx) => (
                   <tr key={idx} onClick={() => handleRowClick(inv)} className="clickable-row">
                     <td className="td-client">
-                      <User size={14} />
-                      <span className="client-name">{inv.clientName || inv.name?.split?.('\n')?.[0] || '—'}</span>
+                      <span className="cell-inner">
+                        <User size={14} />
+                        <span className="client-name">{inv.clientName || inv.name?.split?.('\n')?.[0] || '—'}</span>
+                      </span>
                     </td>
-                    <td className="td-date"><Calendar size={14} /><span>{fmtDate(inv.invoiceDate)}</span></td>
+                    <td className="td-date"><span className="cell-inner"><Calendar size={14} /><span>{fmtDate(inv.invoiceDate)}</span></span></td>
                     <td className="td-email">{inv.email || '—'}</td>
                     <td><span className={`ai-badge ${inv.type?.toLowerCase() === 'tax' ? 'badge-tax' : inv.type?.toLowerCase() === 'proforma' ? 'badge-proforma' : ''}`}>{inv.type || '—'}</span></td>
                     <td className="td-amount">

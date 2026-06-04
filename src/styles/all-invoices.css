@@ -256,19 +256,25 @@
 
 /* Cell styles */
 .td-date {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   color: var(--color-text-secondary);
 }
 
+.td-date .cell-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .td-client {
-  display: flex;
+}
+
+.td-client .cell-inner {
+  display: inline-flex;
   align-items: flex-start;
   gap: 8px;
 }
 
-.td-client > div {
+.td-client .cell-inner > div {
   display: flex;
   flex-direction: column;
 }
