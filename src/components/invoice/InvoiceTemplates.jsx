@@ -135,7 +135,7 @@ export const IndiaTaxInvoice = ({ data }) => {
 
           {termsArray.length > 0 ? (
             termsArray.map((t, i) => (
-              <div key={i} style={{ margin: '0 0 6px 0', padding: '2px 0', fontSize: '12px', color: '#777', lineHeight: '1.6' }}>
+              <div key={i} className="terms-line" style={{ margin: '0 0 2px 0', padding: '1px 0', fontSize: '11px', color: '#777', lineHeight: '1.5', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
                 {t}
               </div>
             ))
@@ -251,7 +251,7 @@ export const UAETaxInvoice = ({ data }) => {
 
           {termsArray.length > 0 ? (
             termsArray.map((t, i) => (
-              <div key={i} style={{ margin: '0 0 6px 0', padding: '2px 0', fontSize: '12px', color: '#777', lineHeight: '1.6' }}>
+              <div key={i} className="terms-line" style={{ margin: '0 0 2px 0', padding: '1px 0', fontSize: '11px', color: '#777', lineHeight: '1.5', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
                 {t}
               </div>
             ))
@@ -521,7 +521,7 @@ export const UAEProformaInvoice = ({ data }) => {
 
           {termsArray.length > 0 ? (
             termsArray.map((t, i) => (
-              <div key={i} style={{ margin: '0 0 6px 0', padding: '2px 0', fontSize: '12px', color: '#777', lineHeight: '1.6' }}>
+              <div key={i} className="terms-line" style={{ margin: '0 0 2px 0', padding: '1px 0', fontSize: '11px', color: '#777', lineHeight: '1.5', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
                 {t}
               </div>
             ))

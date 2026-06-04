@@ -113,7 +113,7 @@
 /* Page Break Rules for PDF Generation */
 .a4-container tr,
 .a4-container tbody tr,
-.a4-container .terms-section,
+.a4-container .item-row,
 .a4-container > div {
   page-break-inside: avoid !important;
   break-inside: avoid !important;
@@ -121,8 +121,6 @@
 }
 
 .terms-section {
-  page-break-inside: avoid !important;
-  break-inside: avoid !important;
   display: block !important;
   width: 100% !important;
   background: white !important;

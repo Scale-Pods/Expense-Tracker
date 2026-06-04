@@ -89,7 +89,7 @@ const AllInvoices = () => {
           windowHeight: pdfElement.scrollHeight
         },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: 'avoid-all' }
+        pagebreak: { mode: 'css' }
       };
 
       try {
@@ -129,7 +129,7 @@ const AllInvoices = () => {
             windowHeight: downloadContainerRef.current.scrollHeight
           },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-          pagebreak: { mode: 'avoid-all' }
+          pagebreak: { mode: 'css' }
         };
         const rawBlob = await html2pdf().set(opt).from(downloadContainerRef.current).output('blob');
         const blob = new Blob([rawBlob], { type: 'application/pdf' });
@@ -250,7 +250,7 @@ const AllInvoices = () => {
           windowHeight: downloadContainerRef.current.scrollHeight
         },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: 'avoid-all' }
+        pagebreak: { mode: 'css' }
       };
       const rawBlob = await html2pdf().set(opt).from(downloadContainerRef.current).output('blob');
       const blob = new Blob([rawBlob], { type: 'application/pdf' });
