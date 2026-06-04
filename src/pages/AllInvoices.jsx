@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   FileText, RefreshCw, Search, Download, ArrowUpDown,
   Calendar, User, DollarSign, Loader2, AlertCircle, Receipt, Eye, X, Send, Repeat
@@ -11,6 +12,7 @@ import CustomSelect from '../components/common/CustomSelect';
 import '../styles/all-invoices.css';
 
 const AllInvoices = () => {
+  const navigate = useNavigate();
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -404,7 +406,7 @@ const AllInvoices = () => {
               </div>
             </div>
             <div className="ai-modal-body">
-              <div className="readonly-notice"><Eye size={14} /> Read-only View</div>
+              <div className="readonly-notice" onClick={() => navigate('/invoice', { state: { prefill: viewInvoice } })} title="Click to edit in Create Invoice"><Eye size={14} /> Read-only View — <strong>Click to Edit</strong></div>
               <div className="invoice-preview-container">
                 <InvoicePaper data={viewInvoice} />
               </div>

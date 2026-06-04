@@ -129,7 +129,7 @@ export const IndiaTaxInvoice = ({ data }) => {
         </div>
       </div>
 
-      <div className="terms-section" style={{ background: '#fff', padding: '8px 25px 15px' }}>
+      <div className="terms-section" style={{ background: '#fff', padding: '8px 25px 15px', pageBreakInside: 'avoid' }}>
         <strong style={{ fontSize: '11px', color: '#333', display: 'block', textTransform: 'uppercase', marginBottom: '4px' }}>Terms & Conditions:</strong>
 
         {termsArray.length > 0 ? (
@@ -243,7 +243,7 @@ export const UAETaxInvoice = ({ data }) => {
         </div>
       </div>
 
-      <div className="terms-section" style={{ background: '#fff', padding: '8px 25px 15px' }}>
+      <div className="terms-section" style={{ background: '#fff', padding: '8px 25px 15px', pageBreakInside: 'avoid' }}>
         <strong style={{ fontSize: '11px', color: '#333', display: 'block', textTransform: 'uppercase', marginBottom: '4px' }}>Terms & Conditions:</strong>
 
         {termsArray.length > 0 ? (
@@ -397,10 +397,10 @@ export const IndiaProformaInvoice = ({ data }) => {
             <strong>Branch:</strong> {data.branch || "FORT"}
           </div>
         </div>
-        <div style={{ flex: 1 }} className="terms-section">
+        <div style={{ flex: 1, pageBreakInside: 'avoid' }} className="terms-section">
           <h4 style={{ textTransform: 'uppercase', fontSize: '11px', color: '#666', marginBottom: '10px' }}>Terms</h4>
           <div style={{ fontSize: '11px', color: '#777', lineHeight: '1.4' }}>
-             {termsArray.length > 0 ? termsArray.map((t, i) => <div key={i} style={{ marginBottom: '3px' }}>{t}</div>) : "Standard terms apply."}
+            {termsArray.length > 0 ? termsArray.map((t, i) => <div key={i} style={{ marginBottom: '3px' }}>{t}</div>) : "Standard terms apply."}
           </div>
         </div>
       </div>
@@ -509,7 +509,7 @@ export const UAEProformaInvoice = ({ data }) => {
         </div>
       </div>
 
-      <div className="terms-section" style={{ background: '#fff', padding: '8px 25px 15px' }}>
+      <div className="terms-section" style={{ background: '#fff', padding: '8px 25px 15px', pageBreakInside: 'avoid' }}>
         <strong style={{ fontSize: '11px', color: '#333', display: 'block', textTransform: 'uppercase', marginBottom: '4px' }}>Terms & Conditions:</strong>
 
         {termsArray.length > 0 ? (
