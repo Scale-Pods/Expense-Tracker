@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Send, Sparkles, Loader2, X, ArrowLeft } from 'lucide-react';
 import '../../styles/email-dialog.css';
 
-const DEFAULT_BODY = `Hi,
+const PROFORMA_BODY = `Hi,
 
 I hope you're doing well.
 
@@ -17,15 +17,35 @@ We look forward to working with you.
 Warm regards,
 ScalePods LLP`;
 
+const TAX_BODY = `Hi,
+
+We hope you're doing well.
+
+Please find attached the tax invoice for the services rendered by ScalePods LLP.
+
+This invoice is being shared for your records and accounting purposes against the completed payment and engagement. We sincerely appreciate the opportunity to work with your team and thank you for your trust in our services.
+
+Should you require any additional documentation, payment acknowledgements, or clarification regarding the invoice, please feel free to reach out. Our team will be happy to assist.
+
+We look forward to continuing our partnership and supporting your business with future initiatives.
+
+Warm Regards,
+ScalePods LLP`;
+
+const getDefaultBody = (invoiceData) => {
+  return (invoiceData?.type || '').toLowerCase() === 'tax' ? TAX_BODY : PROFORMA_BODY;
+};
+
 const getDefaultSubject = (invoiceData) => {
   const firstItem = invoiceData?.items?.[0]?.description;
   const serviceName = firstItem || 'Proposed Services';
-  return `Proforma Invoice for ${serviceName} - ScalePods`;
+  const prefix = (invoiceData?.type || '').toLowerCase() === 'tax' ? 'Tax' : 'Proforma';
+  return `${prefix} Invoice for ${serviceName} - ScalePods`;
 };
 
 const EmailDialog = ({ isOpen, onClose, onSend, invoiceData, isSending }) => {
   const [emailSubject, setEmailSubject] = useState(getDefaultSubject(invoiceData));
-  const [emailBody, setEmailBody] = useState(DEFAULT_BODY);
+  const [emailBody, setEmailBody] = useState(getDefaultBody(invoiceData));
   const [requirements, setRequirements] = useState('');
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
   const [showAiInput, setShowAiInput] = useState(false);
@@ -33,7 +53,7 @@ const EmailDialog = ({ isOpen, onClose, onSend, invoiceData, isSending }) => {
   React.useEffect(() => {
     if (isOpen) {
       setEmailSubject(getDefaultSubject(invoiceData));
-      setEmailBody(DEFAULT_BODY);
+      setEmailBody(getDefaultBody(invoiceData));
       setRequirements('');
       setShowAiInput(false);
     }
