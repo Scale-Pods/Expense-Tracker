@@ -11,7 +11,7 @@ export const IndiaTaxInvoice = ({ data }) => {
   const total = subtotal + cgst + sgst;
 
   return (
-    <div className="india-tax-invoice a4-container" style={{ padding: '0', color: '#1a1a1a', background: '#fff', width: '210mm', minHeight: '297mm', margin: '0 auto', boxShadow: '0 0 10px rgba(0,0,0,0.1)' }}>
+    <div className="india-tax-invoice a4-container" style={{ padding: '0', color: '#1a1a1a', background: '#fff', width: '210mm', margin: '0 auto', boxShadow: '0 0 10px rgba(0,0,0,0.1)' }}>
       <div style={{ textAlign: 'center', background: '#f2f2f2', padding: '6px', borderBottom: '2px solid #1a1a1a', letterSpacing: '2px' }}>
         <h1 style={{ margin: 0, fontSize: '15px', fontWeight: '800', textTransform: 'uppercase', color: '#000' }}>{showGst ? 'Tax Invoice' : 'Invoice'}</h1>
       </div>
@@ -120,29 +120,31 @@ export const IndiaTaxInvoice = ({ data }) => {
         </table>
       </div>
 
-      <div style={{ padding: '5px 25px 0 25px', background: '#fff' }}>
-        <div style={{ padding: '8px', background: '#fafafa', borderLeft: '4px solid #1a1a1a' }}>
-          <strong style={{ display: 'block', fontSize: '11px', color: '#666', textTransform: 'uppercase', marginBottom: '3px' }}>Total Amount in Words:</strong>
-          <span style={{ fontSize: '13px', fontWeight: '700', textTransform: 'capitalize' }}>
-            {total > 0 ? (data.amountInWords || toWords(total, 'INR')) : "Zero Rupees Only"}
-          </span>
-        </div>
-      </div>
-
-      <div className="terms-section" style={{ background: '#fff', padding: '8px 25px 15px', pageBreakInside: 'avoid' }}>
-        <strong style={{ fontSize: '11px', color: '#333', display: 'block', textTransform: 'uppercase', marginBottom: '4px' }}>Terms & Conditions:</strong>
-
-        {termsArray.length > 0 ? (
-          termsArray.map((t, i) => (
-            <div key={i} style={{ margin: '0 0 3px 0', background: '#fff', fontSize: '12px', color: '#777', lineHeight: '1.2' }}>
-              {t}
-            </div>
-          ))
-        ) : (
-          <div style={{ margin: 0, background: '#fff', fontSize: '12px', color: '#777', lineHeight: '1.2' }}>
-            1. Standard terms apply. 2. This is a computer generated document.
+      <div className="terms-section" style={{ pageBreakInside: 'avoid', breakInside: 'avoid', background: '#fff' }}>
+        <div style={{ padding: '5px 25px 0 25px' }}>
+          <div style={{ padding: '8px', background: '#fafafa', borderLeft: '4px solid #1a1a1a' }}>
+            <strong style={{ display: 'block', fontSize: '11px', color: '#666', textTransform: 'uppercase', marginBottom: '3px' }}>Total Amount in Words:</strong>
+            <span style={{ fontSize: '13px', fontWeight: '700', textTransform: 'capitalize' }}>
+              {total > 0 ? (data.amountInWords || toWords(total, 'INR')) : "Zero Rupees Only"}
+            </span>
           </div>
-        )}
+        </div>
+
+        <div style={{ padding: '8px 25px 15px' }}>
+          <strong style={{ fontSize: '11px', color: '#333', display: 'block', textTransform: 'uppercase', marginBottom: '4px' }}>Terms & Conditions:</strong>
+
+          {termsArray.length > 0 ? (
+            termsArray.map((t, i) => (
+              <div key={i} style={{ margin: '0 0 3px 0', background: '#fff', fontSize: '12px', color: '#777', lineHeight: '1.2' }}>
+                {t}
+              </div>
+            ))
+          ) : (
+            <div style={{ margin: 0, background: '#fff', fontSize: '12px', color: '#777', lineHeight: '1.2' }}>
+              1. Standard terms apply. 2. This is a computer generated document.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -154,7 +156,7 @@ export const UAETaxInvoice = ({ data }) => {
   const total = Number(data.amount) || 0;
 
   return (
-    <div className="uae-tax-invoice a4-container" style={{ padding: '0', color: '#1a1a1a', background: '#fff', width: '210mm', minHeight: '297mm', margin: '0 auto' }}>
+    <div className="uae-tax-invoice a4-container" style={{ padding: '0', color: '#1a1a1a', background: '#fff', width: '210mm', margin: '0 auto' }}>
       <div style={{ textAlign: 'center', background: '#f2f2f2', padding: '6px', borderBottom: '2px solid #1a1a1a', letterSpacing: '2px' }}>
         <h1 style={{ margin: 0, fontSize: '15px', fontWeight: '800', textTransform: 'uppercase', color: '#000' }}>Tax Invoice</h1>
       </div>
@@ -234,29 +236,31 @@ export const UAETaxInvoice = ({ data }) => {
         </table>
       </div>
 
-      <div style={{ padding: '5px 25px 0 25px', background: '#fff' }}>
-        <div style={{ padding: '8px', background: '#fafafa', borderLeft: '4px solid #1a1a1a' }}>
-          <strong style={{ display: 'block', fontSize: '11px', color: '#666', textTransform: 'uppercase', marginBottom: '3px' }}>Total Amount in Words:</strong>
-          <span style={{ fontSize: '13px', fontWeight: '700', textTransform: 'capitalize' }}>
-            {total > 0 ? (data.amountInWords || toWords(total, 'AED')) : "Zero UAE Dirhams Only"}
-          </span>
-        </div>
-      </div>
-
-      <div className="terms-section" style={{ background: '#fff', padding: '8px 25px 15px', pageBreakInside: 'avoid' }}>
-        <strong style={{ fontSize: '11px', color: '#333', display: 'block', textTransform: 'uppercase', marginBottom: '4px' }}>Terms & Conditions:</strong>
-
-        {termsArray.length > 0 ? (
-          termsArray.map((t, i) => (
-            <div key={i} style={{ margin: '0 0 3px 0', background: '#fff', fontSize: '12px', color: '#777', lineHeight: '1.2' }}>
-              {t}
-            </div>
-          ))
-        ) : (
-          <div style={{ margin: 0, background: '#fff', fontSize: '12px', color: '#777', lineHeight: '1.2' }}>
-            1. Standard terms apply. 2. This is a computer generated document.
+      <div className="terms-section" style={{ pageBreakInside: 'avoid', breakInside: 'avoid', background: '#fff' }}>
+        <div style={{ padding: '5px 25px 0 25px' }}>
+          <div style={{ padding: '8px', background: '#fafafa', borderLeft: '4px solid #1a1a1a' }}>
+            <strong style={{ display: 'block', fontSize: '11px', color: '#666', textTransform: 'uppercase', marginBottom: '3px' }}>Total Amount in Words:</strong>
+            <span style={{ fontSize: '13px', fontWeight: '700', textTransform: 'capitalize' }}>
+              {total > 0 ? (data.amountInWords || toWords(total, 'AED')) : "Zero UAE Dirhams Only"}
+            </span>
           </div>
-        )}
+        </div>
+
+        <div style={{ padding: '8px 25px 15px' }}>
+          <strong style={{ fontSize: '11px', color: '#333', display: 'block', textTransform: 'uppercase', marginBottom: '4px' }}>Terms & Conditions:</strong>
+
+          {termsArray.length > 0 ? (
+            termsArray.map((t, i) => (
+              <div key={i} style={{ margin: '0 0 3px 0', background: '#fff', fontSize: '12px', color: '#777', lineHeight: '1.2' }}>
+                {t}
+              </div>
+            ))
+          ) : (
+            <div style={{ margin: 0, background: '#fff', fontSize: '12px', color: '#777', lineHeight: '1.2' }}>
+              1. Standard terms apply. 2. This is a computer generated document.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -272,7 +276,7 @@ export const IndiaProformaInvoice = ({ data }) => {
   const total = subtotal + cgst + sgst;
 
   return (
-    <div className="india-proforma-invoice a4-container" style={{ padding: '40px', background: '#fff', width: '210mm', minHeight: '297mm', margin: '0 auto', color: '#333', fontSize: '13px' }}>
+    <div className="india-proforma-invoice a4-container" style={{ padding: '40px', background: '#fff', width: '210mm', margin: '0 auto', color: '#333', fontSize: '13px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '30px' }}>
         <div>
           <img src="https://res.cloudinary.com/dc3a1bfvk/image/upload/v1777098139/ScalePods_-_Logo-_FINAL_----1-01_1_-min_hvvqyt.png" alt="Logo" width="180" style={{ marginBottom: '15px' }} />
@@ -381,26 +385,28 @@ export const IndiaProformaInvoice = ({ data }) => {
         </tbody>
       </table>
 
-      <div style={{ marginBottom: '30px', padding: '15px', background: '#f9f9f9', borderRadius: '5px', borderLeft: '5px solid #333' }}>
-        <strong style={{ display: 'block', fontSize: '11px', color: '#666', textTransform: 'uppercase', marginBottom: '5px' }}>Amount in Words:</strong>
-        <span style={{ fontSize: '14px', fontWeight: 'bold' }}>{toWords(total, 'INR')}</span>
-      </div>
-
-      <div style={{ display: 'flex', gap: '30px' }}>
-        <div style={{ flex: 1 }}>
-          <h4 style={{ textTransform: 'uppercase', fontSize: '11px', color: '#666', marginBottom: '10px' }}>Bank Details</h4>
-          <div style={{ fontSize: '12px', lineHeight: '1.6' }}>
-            <strong>Beneficiary:</strong> {data.accHolder || "SCALEPODS LLP"}<br />
-            <strong>Bank:</strong> {data.bankName || "HDFC Bank Ltd"}<br />
-            <strong>A/c No:</strong> {data.accNo || "50200119456950"}<br />
-            <strong>IFSC:</strong> {data.ifsc || "HDFC0000060"}<br />
-            <strong>Branch:</strong> {data.branch || "FORT"}
-          </div>
+      <div className="terms-section" style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+        <div style={{ marginBottom: '30px', padding: '15px', background: '#f9f9f9', borderRadius: '5px', borderLeft: '5px solid #333' }}>
+          <strong style={{ display: 'block', fontSize: '11px', color: '#666', textTransform: 'uppercase', marginBottom: '5px' }}>Amount in Words:</strong>
+          <span style={{ fontSize: '14px', fontWeight: 'bold' }}>{toWords(total, 'INR')}</span>
         </div>
-        <div style={{ flex: 1, pageBreakInside: 'avoid' }} className="terms-section">
-          <h4 style={{ textTransform: 'uppercase', fontSize: '11px', color: '#666', marginBottom: '10px' }}>Terms</h4>
-          <div style={{ fontSize: '11px', color: '#777', lineHeight: '1.4' }}>
-            {termsArray.length > 0 ? termsArray.map((t, i) => <div key={i} style={{ marginBottom: '3px' }}>{t}</div>) : "Standard terms apply."}
+
+        <div style={{ display: 'flex', gap: '30px' }}>
+          <div style={{ flex: 1 }}>
+            <h4 style={{ textTransform: 'uppercase', fontSize: '11px', color: '#666', marginBottom: '10px' }}>Bank Details</h4>
+            <div style={{ fontSize: '12px', lineHeight: '1.6' }}>
+              <strong>Beneficiary:</strong> {data.accHolder || "SCALEPODS LLP"}<br />
+              <strong>Bank:</strong> {data.bankName || "HDFC Bank Ltd"}<br />
+              <strong>A/c No:</strong> {data.accNo || "50200119456950"}<br />
+              <strong>IFSC:</strong> {data.ifsc || "HDFC0000060"}<br />
+              <strong>Branch:</strong> {data.branch || "FORT"}
+            </div>
+          </div>
+          <div style={{ flex: 1 }}>
+            <h4 style={{ textTransform: 'uppercase', fontSize: '11px', color: '#666', marginBottom: '10px' }}>Terms</h4>
+            <div style={{ fontSize: '11px', color: '#777', lineHeight: '1.4' }}>
+              {termsArray.length > 0 ? termsArray.map((t, i) => <div key={i} style={{ marginBottom: '3px' }}>{t}</div>) : "Standard terms apply."}
+            </div>
           </div>
         </div>
       </div>
@@ -414,7 +420,7 @@ export const UAEProformaInvoice = ({ data }) => {
   const total = Number(data.amount) || 0;
 
   return (
-    <div className="uae-proforma-invoice a4-container" style={{ padding: '0', color: '#1a1a1a', background: '#fff', width: '210mm', minHeight: '297mm', margin: '0 auto' }}>
+    <div className="uae-proforma-invoice a4-container" style={{ padding: '0', color: '#1a1a1a', background: '#fff', width: '210mm', margin: '0 auto' }}>
       <div className="invoice-header-top" style={{ display: 'flex', justifyContent: 'space-between', gap: '20px', padding: '20px', flexWrap: 'wrap', borderBottom: '1px solid #eee' }}>
         <div className="logo-section" style={{ flex: '1', minWidth: '250px' }}>
           <img src="https://res.cloudinary.com/dc3a1bfvk/image/upload/v1777098139/ScalePods_-_Logo-_FINAL_----1-01_1_-min_hvvqyt.png" alt="ScalePods Logo" style={{ width: '180px' }} />
@@ -500,29 +506,31 @@ export const UAEProformaInvoice = ({ data }) => {
         </div>
       </div>
 
-      <div style={{ padding: '5px 25px 0 25px', background: '#fff' }}>
-        <div style={{ padding: '8px', background: '#fafafa', borderLeft: '4px solid #1a1a1a' }}>
-          <strong style={{ display: 'block', fontSize: '11px', color: '#666', textTransform: 'uppercase', marginBottom: '3px' }}>Total Amount in Words:</strong>
-          <span style={{ fontSize: '13px', fontWeight: '700', textTransform: 'capitalize' }}>
-            {total > 0 ? (data.amountInWords || toWords(total, 'AED')) : "Zero UAE Dirhams Only"}
-          </span>
-        </div>
-      </div>
-
-      <div className="terms-section" style={{ background: '#fff', padding: '8px 25px 15px', pageBreakInside: 'avoid' }}>
-        <strong style={{ fontSize: '11px', color: '#333', display: 'block', textTransform: 'uppercase', marginBottom: '4px' }}>Terms & Conditions:</strong>
-
-        {termsArray.length > 0 ? (
-          termsArray.map((t, i) => (
-            <div key={i} style={{ margin: '0 0 3px 0', background: '#fff', fontSize: '12px', color: '#777', lineHeight: '1.2' }}>
-              {t}
-            </div>
-          ))
-        ) : (
-          <div style={{ margin: 0, background: '#fff', fontSize: '12px', color: '#777', lineHeight: '1.2' }}>
-            1. Standard terms apply. 2. This is a computer generated document.
+      <div className="terms-section" style={{ pageBreakInside: 'avoid', breakInside: 'avoid', background: '#fff' }}>
+        <div style={{ padding: '5px 25px 0 25px' }}>
+          <div style={{ padding: '8px', background: '#fafafa', borderLeft: '4px solid #1a1a1a' }}>
+            <strong style={{ display: 'block', fontSize: '11px', color: '#666', textTransform: 'uppercase', marginBottom: '3px' }}>Total Amount in Words:</strong>
+            <span style={{ fontSize: '13px', fontWeight: '700', textTransform: 'capitalize' }}>
+              {total > 0 ? (data.amountInWords || toWords(total, 'AED')) : "Zero UAE Dirhams Only"}
+            </span>
           </div>
-        )}
+        </div>
+
+        <div style={{ padding: '8px 25px 15px' }}>
+          <strong style={{ fontSize: '11px', color: '#333', display: 'block', textTransform: 'uppercase', marginBottom: '4px' }}>Terms & Conditions:</strong>
+
+          {termsArray.length > 0 ? (
+            termsArray.map((t, i) => (
+              <div key={i} style={{ margin: '0 0 3px 0', background: '#fff', fontSize: '12px', color: '#777', lineHeight: '1.2' }}>
+                {t}
+              </div>
+            ))
+          ) : (
+            <div style={{ margin: 0, background: '#fff', fontSize: '12px', color: '#777', lineHeight: '1.2' }}>
+              1. Standard terms apply. 2. This is a computer generated document.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

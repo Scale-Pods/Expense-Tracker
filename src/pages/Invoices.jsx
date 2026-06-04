@@ -51,7 +51,7 @@ const Invoices = () => {
           letterRendering: true
         },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css'] }
+        pagebreak: { mode: ['avoid-all', 'css'], avoid: '.terms-section' }
       };
 
       const rawBlob = await html2pdf().set(opt).from(element).output('blob');
@@ -222,7 +222,7 @@ const Invoices = () => {
             </div>
           )}
 
-          <div ref={invoiceRef} className="invoice-paper-wrapper">
+          <div ref={invoiceRef} className="invoice-paper-wrapper pdf-render-mode">
             <InvoicePaper data={liveData} />
           </div>
 

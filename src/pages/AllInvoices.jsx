@@ -82,7 +82,7 @@ const AllInvoices = () => {
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, letterRendering: true },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css'] }
+        pagebreak: { mode: ['avoid-all', 'css'], avoid: '.terms-section' }
       };
 
       try {
@@ -115,7 +115,7 @@ const AllInvoices = () => {
           image: { type: 'jpeg', quality: 0.98 },
           html2canvas: { scale: 2, useCORS: true, letterRendering: true },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-          pagebreak: { mode: ['css'] }
+          pagebreak: { mode: ['avoid-all', 'css'], avoid: '.terms-section' }
         };
         const rawBlob = await html2pdf().set(opt).from(downloadContainerRef.current).output('blob');
         const blob = new Blob([rawBlob], { type: 'application/pdf' });
@@ -229,7 +229,7 @@ const AllInvoices = () => {
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, letterRendering: true },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css'] }
+        pagebreak: { mode: ['avoid-all', 'css'], avoid: '.terms-section' }
       };
       const rawBlob = await html2pdf().set(opt).from(downloadContainerRef.current).output('blob');
       const blob = new Blob([rawBlob], { type: 'application/pdf' });
@@ -425,7 +425,7 @@ const AllInvoices = () => {
 
       {/* Hidden container for background PDF generation */}
       <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
-        <div ref={downloadContainerRef}>
+        <div ref={downloadContainerRef} className="pdf-render-mode">
           {viewInvoice && <InvoicePaper data={viewInvoice} />}
         </div>
       </div>
