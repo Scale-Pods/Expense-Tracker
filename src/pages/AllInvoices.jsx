@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   FileText, RefreshCw, Search, Download, ArrowUpDown,
-  Calendar, User, DollarSign, Loader2, AlertCircle, Receipt, Eye, X, Send
+  Calendar, User, DollarSign, Loader2, AlertCircle, Receipt, Eye, X, Send, Repeat
 } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import { reconstructInvoiceData } from '../utils/invoiceUtils';
@@ -347,7 +347,20 @@ const AllInvoices = () => {
           <div className="ai-modal-content" onClick={e => e.stopPropagation()}>
             <div className="ai-modal-header">
               <h3>View Invoice</h3>
-              <button className="ai-modal-close" onClick={() => setViewInvoice(null)}><X size={20} /></button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <button
+                  className="ai-type-toggle"
+                  onClick={() => setViewInvoice(prev => ({
+                    ...prev,
+                    type: prev.type === 'Tax' ? 'Proforma' : 'Tax'
+                  }))}
+                  title="Switch between Proforma and Tax"
+                >
+                  <Repeat size={14} />
+                  <span>{viewInvoice.type === 'Tax' ? 'Proforma' : 'Tax'}</span>
+                </button>
+                <button className="ai-modal-close" onClick={() => setViewInvoice(null)}><X size={20} /></button>
+              </div>
             </div>
             <div className="ai-modal-body">
               <div className="readonly-notice"><Eye size={14} /> Read-only View</div>
