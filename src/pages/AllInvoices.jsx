@@ -70,7 +70,8 @@ const AllInvoices = () => {
         filename: `Invoice_${data.name?.split('\n')[0] || 'Record'}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css'] }
       };
 
       try {
@@ -104,7 +105,7 @@ const AllInvoices = () => {
   const sorted = [...filtered].sort((a, b) => {
     let valA = a[sortField] || '';
     let valB = b[sortField] || '';
-    if (['amountPaid'].includes(sortField)) {
+    if (['amount', 'amountPaid'].includes(sortField)) {
       valA = Number(valA) || 0; valB = Number(valB) || 0;
     } else {
       valA = valA.toString().toLowerCase(); valB = valB.toString().toLowerCase();
@@ -172,7 +173,7 @@ const AllInvoices = () => {
                   <th onClick={() => handleSort('invoiceDate')}><span>Date</span><ArrowUpDown size={12} /></th>
                   <th>Email Address</th>
                   <th>Type</th>
-                  <th onClick={() => handleSort('amountPaid')}><span>Amount Paid</span><ArrowUpDown size={12} /></th>
+                  <th onClick={() => handleSort('amount')}><span>Amount</span><ArrowUpDown size={12} /></th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -185,10 +186,10 @@ const AllInvoices = () => {
                     </td>
                     <td className="td-date"><Calendar size={14} /><span>{fmtDate(inv.invoiceDate)}</span></td>
                     <td className="td-email">{inv.email || '—'}</td>
-                    <td><span className={`ai-badge ${inv.type?.toLowerCase() === 'tax' ? 'badge-tax' : 'badge-proforma'}`}>{inv.type || '—'}</span></td>
-                    <td className="td-amount paid">
+                    <td><span className={`ai-badge ${inv.type?.toLowerCase() === 'tax' ? 'badge-tax' : inv.type?.toLowerCase() === 'proforma' ? 'badge-proforma' : ''}`}>{inv.type || '—'}</span></td>
+                    <td className="td-amount">
                       <span className="currency">{inv.currency === 'AED' ? 'AED' : '₹'}</span>
-                      {Number(inv.amountPaid || 0).toLocaleString()}
+                      {Number(inv.amount || 0).toLocaleString()}
                     </td>
                     <td>
                       <button 

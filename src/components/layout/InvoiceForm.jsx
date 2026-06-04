@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, Globe, Building2, Calendar, Mail, FileText, FileCheck, Trash2, Plus, ListOrdered } from 'lucide-react';
+import { Send, RotateCcw, Globe, Building2, Calendar, Mail, FileText, FileCheck, Trash2, Plus, ListOrdered } from 'lucide-react';
 import '../../styles/invoice-form.css';
 import BillingQueue from './BillingQueue';
 
@@ -67,6 +67,10 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
       timestamp: Date.now()
     }));
   }, [formData, onUpdate]);
+
+  const handleClear = () => {
+    setFormData({ ...initialData });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -606,16 +610,27 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
               </div>
             </div>
           </form>
-          <button 
-            type="button" 
-            className="btn-submit full-width" 
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            style={{ marginTop: '1.5rem' }}
-          >
-            <Send size={18} />
-            <span>Generate {formData.type} Invoice</span>
-          </button>
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+            <button 
+              type="button" 
+              className="btn-submit" 
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              style={{ flex: 1, padding: '0.7rem 1.25rem' }}
+            >
+              <Send size={16} />
+              <span>Generate {formData.type} Invoice</span>
+            </button>
+            <button 
+              type="button" 
+              className="btn-clear-small" 
+              onClick={handleClear}
+              title="Clear all fields"
+            >
+              <RotateCcw size={13} />
+              Clear
+            </button>
+          </div>
         </>
       ) : (
         <BillingQueue onSelectClient={handleClientSelect} />

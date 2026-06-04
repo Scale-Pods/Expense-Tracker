@@ -50,7 +50,8 @@ const Invoices = () => {
           useCORS: true,
           letterRendering: true
         },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css'] }
       };
 
       const rawBlob = await html2pdf().set(opt).from(element).output('blob');

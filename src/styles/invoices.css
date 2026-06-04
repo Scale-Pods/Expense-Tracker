@@ -144,8 +144,12 @@
 .terms-section {
   page-break-inside: avoid;
   break-inside: avoid;
-  display: inline-block;
+  display: block;
   width: 100%;
+}
+
+.terms-section + .terms-section {
+  margin-top: 0;
 }
 
 .preview-actions-overlay {
