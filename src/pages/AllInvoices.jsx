@@ -30,6 +30,7 @@ const AllInvoices = () => {
   const [emailPdfBlob, setEmailPdfBlob] = useState(null);
   const [isEmailLoading, setIsEmailLoading] = useState(false);
   const [isEmailSending, setIsEmailSending] = useState(false);
+  const [isViewSending, setIsViewSending] = useState(false);
 
   const fetchInvoices = async () => {
     setLoading(true);
@@ -211,6 +212,95 @@ const AllInvoices = () => {
     }
   };
 
+  const handleViewSend = async () => {
+    if (!viewInvoice) return;
+    const clientName = viewInvoice.name?.split('\n')[0] || 'Client';
+    const typeLabel = viewInvoice.type || 'Proforma';
+    if (!window.confirm(`Send this ${typeLabel} invoice to ${clientName}?`)) return;
+
+    setIsViewSending(true);
+    try {
+      await new Promise(r => setTimeout(r, 300));
+
+      const opt = {
+        margin: 0,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css'] }
+      };
+      const rawBlob = await html2pdf().set(opt).from(downloadContainerRef.current).output('blob');
+      const blob = new Blob([rawBlob], { type: 'application/pdf' });
+
+      const data = viewInvoice;
+      const clientAddress = data.name?.split('\n').slice(1).join(', ') || '';
+      const items = data.items || [];
+      const itemsJson = JSON.stringify(items);
+      const lineItemDescription = items.map(item => item.description).filter(Boolean).join(', ');
+
+      const typeKey = (data.type || 'Proforma').toLowerCase().replace('proforma', 'performa');
+      const regionKey = (data.region || 'India').toLowerCase();
+      const actionType = `${typeKey}${regionKey}`;
+
+      const payload = {
+        event: 'send',
+        invoiceType: `${typeKey}-${regionKey}`,
+        type: data.type || '',
+        region: data.region || '',
+        name: data.name || '',
+        clientName,
+        clientAddress,
+        email: data.email || '',
+        lineItemDescription,
+        currency: data.currency || '',
+        amount: data.amount || '',
+        amountPaid: data.amountPaid || '',
+        dueAmount: data.dueAmount || '',
+        invoiceDate: data.invoiceDate || '',
+        dueDate: data.dueDate || '',
+        paymentTerm: data.paymentTerm || '',
+        items: itemsJson,
+        clientGstin: data.clientGstin || '',
+        clientState: data.clientState || '',
+        myGstin: data.myGstin || '',
+        sacCode: data.sacCode || '',
+        amountInWords: data.amountInWords || '',
+        accHolder: data.accHolder || '',
+        bankName: data.bankName || '',
+        accNo: data.accNo || '',
+        ifsc: data.ifsc || '',
+        branch: data.branch || '',
+        accType: data.accType || '',
+        terms: data.terms || '',
+      };
+
+      const webhookUrl = `${import.meta.env.VITE_N8N_BASE_URL}/${import.meta.env.VITE_WEBHOOK_ID_INVOICE}?action=${actionType}`;
+
+      const formData = new FormData();
+      formData.append('file', blob, `Invoice_${clientName.replace(/\s+/g, '_')}.pdf`);
+      Object.entries(payload).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (response.ok) {
+        alert('Invoice sent successfully!');
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Webhook failed: ${errorText}`);
+      }
+    } catch (err) {
+      alert('Error: ' + err.message);
+      console.error('View Send Error:', err);
+    } finally {
+      setIsViewSending(false);
+    }
+  };
+
   // Filtering
   const filtered = invoices.filter(inv => {
     const name = (inv.clientName || inv.name || '').toLowerCase();
@@ -358,6 +448,15 @@ const AllInvoices = () => {
                 >
                   <Repeat size={14} />
                   <span>{viewInvoice.type === 'Tax' ? 'Proforma' : 'Tax'}</span>
+                </button>
+                <button
+                  className="ai-view-send-btn"
+                  onClick={handleViewSend}
+                  disabled={isViewSending}
+                  title="Send this invoice via email"
+                >
+                  {isViewSending ? <Loader2 size={14} className="spin" /> : <Send size={14} />}
+                  <span>{isViewSending ? 'Sending...' : 'Send'}</span>
                 </button>
                 <button className="ai-modal-close" onClick={() => setViewInvoice(null)}><X size={20} /></button>
               </div>

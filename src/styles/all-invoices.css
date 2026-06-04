@@ -527,6 +527,32 @@
   color: #6366f1;
 }
 
+.ai-view-send-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--glass-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ai-view-send-btn:hover {
+  background: rgba(20, 184, 166, 0.15);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.ai-view-send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .ai-modal-close {
   background: transparent;
   border: none;
