@@ -42,16 +42,19 @@ const Invoices = () => {
     try {
       const element = invoiceRef.current;
       const opt = {
-        margin: 0,
+        margin: [10, 10, 10, 10], // top, left, bottom, right
         filename: `Invoice_${currentData?.name?.split('\n')[0] || 'ScalePods'}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
+        image: { type: 'png', quality: 1.0 },
         html2canvas: { 
           scale: 2, 
           useCORS: true,
-          letterRendering: true
+          scrollY: 0,
+          scrollX: 0,
+          windowWidth: element.scrollWidth,
+          windowHeight: element.scrollHeight
         },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['avoid-all', 'css'], avoid: '.terms-section' }
+        pagebreak: { mode: 'css', avoid: '.terms-section' }
       };
 
       const rawBlob = await html2pdf().set(opt).from(element).output('blob');

@@ -92,10 +92,40 @@
   transition: all 0.3s ease;
 }
 
-/* Strip min-height when rendering for PDF to prevent blank extra pages */
+/* PDF Render Mode overrides to prevent slicing issues */
+.pdf-render-mode {
+  height: auto !important;
+  min-height: auto !important;
+  overflow: visible !important;
+  background: white !important;
+}
+
 .pdf-render-mode .a4-container,
 .pdf-render-mode .invoice-paper {
   min-height: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  padding: 15mm !important; /* Ensure padding is consistent in PDF */
+}
+
+/* Page Break Rules for PDF Generation */
+.a4-container tr,
+.a4-container tbody tr,
+.a4-container .terms-section,
+.a4-container > div {
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
+  position: relative !important;
+}
+
+.terms-section {
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
+  display: block !important;
+  width: 100% !important;
+  background: white !important;
 }
 
 /* Page separator between A4 pages (Google Docs style) */
@@ -145,26 +175,6 @@
 .page-break-before {
   page-break-before: always;
   break-before: page;
-}
-
-.terms-section {
-  page-break-inside: avoid !important;
-  break-inside: avoid !important;
-  display: block;
-  width: 100%;
-}
-
-/* Prevent table rows from splitting across pages */
-.a4-container tr,
-.a4-container tbody tr {
-  page-break-inside: avoid;
-  break-inside: avoid;
-}
-
-/* Prevent any div directly inside the a4 container from splitting */
-.a4-container > div {
-  page-break-inside: avoid;
-  break-inside: avoid;
 }
 
 .terms-section + .terms-section {

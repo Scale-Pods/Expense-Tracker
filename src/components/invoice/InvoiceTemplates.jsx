@@ -87,7 +87,7 @@ export const IndiaTaxInvoice = ({ data }) => {
           </thead>
           <tbody>
             {data.items.map((item, idx) => (
-              <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
+              <tr key={idx} className="item-row" style={{ borderBottom: '1px solid #eee' }}>
                 <td style={{ padding: '8px 15px', verticalAlign: 'top' }}>
                   <strong style={{ fontSize: '13px' }}>{item.description}</strong>
                 </td>
@@ -220,7 +220,7 @@ export const UAETaxInvoice = ({ data }) => {
           </thead>
           <tbody>
             {data.items.map((item, idx) => (
-              <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
+              <tr key={idx} className="item-row" style={{ borderBottom: '1px solid #eee' }}>
                 <td style={{ padding: '8px 15px', verticalAlign: 'top' }}>
                   <strong style={{ fontSize: '13px' }}>{item.description}</strong>
                 </td>
@@ -354,7 +354,7 @@ export const IndiaProformaInvoice = ({ data }) => {
         </thead>
         <tbody>
           {data.items.map((item, idx) => (
-            <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
+            <tr key={idx} className="item-row" style={{ borderBottom: '1px solid #eee' }}>
               <td style={{ padding: '12px' }}>
                 <strong style={{ fontSize: '14px' }}>{item.description}</strong>
               </td>
@@ -470,7 +470,7 @@ export const UAEProformaInvoice = ({ data }) => {
           </thead>
           <tbody>
             {data.items.map((item, idx) => (
-              <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
+              <tr key={idx} className="item-row" style={{ borderBottom: '1px solid #eee' }}>
                 <td style={{ padding: '12px', fontSize: '13px', verticalAlign: 'top' }}>
                   <strong>{item.description}</strong>
                 </td>

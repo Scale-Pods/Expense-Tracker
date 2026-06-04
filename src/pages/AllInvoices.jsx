@@ -77,12 +77,19 @@ const AllInvoices = () => {
     setTimeout(async () => {
       const pdfElement = downloadContainerRef.current;
       const opt = {
-        margin: 0,
+        margin: [10, 10, 10, 10],
         filename: `Invoice_${data.name?.split('\n')[0] || 'Record'}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+        image: { type: 'png', quality: 1.0 },
+        html2canvas: { 
+          scale: 2, 
+          useCORS: true, 
+          scrollY: 0, 
+          scrollX: 0,
+          windowWidth: pdfElement.scrollWidth,
+          windowHeight: pdfElement.scrollHeight
+        },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['avoid-all', 'css'], avoid: '.terms-section' }
+        pagebreak: { mode: 'css', avoid: '.terms-section' }
       };
 
       try {
@@ -111,11 +118,18 @@ const AllInvoices = () => {
     setTimeout(async () => {
       try {
         const opt = {
-          margin: 0,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+          margin: [10, 10, 10, 10],
+          image: { type: 'png', quality: 1.0 },
+          html2canvas: { 
+            scale: 2, 
+            useCORS: true, 
+            scrollY: 0, 
+            scrollX: 0,
+            windowWidth: downloadContainerRef.current.scrollWidth,
+            windowHeight: downloadContainerRef.current.scrollHeight
+          },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-          pagebreak: { mode: ['avoid-all', 'css'], avoid: '.terms-section' }
+          pagebreak: { mode: 'css', avoid: '.terms-section' }
         };
         const rawBlob = await html2pdf().set(opt).from(downloadContainerRef.current).output('blob');
         const blob = new Blob([rawBlob], { type: 'application/pdf' });
@@ -225,11 +239,18 @@ const AllInvoices = () => {
       await new Promise(r => setTimeout(r, 300));
 
       const opt = {
-        margin: 0,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+        margin: [10, 10, 10, 10],
+        image: { type: 'png', quality: 1.0 },
+        html2canvas: { 
+          scale: 2, 
+          useCORS: true, 
+          scrollY: 0, 
+          scrollX: 0,
+          windowWidth: downloadContainerRef.current.scrollWidth,
+          windowHeight: downloadContainerRef.current.scrollHeight
+        },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['avoid-all', 'css'], avoid: '.terms-section' }
+        pagebreak: { mode: 'css', avoid: '.terms-section' }
       };
       const rawBlob = await html2pdf().set(opt).from(downloadContainerRef.current).output('blob');
       const blob = new Blob([rawBlob], { type: 'application/pdf' });
