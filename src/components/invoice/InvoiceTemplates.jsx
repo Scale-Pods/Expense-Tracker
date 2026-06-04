@@ -135,12 +135,12 @@ export const IndiaTaxInvoice = ({ data }) => {
 
           {termsArray.length > 0 ? (
             termsArray.map((t, i) => (
-              <div key={i} style={{ margin: '0 0 3px 0', background: '#fff', fontSize: '12px', color: '#777', lineHeight: '1.2' }}>
+              <div key={i} style={{ margin: '0 0 6px 0', padding: '2px 0', fontSize: '12px', color: '#777', lineHeight: '1.6' }}>
                 {t}
               </div>
             ))
           ) : (
-            <div style={{ margin: 0, background: '#fff', fontSize: '12px', color: '#777', lineHeight: '1.2' }}>
+            <div style={{ margin: 0, padding: '2px 0', fontSize: '12px', color: '#777', lineHeight: '1.6' }}>
               1. Standard terms apply. 2. This is a computer generated document.
             </div>
           )}
@@ -251,12 +251,12 @@ export const UAETaxInvoice = ({ data }) => {
 
           {termsArray.length > 0 ? (
             termsArray.map((t, i) => (
-              <div key={i} style={{ margin: '0 0 3px 0', background: '#fff', fontSize: '12px', color: '#777', lineHeight: '1.2' }}>
+              <div key={i} style={{ margin: '0 0 6px 0', padding: '2px 0', fontSize: '12px', color: '#777', lineHeight: '1.6' }}>
                 {t}
               </div>
             ))
           ) : (
-            <div style={{ margin: 0, background: '#fff', fontSize: '12px', color: '#777', lineHeight: '1.2' }}>
+            <div style={{ margin: 0, padding: '2px 0', fontSize: '12px', color: '#777', lineHeight: '1.6' }}>
               1. Standard terms apply. 2. This is a computer generated document.
             </div>
           )}
@@ -404,8 +404,8 @@ export const IndiaProformaInvoice = ({ data }) => {
           </div>
           <div style={{ flex: 1 }}>
             <h4 style={{ textTransform: 'uppercase', fontSize: '11px', color: '#666', marginBottom: '10px' }}>Terms</h4>
-            <div style={{ fontSize: '11px', color: '#777', lineHeight: '1.4' }}>
-              {termsArray.length > 0 ? termsArray.map((t, i) => <div key={i} style={{ marginBottom: '3px' }}>{t}</div>) : "Standard terms apply."}
+            <div style={{ fontSize: '11px', color: '#777', lineHeight: '1.5', padding: '2px 0' }}>
+              {termsArray.length > 0 ? termsArray.map((t, i) => <div key={i} style={{ marginBottom: '6px' }}>{t}</div>) : "Standard terms apply."}
             </div>
           </div>
         </div>
@@ -521,12 +521,12 @@ export const UAEProformaInvoice = ({ data }) => {
 
           {termsArray.length > 0 ? (
             termsArray.map((t, i) => (
-              <div key={i} style={{ margin: '0 0 3px 0', background: '#fff', fontSize: '12px', color: '#777', lineHeight: '1.2' }}>
+              <div key={i} style={{ margin: '0 0 6px 0', padding: '2px 0', fontSize: '12px', color: '#777', lineHeight: '1.6' }}>
                 {t}
               </div>
             ))
           ) : (
-            <div style={{ margin: 0, background: '#fff', fontSize: '12px', color: '#777', lineHeight: '1.2' }}>
+            <div style={{ margin: 0, padding: '2px 0', fontSize: '12px', color: '#777', lineHeight: '1.6' }}>
               1. Standard terms apply. 2. This is a computer generated document.
             </div>
           )}

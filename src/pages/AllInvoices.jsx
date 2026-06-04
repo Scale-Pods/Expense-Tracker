@@ -77,7 +77,7 @@ const AllInvoices = () => {
     setTimeout(async () => {
       const pdfElement = downloadContainerRef.current;
       const opt = {
-        margin: [10, 10, 10, 10],
+        margin: 0,
         filename: `Invoice_${data.name?.split('\n')[0] || 'Record'}.pdf`,
         image: { type: 'png', quality: 1.0 },
         html2canvas: { 
@@ -89,7 +89,7 @@ const AllInvoices = () => {
           windowHeight: pdfElement.scrollHeight
         },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: 'css', avoid: '.terms-section' }
+        pagebreak: { mode: 'avoid-all' }
       };
 
       try {
@@ -118,7 +118,7 @@ const AllInvoices = () => {
     setTimeout(async () => {
       try {
         const opt = {
-          margin: [10, 10, 10, 10],
+          margin: 0,
           image: { type: 'png', quality: 1.0 },
           html2canvas: { 
             scale: 2, 
@@ -129,7 +129,7 @@ const AllInvoices = () => {
             windowHeight: downloadContainerRef.current.scrollHeight
           },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-          pagebreak: { mode: 'css', avoid: '.terms-section' }
+          pagebreak: { mode: 'avoid-all' }
         };
         const rawBlob = await html2pdf().set(opt).from(downloadContainerRef.current).output('blob');
         const blob = new Blob([rawBlob], { type: 'application/pdf' });
@@ -239,7 +239,7 @@ const AllInvoices = () => {
       await new Promise(r => setTimeout(r, 300));
 
       const opt = {
-        margin: [10, 10, 10, 10],
+        margin: 0,
         image: { type: 'png', quality: 1.0 },
         html2canvas: { 
           scale: 2, 
@@ -250,7 +250,7 @@ const AllInvoices = () => {
           windowHeight: downloadContainerRef.current.scrollHeight
         },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: 'css', avoid: '.terms-section' }
+        pagebreak: { mode: 'avoid-all' }
       };
       const rawBlob = await html2pdf().set(opt).from(downloadContainerRef.current).output('blob');
       const blob = new Blob([rawBlob], { type: 'application/pdf' });
