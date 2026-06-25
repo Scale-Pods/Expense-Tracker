@@ -75,7 +75,7 @@ const EmailDialog = ({ isOpen, onClose, onSend, invoiceData, isSending }) => {
           items: invoiceData?.items || [],
         }
       };
-      const response = await fetch('https://n8n.srv1010832.hstgr.cloud/webhook/461ffb29-049d-4734-9a68-cb016d1d882a', {
+      const response = await fetch(`${import.meta.env.VITE_N8N_BASE_URL}/${import.meta.env.VITE_WEBHOOK_ID_EMAIL_AI}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

@@ -614,3 +614,30 @@
     font-size: 16px;
   }
 }
+
+@media (max-width: 480px) {
+  .ai-stats-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .ai-page-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .ai-search-box {
+    min-width: 100%;
+  }
+  .ai-filters {
+    width: 100%;
+  }
+  .ai-filters select {
+    flex: 1;
+  }
+  .ai-table {
+    min-width: 600px;
+  }
+  .ai-table th,
+  .ai-table td {
+    padding: 10px 12px;
+  }
+}

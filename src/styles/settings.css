@@ -365,3 +365,19 @@
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
+
+@media (max-width: 480px) {
+  .settings-page {
+    padding: var(--spacing-md);
+  }
+  .settings-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .settings-card {
+    padding: 1.25rem;
+  }
+  .settings-title {
+    font-size: 1.35rem;
+  }
+}

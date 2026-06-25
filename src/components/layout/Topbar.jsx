@@ -26,7 +26,9 @@ const Topbar = ({ toggleSidebar }) => {
   return (
     <header className="topbar">
       <div className="greeting-section">
-        {/* Page title removed as requested */}
+        <button className="sidebar-toggle-btn" onClick={toggleSidebar} aria-label="Toggle sidebar">
+          <Menu size={20} />
+        </button>
       </div>
       
       <div className="topbar-actions">

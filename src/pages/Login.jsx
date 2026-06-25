@@ -55,12 +55,14 @@ export default function Login() {
       <div className="login-blob login-blob-1" />
       <div className="login-blob login-blob-2" />
       <div className="login-blob login-blob-3" />
+      <div className="login-glow" />
+
+      <div className="login-top-logo">
+        <Logo className="login-logo" />
+      </div>
 
       <div className={`login-card ${shake ? 'shake' : ''}`}>
         <div className="login-card-header">
-          <div className="login-logo-wrap">
-            <Logo className="login-logo" />
-          </div>
           <p className="login-subtitle">Sign in to your workspace</p>
         </div>
 

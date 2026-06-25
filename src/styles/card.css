@@ -62,3 +62,12 @@
 .card-content {
   padding: 24px;
 }
+
+@media (max-width: 480px) {
+  .card-header {
+    padding: 14px 16px;
+  }
+  .card-content {
+    padding: 16px;
+  }
+}

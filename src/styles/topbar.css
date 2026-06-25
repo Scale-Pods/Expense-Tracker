@@ -68,3 +68,34 @@
   .topbar { padding: 24px 16px; }
   .greeting-section h2 { font-size: 20px; }
 }
+
+@media (max-width: 480px) {
+  .topbar {
+    padding: 16px 12px 4px;
+  }
+
+  .topbar-actions {
+    gap: 8px;
+  }
+
+  .action-pill {
+    padding: 6px 12px;
+    font-size: 11px;
+    border-radius: 10px;
+  }
+
+  .theme-toggle-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+  }
+
+  .theme-toggle-btn svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .date-pill {
+    display: none;
+  }
+}

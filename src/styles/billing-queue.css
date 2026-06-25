@@ -232,3 +232,15 @@
   background: var(--color-border);
   border-radius: 10px;
 }
+
+@media (max-width: 480px) {
+  .billing-queue-section {
+    padding: 0.5rem;
+  }
+  .queue-client-row {
+    padding: 0.6rem 0.7rem;
+  }
+  .client-row-amount {
+    font-size: 0.75rem;
+  }
+}

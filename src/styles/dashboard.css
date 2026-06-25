@@ -132,6 +132,8 @@
   align-items: center;
   gap: 8px;
   background: var(--glass-bg);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
   border: 1px solid var(--glass-border);
   padding: 10px 20px;
   border-radius: 12px;
@@ -139,11 +141,10 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  position: relative;
+  box-shadow: var(--glass-shadow);
 }
 
 .filter-toggle-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
   border-color: var(--color-primary);
 }
 
@@ -151,6 +152,43 @@
   background: var(--color-primary);
   color: white;
   border-color: var(--color-primary);
+}
+
+.filter-chevron {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.filter-chevron.open {
+  transform: rotate(180deg);
+}
+
+.dashboard-filter-bar-sleek {
+  position: relative;
+  z-index: 40;
+  margin-bottom: 32px;
+}
+
+.filter-dropdown-content {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, visibility 0.3s ease;
+  margin-top: 0;
+}
+
+.dashboard-filter-bar-sleek.open .filter-dropdown-content {
+  max-height: 500px;
+  opacity: 1;
+  visibility: visible;
+  margin-top: 12px;
+}
+
+.filter-row-flush {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .dashboard-header-sleek {
@@ -184,33 +222,21 @@
   line-height: 1.1;
 }
 
-.dashboard-filter-bar-sleek {
-  position: relative;
-  z-index: 40;
-  margin-bottom: 32px;
-}
-
-.filter-row-flush {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
 .custom-filter-pill {
   background: var(--glass-bg);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
   border: 1px solid var(--glass-border);
-  border-radius: 8px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   padding: 0 14px;
-  height: 38px;
+  height: 40px;
   transition: all 0.2s ease;
   box-shadow: var(--glass-shadow);
 }
 
 .custom-filter-pill:hover {
-  background: var(--glass-bg);
   border-color: var(--color-primary);
   opacity: 0.9;
 }
@@ -282,28 +308,30 @@
 }
 
 .reset-btn-minimal {
-  background: transparent;
-  border: 1px solid rgba(255, 71, 87, 0.3);
-  color: #ff4757;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #EF4444;
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 0 14px;
-  height: 38px;
-  border-radius: 8px;
+  height: 40px;
+  border-radius: 12px;
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
 }
 
 .reset-btn-minimal:hover {
-  background: rgba(255, 71, 87, 0.05);
-  border-color: #ff4757;
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.4);
+  transform: translateY(-1px);
 }
 
-.reset-btn-minimal span {
-  margin-top: 1px;
+.reset-btn-minimal:active {
+  transform: translateY(0);
 }
 
 .add-entry-btn-sleek {
@@ -344,5 +372,89 @@
   .filter-grid { grid-template-columns: 1fr; }
   .filter-row-flush > * {
     width: calc(50% - 6px);
+  }
+}
+
+/* 430×932 mobile optimization */
+@media (max-width: 480px) {
+  .dashboard-container {
+    gap: 12px;
+  }
+
+  .kpi-grid {
+    gap: 10px;
+  }
+
+  .kpi-card {
+    padding: 12px 14px;
+    gap: 12px;
+    border-radius: 16px;
+  }
+
+  .kpi-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+
+  .kpi-icon-wrapper svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .kpi-label {
+    font-size: 10px;
+  }
+
+  .kpi-value {
+    font-size: 18px;
+  }
+
+  .dashboard-main-grid {
+    gap: 12px;
+  }
+
+  .chart-card {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .renewals-section {
+    gap: 12px;
+  }
+
+  .renewal-item {
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+  }
+
+  .dashboard-header-sleek {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .title-bold {
+    font-size: 20px;
+  }
+
+  .filter-row-flush {
+    gap: 8px;
+  }
+
+  .filter-row-flush > * {
+    width: 100%;
+  }
+
+  .add-entry-btn-sleek {
+    width: 100%;
+    justify-content: center;
+    height: 42px;
+  }
+
+  .custom-filter-pill {
+    height: 34px;
+    padding: 0 10px;
   }
 }

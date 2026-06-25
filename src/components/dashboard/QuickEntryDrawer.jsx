@@ -7,7 +7,8 @@ import {
   X, 
   Check, 
   Loader2, 
-  AlertCircle
+  AlertCircle,
+  ArrowLeft
 } from 'lucide-react';
 import { submitExpense } from '../../utils/api';
 import { useAuth } from '../../hooks/AuthContext';
@@ -133,8 +134,15 @@ const QuickEntryDrawer = ({ onRefresh, isOpen, setIsOpen }) => {
       {/* Slide-out Panel */}
       <div className={`drawer-panel ${isOpen ? 'open' : ''}`}>
         <div className="drawer-header">
-          <span className="drawer-title">Quick Entry</span>
-          <span className="drawer-subtitle">Track expense via text or image</span>
+          <div className="drawer-header-row">
+            <button className="drawer-close-btn" onClick={() => setIsOpen(false)} aria-label="Close">
+              <ArrowLeft size={20} />
+            </button>
+            <div className="drawer-header-text">
+              <span className="drawer-title">Quick Entry</span>
+              <span className="drawer-subtitle">Track expense via text or image</span>
+            </div>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="drawer-form">

@@ -77,3 +77,14 @@
     gap: 1rem;
   }
 }
+
+@media (max-width: 480px) {
+  .burn-stats-compact {
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem 0;
+  }
+  .burn-value-compact {
+    font-size: 1.2rem;
+  }
+}

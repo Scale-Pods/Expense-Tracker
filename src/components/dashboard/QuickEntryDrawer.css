@@ -101,6 +101,36 @@
   margin-bottom: 32px;
 }
 
+.drawer-header-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.drawer-header-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.drawer-close-btn {
+  display: none;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.drawer-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .drawer-title {
   display: block;
   font-size: 20px;
@@ -205,10 +235,19 @@
 }
 
 @media (max-width: 640px) {
+  .drawer-close-btn {
+    display: flex;
+  }
+
   .drawer-panel {
     width: 100%;
     right: 0;
     transform: translateX(100%);
+    padding: 40px 20px;
+  }
+
+  .drawer-toggle-btn {
+    display: none;
   }
 }
 

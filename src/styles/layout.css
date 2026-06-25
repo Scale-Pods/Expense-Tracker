@@ -29,3 +29,9 @@
     width: 100%;
   }
 }
+
+@media (max-width: 480px) {
+  .page-content {
+    padding: 0px 12px 20px;
+  }
+}

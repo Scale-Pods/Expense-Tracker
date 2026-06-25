@@ -48,6 +48,7 @@ const Overview = () => {
   const [typeFilter, setTypeFilter] = React.useState('all');
   const [paidByFilter, setPaidByFilter] = useState('all');
   const [isEntryDrawerOpen, setIsEntryDrawerOpen] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Extract unique filter options from raw data
   const filterOptions = useMemo(() => {
@@ -325,8 +326,22 @@ const Overview = () => {
         </div>
       </div>
 
-      <div className="dashboard-filter-bar-sleek stagger-load">
-        <div className="filter-row-flush">
+      <div className={`dashboard-filter-bar-sleek stagger-load ${showFilters ? 'open' : ''}`}>
+        <button 
+          className="filter-toggle-btn"
+          onClick={() => setShowFilters(v => !v)}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="4" y1="6" x2="20" y2="6"/>
+            <line x1="8" y1="12" x2="20" y2="12"/>
+            <line x1="12" y1="18" x2="20" y2="18"/>
+          </svg>
+          <span>Filters</span>
+          <ChevronDown size={14} className={`filter-chevron ${showFilters ? 'open' : ''}`} />
+        </button>
+
+        <div className="filter-dropdown-content">
+          <div className="filter-row-flush">
           <CustomSelect 
             label="Date Range"
             value={dateFilter} 
@@ -408,6 +423,7 @@ const Overview = () => {
             <X size={14} />
             <span>Reset</span>
           </button>
+        </div>
         </div>
       </div>
 

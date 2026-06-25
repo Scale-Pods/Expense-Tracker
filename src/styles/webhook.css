@@ -133,3 +133,17 @@
 .animate-spin {
   animation: spin 1s linear infinite;
 }
+
+@media (max-width: 480px) {
+  .webhook-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .webhook-content {
+    padding: var(--spacing-md);
+  }
+  .json-viewer-container {
+    max-height: 400px;
+    padding: var(--spacing-md);
+  }
+}
