@@ -22,6 +22,7 @@ import { useWebhookData } from '../hooks/useWebhookData';
 import { useAuth } from '../hooks/AuthContext';
 import { useTheme } from '../hooks/ThemeContext';
 import { useNavigate } from 'react-router-dom';
+import { parseSmartDate } from '../utils/invoiceUtils';
 import { format } from 'date-fns';
 import Badge from '../components/common/Badge';
 import Card from '../components/common/Card';
@@ -122,13 +123,7 @@ const Investments = () => {
   }, [investmentData]);
 
   const chartData = useMemo(() => {
-    const sorted = [...investmentData].sort((a, b) => {
-        const [mA, dA, yA] = a.date.split('/');
-        const [mB, dB, yB] = b.date.split('/');
-        const dateA = new Date(`${yA}-${mA}-${dA}`);
-        const dateB = new Date(`${yB}-${mB}-${dB}`);
-        return dateA - dateB;
-    });
+    const sorted = [...investmentData].sort((a, b) => parseSmartDate(a.date) - parseSmartDate(b.date));
     let runningTotal = 0;
     return sorted.map(item => {
       runningTotal += item.amount;

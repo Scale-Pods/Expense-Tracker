@@ -10,6 +10,7 @@ import { format, subDays, subMonths, subYears, startOfDay, endOfDay, isAfter, is
 import CustomSelect from '../components/common/CustomSelect';
 import { useTheme } from '../hooks/ThemeContext';
 import { useCurrency } from '../hooks/CurrencyContext';
+import { parseSmartDate } from '../utils/invoiceUtils';
 import CubeLoader from '../components/ui/cube-loader';
 import { AlertCircle, RefreshCw, Sparkles, Database } from 'lucide-react';
 import WebhookDataSection from '../components/WebhookDataSection';
@@ -65,8 +66,7 @@ const processExpense = (data, exchangeRate) => {
       categoryStats[cat].value += amt;
       if (exp.Date) {
         try {
-          const parts = exp.Date.split('/');
-          const dt = parts.length === 3 ? new Date(`${parts[2]}-${parts[0]}-${parts[1]}`) : new Date(exp.Date);
+          const dt = parseSmartDate(exp.Date);
           if (!isNaN(dt.getTime())) {
             const monthStr = format(dt, 'MMM yyyy');
             if (!trendMap[monthStr]) trendMap[monthStr] = {};
@@ -117,8 +117,7 @@ const processInvestment = (data) => {
       const dateStr = item.Date || item.date || '';
       if (dateStr) {
         try {
-          const parts = dateStr.split('/');
-          const dt = parts.length === 3 ? new Date(`${parts[2]}-${parts[0]}-${parts[1]}`) : new Date(dateStr);
+          const dt = parseSmartDate(dateStr);
           if (!isNaN(dt.getTime())) {
             const monthStr = format(dt, 'MMM yyyy');
             if (!trendMap[monthStr]) trendMap[monthStr] = {};
@@ -170,8 +169,7 @@ const processClient = (data) => {
       const dateStr = getVal(['Realised Date', 'realisedDate', 'RealisedDate']) || '';
       if (dateStr) {
         try {
-          const parts = dateStr.split('/');
-          const dt = parts.length === 3 ? new Date(`${parts[2]}-${parts[0]}-${parts[1]}`) : new Date(dateStr);
+          const dt = parseSmartDate(dateStr);
           if (!isNaN(dt.getTime())) {
             const monthStr = format(dt, 'MMM yyyy');
             if (!trendMap[monthStr]) trendMap[monthStr] = {};
@@ -270,14 +268,10 @@ const CategoryAnalysis = () => {
       let dt = null;
       if (exp.Date || exp.date) {
         const dStr = exp.Date || exp.date;
-        const parts = dStr.split('/');
-        if (parts.length === 3) dt = new Date(`${parts[2]}-${parts[0]}-${parts[1]}`);
-        else dt = new Date(dStr);
+        if (dStr) dt = parseSmartDate(dStr);
       } else if (exp["Realised Date"] || exp.realisedDate || exp.RealisedDate) {
         const dStr = exp["Realised Date"] || exp.realisedDate || exp.RealisedDate;
-        const parts = dStr.split('/');
-        if (parts.length === 3) dt = new Date(`${parts[2]}-${parts[0]}-${parts[1]}`);
-        else dt = new Date(dStr);
+        if (dStr) dt = parseSmartDate(dStr);
       }
       
       if (dt && !isNaN(dt.getTime())) {

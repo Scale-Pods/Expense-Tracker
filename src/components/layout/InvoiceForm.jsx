@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Send, RotateCcw, Globe, Building2, Calendar, Mail, FileText, FileCheck, Trash2, Plus, ListOrdered } from 'lucide-react';
 import '../../styles/invoice-form.css';
 import BillingQueue from './BillingQueue';
+import { parseSmartDate } from '../../utils/invoiceUtils';
 
 const CACHE_KEY = 'invoice_form_cache';
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour
@@ -169,12 +170,13 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
   // Convert DD/MM/YYYY to YYYY-MM-DD for HTML date inputs
   const convertDate = (dateStr) => {
     if (!dateStr) return '';
-    // Already YYYY-MM-DD
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-    // MM/DD/YYYY
-    const parts = dateStr.split('/');
-    if (parts.length === 3) {
-      return `${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
+    const d = parseSmartDate(dateStr);
+    if (d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
     }
     return dateStr;
   };

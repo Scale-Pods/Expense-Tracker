@@ -4,6 +4,7 @@ import Table from '../components/common/Table';
 import Badge from '../components/common/Badge';
 import { useWebhookData } from '../hooks/useWebhookData';
 import { useCurrency } from '../hooks/CurrencyContext';
+import { parseSmartDate } from '../utils/invoiceUtils';
 import { Search, Calendar, ArrowUpDown, Loader, AlertCircle, Filter, Tag, X, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, parse, isWithinInterval, startOfDay, endOfDay, subDays, subMonths, subYears, isBefore, isAfter } from 'date-fns';
 import CubeLoader from '../components/ui/cube-loader';
@@ -56,12 +57,7 @@ const MonthlyPayments = () => {
       let date = null;
       if (exp.Date) {
         try {
-          const parts = exp.Date.split('/');
-          if (parts.length === 3) {
-            date = new Date(`${parts[2]}-${parts[0]}-${parts[1]}`);
-          } else {
-            date = new Date(exp.Date);
-          }
+          date = parseSmartDate(exp.Date);
         } catch { /* ignore parse error */ }
       }
 

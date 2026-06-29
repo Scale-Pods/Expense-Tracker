@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Card from '../components/common/Card';
 import Badge from '../components/common/Badge';
 import { useWebhookData } from '../hooks/useWebhookData';
+import { parseSmartDate } from '../utils/invoiceUtils';
 import { useNavigate } from 'react-router-dom';
 import { 
   Bell, 
@@ -93,8 +94,8 @@ const Reminders = () => {
         const title = item.Service || item["Tracker Title"] || item["Spent On"] || item.Title || item.title || 'Untitled Reminder';
         let dayOfMonth = item["Due Date"] || item["Day of Month"] || item.DayOfMonth || item.dayOfMonth || item.day || '1';
         if (dayOfMonth === '1' && item.Date && typeof item.Date === 'string') {
-          const dateParts = item.Date.split('/');
-          if (dateParts.length >= 2) dayOfMonth = dateParts[1];
+          const d = parseSmartDate(item.Date);
+          if (d) dayOfMonth = String(d.getDate());
         }
         const description = item.Description || item["Notes & Context"] || item["Spent From"] || item.description || item["Vendor"] || '';
         let amount = '0';

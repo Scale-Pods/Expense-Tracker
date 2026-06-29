@@ -2,12 +2,37 @@
  * Shared invoice utility functions used by both Create Invoice and All Invoices pages.
  */
 
+export const parseSmartDate = (dateStr) => {
+  if (!dateStr) return null;
+  const parts = dateStr.split('/');
+  if (parts.length !== 3) {
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  const p1 = parseInt(parts[0], 10);
+  const p2 = parseInt(parts[1], 10);
+  const y = parseInt(parts[2], 10);
+
+  // Try M/D/YYYY first
+  const d1 = new Date(y, p1 - 1, p2);
+  if (d1.getMonth() === p1 - 1 && d1.getDate() === p2) return d1;
+
+  // Fallback to D/M/YYYY
+  const d2 = new Date(y, p2 - 1, p1);
+  if (d2.getMonth() === p2 - 1 && d2.getDate() === p1) return d2;
+
+  return null;
+};
+
 export const formatDate = (dateStr) => {
   if (!dateStr) return '';
   if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr) || /^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) return dateStr;
-  const parts = dateStr.split('-');
-  if (parts.length === 3) {
-    return `${parts[2]}-${parts[0]}-${parts[1]}`;
+  const d = parseSmartDate(dateStr);
+  if (d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
   }
   return dateStr;
 };

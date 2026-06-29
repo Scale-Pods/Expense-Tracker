@@ -9,6 +9,7 @@ import { Download, Loader, AlertCircle, Info, ArrowUpDown } from 'lucide-react';
 import { useTheme } from '../hooks/ThemeContext';
 import { useWebhookData } from '../hooks/useWebhookData';
 import { useCurrency } from '../hooks/CurrencyContext';
+import { parseSmartDate } from '../utils/invoiceUtils';
 import { format, subMonths, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import CubeLoader from '../components/ui/cube-loader';
 import '../styles/reports.css';
@@ -80,13 +81,8 @@ const Reports = () => {
       }
       let dt = null;
       if (exp.Date) {
-        const parts = exp.Date.split('/');
-        if (parts.length === 3) {
-          dt = new Date(`${parts[2]}-${parts[0]}-${parts[1]}`);
-        } else {
-          dt = new Date(exp.Date);
+          dt = parseSmartDate(exp.Date);
         }
-      }
       return { ...exp, amt, dt };
     }).filter(e => e.dt && !isNaN(e.dt.getTime()));
 
@@ -158,10 +154,9 @@ const Reports = () => {
       const amt = parseFloat(String(val).replace(/[^0-9.-]/g, '')) || 0;
       let dt = null;
       const dateStr = item['Realised Date'] || item.realisedDate || '';
-      if (dateStr.includes('/')) {
-        const p = dateStr.split('/');
-        dt = new Date(`${p[2]}-${p[0]}-${p[1]}`);
-      }
+      if (dateStr) {
+          dt = parseSmartDate(dateStr);
+        }
       return { ...item, amt: amt / (exchangeRate || 1), dt };
     }).filter(r => r.dt && isWithinInterval(r.dt, { start, end }));
     const totalRev = monthlyRev.reduce((sum, r) => sum + r.amt, 0);

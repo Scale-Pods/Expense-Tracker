@@ -3,6 +3,7 @@ import Card from '../components/common/Card';
 import ChartCard from '../components/charts/ChartCard';
 import Badge from '../components/common/Badge';
 import { useWebhookData } from '../hooks/useWebhookData';
+import { parseSmartDate } from '../utils/invoiceUtils';
 import { 
   PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -104,9 +105,7 @@ const Overview = () => {
         // Apply Date Filter to Revenue
         let dt = null;
         if (item.Date) {
-          const parts = item.Date.split('/');
-          if (parts.length === 3) dt = new Date(`${parts[2]}-${parts[0]}-${parts[1]}`);
-          else dt = new Date(item.Date);
+          dt = item.Date.includes('/') ? parseSmartDate(item.Date) : new Date(item.Date);
         }
 
         if (dt && !isNaN(dt.getTime())) {
@@ -146,9 +145,7 @@ const Overview = () => {
       // 1. Date Filter
       let dt = null;
       if (exp.Date) {
-        const parts = exp.Date.split('/');
-        if (parts.length === 3) dt = new Date(`${parts[2]}-${parts[0]}-${parts[1]}`);
-        else dt = new Date(exp.Date);
+        dt = exp.Date.includes('/') ? parseSmartDate(exp.Date) : new Date(exp.Date);
       }
       
       if (dt && !isNaN(dt.getTime())) {
@@ -213,9 +210,7 @@ const Overview = () => {
 
         let dt = null;
         if (exp.Date) {
-          const parts = exp.Date.split('/');
-          if (parts.length === 3) dt = new Date(`${parts[2]}-${parts[0]}-${parts[1]}`);
-          else dt = new Date(exp.Date);
+          dt = exp.Date.includes('/') ? parseSmartDate(exp.Date) : new Date(exp.Date);
           if (dt && !isNaN(dt.getTime())) {
             validDateExpenses.push({ ...exp, dt, amt });
           }

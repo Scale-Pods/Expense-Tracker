@@ -25,6 +25,7 @@ import {
   IndianRupee
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { parseSmartDate } from '../utils/invoiceUtils';
 import { format } from 'date-fns';
 import { 
   AreaChart, 
@@ -221,11 +222,7 @@ const ClientRevenue = () => {
     
     return Object.keys(groups)
       .filter(d => d !== 'N/A' && d.includes('/'))
-      .sort((a, b) => {
-        const [mA, dA, yA] = a.split('/');
-        const [mB, dB, yB] = b.split('/');
-        return new Date(yA, mA-1, dA) - new Date(yB, mB-1, dB);
-      })
+      .sort((a, b) => parseSmartDate(a) - parseSmartDate(b))
       .map(date => ({ date, amount: groups[date] }));
   }, [revenueData]);
 
@@ -257,18 +254,18 @@ const ClientRevenue = () => {
     const months = {};
     revenueData.forEach(r => {
       const date = r.realisedDate || '';
-      if (date.includes('/')) {
-        const parts = date.split('/');
-        const key = `${parts[2]}-${parts[0].padStart(2, '0')}`;
+      const d = parseSmartDate(date);
+      if (d) {
+        const key = format(d, 'yyyy-MM');
         if (!months[key]) months[key] = { month: key.split('-')[1], revenue: 0, expense: 0 };
         months[key].revenue += r.realisedRevenue;
       }
     });
     expenseData.forEach(e => {
       const date = e.date || '';
-      if (date.includes('/')) {
-        const parts = date.split('/');
-        const key = `${parts[2]}-${parts[0].padStart(2, '0')}`;
+      const d = parseSmartDate(date);
+      if (d) {
+        const key = format(d, 'yyyy-MM');
         if (!months[key]) months[key] = { month: key.split('-')[1], revenue: 0, expense: 0 };
         months[key].expense += e.amount;
       }
