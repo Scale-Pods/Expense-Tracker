@@ -1,24 +1,27 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import Card from '../components/common/Card';
 import Table from '../components/common/Table';
 import Badge from '../components/common/Badge';
 import { useWebhookData } from '../hooks/useWebhookData';
 import { useCurrency } from '../hooks/CurrencyContext';
-import { Search, Calendar, ArrowUpDown, Loader, AlertCircle, Filter, Tag, X, ChevronDown } from 'lucide-react';
+import { Search, Calendar, ArrowUpDown, Loader, AlertCircle, Filter, Tag, X, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, parse, isWithinInterval, startOfDay, endOfDay, subDays, subMonths, subYears, isBefore, isAfter } from 'date-fns';
 import CubeLoader from '../components/ui/cube-loader';
 import CustomSelect from '../components/common/CustomSelect';
 import '../styles/payments.css';
 import '../styles/dashboard.css';
 
+const PAGE_SIZE = 20;
+
 const MonthlyPayments = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'desc' });
-  const [dateFilter, setDateFilter] = useState('1 month');
+  const [dateFilter, setDateFilter] = useState('all time');
   const [customRange, setCustomRange] = useState({ start: '', end: '' });
   const [cardFilter, setCardFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [paidByFilter, setPaidByFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { data: webhookResponse, loading, error } = useWebhookData();
   const { data: cardsResponse } = useWebhookData('Cards');
@@ -163,14 +166,30 @@ const MonthlyPayments = () => {
     return data;
   }, [searchTerm, sortConfig, dateFilter, customRange, cardFilter, typeFilter, paidByFilter, paymentsData, convert]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [dateFilter, customRange, cardFilter, typeFilter, paidByFilter, searchTerm]);
+
   const totalMonthly = useMemo(() => {
     return filteredData.reduce((sum, item) => sum + item.cost, 0);
   }, [filteredData]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredData.length / PAGE_SIZE));
+
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredData.slice(start, start + PAGE_SIZE);
+  }, [filteredData, currentPage]);
+
+  const goToPage = useCallback((page) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  }, [totalPages]);
 
   const requestSort = (key) => {
     let direction = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') direction = 'desc';
     setSortConfig({ key, direction });
+    setCurrentPage(1);
   };
 
   const columns = [
@@ -223,7 +242,7 @@ const MonthlyPayments = () => {
       <div className="services-container">
         <div className="p-6 bg-red-50 rounded-xl border border-red-100 flex items-center shadow-sm">
           <AlertCircle className="text-red-500 mr-4" size={32} />
-          <p className="text-red-600/80">Failed to load monthly payments. {error?.message || webhookResponse?.message}</p>
+          <p className="text-red-600/80">Failed to load payments. {error?.message || webhookResponse?.message}</p>
         </div>
       </div>
     );
@@ -235,8 +254,8 @@ const MonthlyPayments = () => {
     <div className="payments-container redesigned">
       <div className="dashboard-header-sleek stagger-load flex justify-between items-end mb-8">
         <div className="header-text-group">
-          <p className="subtitle-muted">Detailed view of your expenditures</p>
-          <h1 className="title-bold">Monthly Payments</h1>
+          <p className="subtitle-muted">Complete record of all your expenditures</p>
+          <h1 className="title-bold">All Payments</h1>
         </div>
       </div>
 
@@ -313,7 +332,7 @@ const MonthlyPayments = () => {
           <button 
             className="reset-btn-minimal"
             onClick={() => {
-              setDateFilter('1 month');
+              setDateFilter('all time');
               setCardFilter('all');
               setTypeFilter('all');
               setPaidByFilter('all');
@@ -362,8 +381,45 @@ const MonthlyPayments = () => {
         </div>
         
         <div className="table-responsive">
-          <Table columns={columns} data={filteredData} emptyMessage="No payments found." />
+          <Table columns={columns} data={paginatedData} emptyMessage="No payments found." />
         </div>
+
+        {totalPages > 1 && (
+          <div className="pagination-bar">
+            <div className="pagination-info">
+              Showing {(currentPage - 1) * PAGE_SIZE + 1}&ndash;{Math.min(currentPage * PAGE_SIZE, filteredData.length)} of {filteredData.length}
+            </div>
+            <div className="pagination-controls">
+              <button
+                className="pagination-btn"
+                disabled={currentPage === 1}
+                onClick={() => goToPage(currentPage - 1)}
+              >
+                <ChevronLeft size={16} />
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(p => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+                .map((p, idx, arr) => (
+                  <React.Fragment key={p}>
+                    {idx > 0 && arr[idx - 1] !== p - 1 && <span className="pagination-ellipsis">...</span>}
+                    <button
+                      className={`pagination-btn ${p === currentPage ? 'active' : ''}`}
+                      onClick={() => goToPage(p)}
+                    >
+                      {p}
+                    </button>
+                  </React.Fragment>
+                ))}
+              <button
+                className="pagination-btn"
+                disabled={currentPage === totalPages}
+                onClick={() => goToPage(currentPage + 1)}
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
+        )}
       </Card>
     </div>
   );
