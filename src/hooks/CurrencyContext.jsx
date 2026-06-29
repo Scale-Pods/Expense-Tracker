@@ -1,36 +1,29 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import { useWebhookData } from './useWebhookData';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const CurrencyContext = createContext();
 
 export const CurrencyProvider = ({ children }) => {
-  const { data: webhookResponse } = useWebhookData();
   const [currency, setCurrency] = useState(() => {
     const saved = localStorage.getItem('app-currency');
     return saved || 'USD';
   });
+  const [exchangeRate, setExchangeRate] = useState(1);
 
-  // Calculate dynamic exchange rate from real data
-  const exchangeRate = useMemo(() => {
-    if (!webhookResponse?.data || !Array.isArray(webhookResponse.data)) return 1; // leave it at 1 if no data
-    
-    // Find first record with both USD and INR
-    const validRecord = webhookResponse.data.find(exp => {
-      const usd = String(exp["Amount in $ (If Applicable)"] || "0");
-      const inr = String(exp["Amount in ₹"] || "0");
-      return usd !== "0" && inr !== "0" && inr !== "INR Not Available";
-    });
-
-    if (validRecord) {
-      const usdVal = parseFloat(String(validRecord["Amount in $ (If Applicable)"]).replace(/[^0-9.]/g, '')) || 0;
-      const inrVal = parseFloat(String(validRecord["Amount in ₹"]).replace(/[^0-9.]/g, '')) || 0;
-      if (usdVal > 0 && inrVal > 0) {
-        return inrVal / usdVal;
+  const fetchExchangeRate = useCallback(async () => {
+    try {
+      const res = await fetch('https://api.frankfurter.app/latest?from=USD&to=INR');
+      const data = await res.json();
+      if (data?.rates?.INR) {
+        setExchangeRate(data.rates.INR);
       }
+    } catch {
+      // fallback to 1 if API fails
     }
+  }, []);
 
-    return 1; // default to 1 if no dual-currency record found in sheet
-  }, [webhookResponse]);
+  useEffect(() => {
+    fetchExchangeRate();
+  }, [fetchExchangeRate]);
 
   const formats = {
     USD: { symbol: '$', rate: 1, locale: 'en-US' },

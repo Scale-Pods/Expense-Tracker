@@ -198,16 +198,19 @@ const Overview = () => {
         let amt = 0;
         const usdStr = String(exp["Amount in $ (If Applicable)"] || "");
         const inrStr = String(exp["Amount in ₹"] || "");
-        if (inrStr && inrStr !== "0" && inrStr !== "INR Not Available") amt = (parseFloat(inrStr.replace(/[^0-9.]/g, '')) || 0) / exchangeRate;
-        else if (usdStr && usdStr !== "0" && usdStr !== "INR Not Available") amt = parseFloat(usdStr.replace(/[^0-9.]/g, '')) || 0;
+        const hasUsd = usdStr && usdStr !== "0" && usdStr !== "INR Not Available";
+        const hasInr = inrStr && inrStr !== "0" && inrStr !== "INR Not Available";
+
+        if (hasUsd && hasInr) {
+          amt = parseFloat(usdStr.replace(/[^0-9.]/g, '')) || 0;
+        } else if (hasInr) {
+          amt = (parseFloat(inrStr.replace(/[^0-9.]/g, '')) || 0) / exchangeRate;
+        } else if (hasUsd) {
+          amt = parseFloat(usdStr.replace(/[^0-9.]/g, '')) || 0;
+        }
         
         exp.amt = amt; // Fix: Attach amt to exp object
 
-        monthlySpend += amt;
-        annualSpend += amt * 12;
-        const type = exp.Type?.toLowerCase() || '';
-        if (type.includes('recurring') || type.includes('subscription') || type.includes('salary')) recurringCount++;
-        
         let dt = null;
         if (exp.Date) {
           const parts = exp.Date.split('/');
@@ -217,6 +220,14 @@ const Overview = () => {
             validDateExpenses.push({ ...exp, dt, amt });
           }
         }
+
+        const now = new Date();
+        if (dt && dt.getMonth() === now.getMonth() && dt.getFullYear() === now.getFullYear()) {
+          monthlySpend += amt;
+        }
+        annualSpend += amt * 12;
+        const type = exp.Type?.toLowerCase() || '';
+        if (type.includes('recurring') || type.includes('subscription') || type.includes('salary')) recurringCount++;
       });
 
     let parsedReminders = [];

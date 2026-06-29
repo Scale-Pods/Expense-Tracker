@@ -31,9 +31,14 @@ const processExpense = (data, exchangeRate) => {
     let amt = 0;
     const usdStr = String(exp['Amount in $ (If Applicable)'] || '');
     const inrStr = String(exp['Amount in ₹'] || '');
-    if (inrStr && inrStr !== '0' && inrStr !== 'INR Not Available') {
+    const hasUsd = usdStr !== '0' && usdStr !== 'INR Not Available';
+    const hasInr = inrStr !== '0' && inrStr !== 'INR Not Available';
+
+    if (hasUsd && hasInr) {
+      amt = parseFloat(usdStr.replace(/[^0-9.]/g, '')) || 0;
+    } else if (hasInr) {
       amt = (parseFloat(inrStr.replace(/[^0-9.]/g, '')) || 0) / exchangeRate;
-    } else if (usdStr && usdStr !== '0' && usdStr !== 'INR Not Available') {
+    } else if (hasUsd) {
       amt = parseFloat(usdStr.replace(/[^0-9.]/g, '')) || 0;
     }
 

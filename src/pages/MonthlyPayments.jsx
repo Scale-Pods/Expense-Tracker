@@ -31,15 +31,17 @@ const MonthlyPayments = () => {
 
     const displayNames = {};
     return webhookResponse.data.map((exp, idx) => {
+      const usdStr = String(exp["Amount in $ (If Applicable)"] || "0");
       const inrStr = String(exp["Amount in ₹"] || "0");
+      const hasUsd = usdStr !== "0" && usdStr !== "INR Not Available";
+      const hasInr = inrStr !== "0" && inrStr !== "INR Not Available";
       let costVal = 0;
-      if (inrStr !== "0" && inrStr !== "INR Not Available") {
-         costVal = (parseFloat(inrStr.replace(/[^0-9.]/g, '')) || 0) / exchangeRate; 
-      } else {
-         let amtStr = String(exp["Amount in $ (If Applicable)"] || "0");
-         if (amtStr !== "0" && amtStr !== "INR Not Available") {
-            costVal = parseFloat(amtStr.replace(/[^0-9.]/g, '')) || 0;
-         }
+      if (hasUsd && hasInr) {
+        costVal = parseFloat(usdStr.replace(/[^0-9.]/g, '')) || 0;
+      } else if (hasInr) {
+        costVal = (parseFloat(inrStr.replace(/[^0-9.]/g, '')) || 0) / exchangeRate;
+      } else if (hasUsd) {
+        costVal = parseFloat(usdStr.replace(/[^0-9.]/g, '')) || 0;
       }
 
       const rawName = exp["Spent On"] || 'Unknown';

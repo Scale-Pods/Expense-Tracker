@@ -66,12 +66,17 @@ const Reports = () => {
     
     const processedExpenses = expenses.map(exp => {
       let amt = 0;
-      const usd = String(exp["Amount in $ (If Applicable)"] || "0");
-      const inr = String(exp["Amount in ₹"] || "0");
-      if (inr && inr !== "0" && inr !== "INR Not Available") {
-        amt = (parseFloat(inr.replace(/[^0-9.]/g, '')) || 0) / (exchangeRate || 1);
-      } else if (usd && usd !== "0" && usd !== "INR Not Available") {
-        amt = parseFloat(usd.replace(/[^0-9.]/g, '')) || 0;
+      const usdStr = String(exp["Amount in $ (If Applicable)"] || "0");
+      const inrStr = String(exp["Amount in ₹"] || "0");
+      const hasUsd = usdStr !== "0" && usdStr !== "INR Not Available";
+      const hasInr = inrStr !== "0" && inrStr !== "INR Not Available";
+
+      if (hasUsd && hasInr) {
+        amt = parseFloat(usdStr.replace(/[^0-9.]/g, '')) || 0;
+      } else if (hasInr) {
+        amt = (parseFloat(inrStr.replace(/[^0-9.]/g, '')) || 0) / (exchangeRate || 1);
+      } else if (hasUsd) {
+        amt = parseFloat(usdStr.replace(/[^0-9.]/g, '')) || 0;
       }
       let dt = null;
       if (exp.Date) {
