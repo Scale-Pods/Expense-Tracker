@@ -94,7 +94,7 @@ const Reminders = () => {
         let dayOfMonth = item["Due Date"] || item["Day of Month"] || item.DayOfMonth || item.dayOfMonth || item.day || '1';
         if (dayOfMonth === '1' && item.Date && typeof item.Date === 'string') {
           const dateParts = item.Date.split('/');
-          if (dateParts.length >= 1) dayOfMonth = dateParts[0];
+          if (dateParts.length >= 2) dayOfMonth = dateParts[1];
         }
         const description = item.Description || item["Notes & Context"] || item["Spent From"] || item.description || item["Vendor"] || '';
         let amount = '0';

@@ -105,7 +105,7 @@ const Overview = () => {
         let dt = null;
         if (item.Date) {
           const parts = item.Date.split('/');
-          if (parts.length === 3) dt = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+          if (parts.length === 3) dt = new Date(`${parts[2]}-${parts[0]}-${parts[1]}`);
           else dt = new Date(item.Date);
         }
 
@@ -147,7 +147,7 @@ const Overview = () => {
       let dt = null;
       if (exp.Date) {
         const parts = exp.Date.split('/');
-        if (parts.length === 3) dt = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+        if (parts.length === 3) dt = new Date(`${parts[2]}-${parts[0]}-${parts[1]}`);
         else dt = new Date(exp.Date);
       }
       
@@ -214,7 +214,7 @@ const Overview = () => {
         let dt = null;
         if (exp.Date) {
           const parts = exp.Date.split('/');
-          if (parts.length === 3) dt = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+          if (parts.length === 3) dt = new Date(`${parts[2]}-${parts[0]}-${parts[1]}`);
           else dt = new Date(exp.Date);
           if (dt && !isNaN(dt.getTime())) {
             validDateExpenses.push({ ...exp, dt, amt });

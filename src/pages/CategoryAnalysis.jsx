@@ -66,7 +66,7 @@ const processExpense = (data, exchangeRate) => {
       if (exp.Date) {
         try {
           const parts = exp.Date.split('/');
-          const dt = parts.length === 3 ? new Date(`${parts[2]}-${parts[1]}-${parts[0]}`) : new Date(exp.Date);
+          const dt = parts.length === 3 ? new Date(`${parts[2]}-${parts[0]}-${parts[1]}`) : new Date(exp.Date);
           if (!isNaN(dt.getTime())) {
             const monthStr = format(dt, 'MMM yyyy');
             if (!trendMap[monthStr]) trendMap[monthStr] = {};
@@ -118,7 +118,7 @@ const processInvestment = (data) => {
       if (dateStr) {
         try {
           const parts = dateStr.split('/');
-          const dt = parts.length === 3 ? new Date(`${parts[2]}-${parts[1]}-${parts[0]}`) : new Date(dateStr);
+          const dt = parts.length === 3 ? new Date(`${parts[2]}-${parts[0]}-${parts[1]}`) : new Date(dateStr);
           if (!isNaN(dt.getTime())) {
             const monthStr = format(dt, 'MMM yyyy');
             if (!trendMap[monthStr]) trendMap[monthStr] = {};
@@ -171,7 +171,7 @@ const processClient = (data) => {
       if (dateStr) {
         try {
           const parts = dateStr.split('/');
-          const dt = parts.length === 3 ? new Date(`${parts[2]}-${parts[1]}-${parts[0]}`) : new Date(dateStr);
+          const dt = parts.length === 3 ? new Date(`${parts[2]}-${parts[0]}-${parts[1]}`) : new Date(dateStr);
           if (!isNaN(dt.getTime())) {
             const monthStr = format(dt, 'MMM yyyy');
             if (!trendMap[monthStr]) trendMap[monthStr] = {};
@@ -271,12 +271,12 @@ const CategoryAnalysis = () => {
       if (exp.Date || exp.date) {
         const dStr = exp.Date || exp.date;
         const parts = dStr.split('/');
-        if (parts.length === 3) dt = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+        if (parts.length === 3) dt = new Date(`${parts[2]}-${parts[0]}-${parts[1]}`);
         else dt = new Date(dStr);
       } else if (exp["Realised Date"] || exp.realisedDate || exp.RealisedDate) {
         const dStr = exp["Realised Date"] || exp.realisedDate || exp.RealisedDate;
         const parts = dStr.split('/');
-        if (parts.length === 3) dt = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+        if (parts.length === 3) dt = new Date(`${parts[2]}-${parts[0]}-${parts[1]}`);
         else dt = new Date(dStr);
       }
       

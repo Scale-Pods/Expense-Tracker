@@ -171,10 +171,10 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
     if (!dateStr) return '';
     // Already YYYY-MM-DD
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-    // DD/MM/YYYY
+    // MM/DD/YYYY
     const parts = dateStr.split('/');
     if (parts.length === 3) {
-      return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+      return `${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
     }
     return dateStr;
   };

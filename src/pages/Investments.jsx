@@ -123,8 +123,10 @@ const Investments = () => {
 
   const chartData = useMemo(() => {
     const sorted = [...investmentData].sort((a, b) => {
-        const dateA = new Date(a.date.split('/').reverse().join('-'));
-        const dateB = new Date(b.date.split('/').reverse().join('-'));
+        const [mA, dA, yA] = a.date.split('/');
+        const [mB, dB, yB] = b.date.split('/');
+        const dateA = new Date(`${yA}-${mA}-${dA}`);
+        const dateB = new Date(`${yB}-${mB}-${dB}`);
         return dateA - dateB;
     });
     let runningTotal = 0;

@@ -58,7 +58,7 @@ const MonthlyPayments = () => {
         try {
           const parts = exp.Date.split('/');
           if (parts.length === 3) {
-            date = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+            date = new Date(`${parts[2]}-${parts[0]}-${parts[1]}`);
           } else {
             date = new Date(exp.Date);
           }
@@ -78,7 +78,7 @@ const MonthlyPayments = () => {
          card: exp["Paid Via"] || exp.PaidVia || exp.Card || '',
          paidBy: exp["Paid By"] || exp.PaidBy || ''
       };
-    }).filter(s => s.cost > 0 && s.date);
+    }).filter(s => s.cost > 0 && s.date && !isNaN(s.date.getTime()));
   }, [webhookResponse, exchangeRate]);
 
   const filterOptions = useMemo(() => {
@@ -213,9 +213,22 @@ const MonthlyPayments = () => {
     },
     { 
       header: <div className="sort-header" onClick={() => requestSort('date')}>Date <ArrowUpDown size={14} /></div>, 
-      accessor: 'dateStr',
+      accessor: 'date',
       align: 'center',
-      className: 'nowrap'
+      className: 'nowrap',
+      render: (row) => row.date && !isNaN(row.date.getTime()) ? format(row.date, 'MMM dd, yyyy') : <span className="text-muted">—</span>
+    },
+    {
+      header: 'Spent By',
+      accessor: 'paidBy',
+      align: 'center',
+      render: (row) => row.paidBy ? <Badge variant="info">{row.paidBy}</Badge> : <span className="text-muted">—</span>
+    },
+    {
+      header: 'Card',
+      accessor: 'card',
+      align: 'center',
+      render: (row) => row.card ? <span className="text-sm text-secondary">{row.card}</span> : <span className="text-muted">—</span>
     },
     { 
       header: 'Status', 

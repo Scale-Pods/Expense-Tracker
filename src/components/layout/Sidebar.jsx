@@ -8,7 +8,6 @@ import {
   FileText, 
   Receipt,
   Settings, 
-  Database, 
   Bell,
   ChevronDown,
   ChevronUp,
@@ -28,7 +27,7 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
   const location = useLocation();
   const { currentUser, logout } = useAuth();
   const [isSettingsOpen, setIsSettingsOpen] = useState(
-    location.pathname === '/webhook' || location.pathname === '/settings'
+    location.pathname === '/settings'
   );
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(
     location.pathname === '/invoice' || location.pathname === '/invoices'
@@ -134,14 +133,6 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
               >
                 <KeyRound size={18} />
                 <span>Account & Password</span>
-              </NavLink>
-              <NavLink 
-                to="/webhook"
-                className={({ isActive }) => `nav-item sub-item ${isActive ? 'active' : ''}`}
-                onClick={closeSidebar}
-              >
-                <Database size={18} />
-                <span>Webhook Data</span>
               </NavLink>
             </div>
           )}

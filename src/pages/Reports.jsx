@@ -82,7 +82,7 @@ const Reports = () => {
       if (exp.Date) {
         const parts = exp.Date.split('/');
         if (parts.length === 3) {
-          dt = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+          dt = new Date(`${parts[2]}-${parts[0]}-${parts[1]}`);
         } else {
           dt = new Date(exp.Date);
         }
@@ -160,7 +160,7 @@ const Reports = () => {
       const dateStr = item['Realised Date'] || item.realisedDate || '';
       if (dateStr.includes('/')) {
         const p = dateStr.split('/');
-        dt = new Date(`${p[2]}-${p[1]}-${p[0]}`);
+        dt = new Date(`${p[2]}-${p[0]}-${p[1]}`);
       }
       return { ...item, amt: amt / (exchangeRate || 1), dt };
     }).filter(r => r.dt && isWithinInterval(r.dt, { start, end }));

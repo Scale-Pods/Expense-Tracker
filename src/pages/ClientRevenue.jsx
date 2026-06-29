@@ -222,8 +222,8 @@ const ClientRevenue = () => {
     return Object.keys(groups)
       .filter(d => d !== 'N/A' && d.includes('/'))
       .sort((a, b) => {
-        const [dA, mA, yA] = a.split('/');
-        const [dB, mB, yB] = b.split('/');
+        const [mA, dA, yA] = a.split('/');
+        const [mB, dB, yB] = b.split('/');
         return new Date(yA, mA-1, dA) - new Date(yB, mB-1, dB);
       })
       .map(date => ({ date, amount: groups[date] }));
@@ -259,7 +259,7 @@ const ClientRevenue = () => {
       const date = r.realisedDate || '';
       if (date.includes('/')) {
         const parts = date.split('/');
-        const key = `${parts[2]}-${parts[1].padStart(2, '0')}`;
+        const key = `${parts[2]}-${parts[0].padStart(2, '0')}`;
         if (!months[key]) months[key] = { month: key.split('-')[1], revenue: 0, expense: 0 };
         months[key].revenue += r.realisedRevenue;
       }
@@ -268,7 +268,7 @@ const ClientRevenue = () => {
       const date = e.date || '';
       if (date.includes('/')) {
         const parts = date.split('/');
-        const key = `${parts[2]}-${parts[1].padStart(2, '0')}`;
+        const key = `${parts[2]}-${parts[0].padStart(2, '0')}`;
         if (!months[key]) months[key] = { month: key.split('-')[1], revenue: 0, expense: 0 };
         months[key].expense += e.amount;
       }

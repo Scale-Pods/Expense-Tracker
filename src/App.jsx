@@ -7,7 +7,6 @@ import Overview from './pages/Overview';
 import MonthlyPayments from './pages/MonthlyPayments';
 import CategoryAnalysis from './pages/CategoryAnalysis';
 import Reports from './pages/Reports';
-import WebhookData from './pages/WebhookData';
 import Reminders from './pages/Reminders';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
@@ -59,7 +58,6 @@ function App() {
           <Route path="monthly" element={<MonthlyPayments />} />
           <Route path="categories" element={<CategoryAnalysis />} />
           <Route path="reports" element={<Reports />} />
-          <Route path="webhook" element={<WebhookData />} />
           <Route path="reminders" element={<Reminders />} />
           <Route path="settings" element={<Settings />} />
           <Route path="revenue" element={<ClientRevenue />} />
