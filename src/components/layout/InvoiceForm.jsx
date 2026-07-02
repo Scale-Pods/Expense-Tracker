@@ -611,28 +611,27 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
                 ></textarea>
               </div>
             </div>
+
+            <div className="form-actions">
+              <button 
+                type="submit" 
+                className="btn-submit" 
+                disabled={isSubmitting}
+              >
+                <Send size={16} />
+                <span>Generate {formData.type} Invoice</span>
+              </button>
+              <button 
+                type="button" 
+                className="btn-clear-small" 
+                onClick={handleClear}
+                title="Clear all fields"
+              >
+                <RotateCcw size={13} />
+                Clear
+              </button>
+            </div>
           </form>
-          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
-            <button 
-              type="button" 
-              className="btn-submit" 
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              style={{ flex: 1, padding: '0.7rem 1.25rem' }}
-            >
-              <Send size={16} />
-              <span>Generate {formData.type} Invoice</span>
-            </button>
-            <button 
-              type="button" 
-              className="btn-clear-small" 
-              onClick={handleClear}
-              title="Clear all fields"
-            >
-              <RotateCcw size={13} />
-              Clear
-            </button>
-          </div>
         </>
       ) : (
         <BillingQueue onSelectClient={handleClientSelect} />

@@ -1,7 +1,8 @@
 .invoice-form-container {
   width: 100%;
   max-width: 100%;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
   border-radius: 24px;
@@ -77,7 +78,25 @@ form {
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  overflow: hidden;
+}
+
+.form-actions {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  background: var(--color-bg-card);
+  z-index: 1;
+}
+
+.form-actions .btn-submit {
+  flex: 1;
+  padding: 0.7rem 1.25rem;
+}
+
+.form-actions .btn-submit:hover {
+  transform: translateY(-1px);
 }
 
 .invoice-form {

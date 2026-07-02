@@ -312,12 +312,6 @@ const Invoices = () => {
         </div>
       </div>
 
-      {showForm && <div className="form-drawer-overlay" onClick={() => setShowForm(false)} />}
-
-      <button className="mobile-form-toggle" onClick={() => setShowForm(true)} aria-label="Open invoice form">
-        <ChevronLeft size={20} />
-      </button>
-
       <div className={`form-section-sidebar ${showForm ? 'open' : ''}`}>
         <div className="form-drawer-header">
           <div className="drawer-header-left">
@@ -330,6 +324,12 @@ const Invoices = () => {
         </div>
         <InvoiceForm onGenerate={handleGenerate} onUpdate={setLiveData} prefill={prefillData} />
       </div>
+
+      {showForm && <div className="form-drawer-overlay" onClick={() => setShowForm(false)} />}
+
+      <button className="mobile-form-toggle" onClick={() => setShowForm(true)} aria-label="Open invoice form">
+        <ChevronLeft size={20} />
+      </button>
 
       <EmailDialog
         isOpen={showEmailDialog}

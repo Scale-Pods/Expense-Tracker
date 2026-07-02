@@ -1,6 +1,6 @@
 .invoice-generator-page {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr minmax(380px, 520px);
   align-items: start;
   padding: 0;
   width: 100%;
@@ -339,6 +339,12 @@
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-drawer-header {
+  display: none;
 }
 
 /* Custom scrollbar for form sidebar */
@@ -365,6 +371,10 @@
   .invoice-generator-page {
     grid-template-columns: 1fr;
     padding: 0;
+  }
+
+  .form-section-sidebar {
+    max-width: none;
   }
 
   .invoice-paper, .a4-container {
@@ -432,6 +442,10 @@
     background: var(--glass-bg);
     backdrop-filter: blur(12px);
     flex-shrink: 0;
+  }
+  .form-section-sidebar {
+    display: flex;
+    flex-direction: column;
   }
   .drawer-header-left {
     display: flex;
