@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Card from '../components/common/Card';
 import Table from '../components/common/Table';
 import { 
@@ -22,9 +22,13 @@ import {
   Database,
   RefreshCw,
   ArrowRight,
-  IndianRupee
+  IndianRupee,
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle2,
+  X
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+
 import { parseSmartDate } from '../utils/invoiceUtils';
 import { format } from 'date-fns';
 import { 
@@ -46,7 +50,6 @@ import {
 import { useWebhookData } from '../hooks/useWebhookData';
 import { useTheme } from '../hooks/ThemeContext';
 import CubeLoader from '../components/ui/cube-loader';
-import WebhookDataSection from '../components/WebhookDataSection';
 import '../styles/payments.css';
 import '../styles/reminders.css';
 
@@ -66,28 +69,24 @@ const CURRENCIES = [
 
 const ClientRevenue = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortConfig, setSortConfig] = useState({ key: 'clientName', direction: 'desc' });
+  const [sortConfig, setSortConfig] = useState({ key: 'realisedDate', direction: 'desc' });
   const { theme } = useTheme();
   
   // Lifted state for reactive switching
-  const [activeTab, setActiveTab] = useState('Client');
-  const { data: webhookResponse, loading, error, refetch } = useWebhookData(activeTab);
+  const activeTab = 'Client';
+  const { data: webhookResponse, loading, refetch } = useWebhookData(activeTab);
   
   // Also need Expense data for P&L comparison (only used when on Client tab)
   const { data: expenseDataRaw } = useWebhookData('Expense');
+
+  const PAGE_SIZE = 10;
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [activePieIndex, setActivePieIndex] = useState(null);
   const [isAreaHovered, setIsAreaHovered] = useState(false);
   const [hoveredBarKey, setHoveredBarKey] = useState(null);
 
-  const [lastUpdated, setLastUpdated] = useState(new Date());
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    if (webhookResponse) {
-      setLastUpdated(new Date());
-    }
-  }, [webhookResponse]);
 
   const [newRevenue, setNewRevenue] = useState({
     clientName: '',
@@ -102,11 +101,24 @@ const ClientRevenue = () => {
     receivableDate: ''
   });
   const [submitting, setSubmitting] = useState(false);
-  const [confirmation, setConfirmation] = useState({ show: false, title: '', message: '' });
+  const [confirmation, setConfirmation] = useState({ show: false, title: '', message: '', onOk: null });
+
+  useEffect(() => {
+    const income = parseFloat(newRevenue.incomeAmount) || 0;
+    const realised = parseFloat(newRevenue.realisedRevenue) || 0;
+    const autoRecv = Math.max(0, income - realised);
+    setNewRevenue(prev => ({ ...prev, receivables: autoRecv || '' }));
+  }, [newRevenue.incomeAmount, newRevenue.realisedRevenue]);
+
+  // Receivable collection modal state
+  const [collectModal, setCollectModal] = useState(null); // { row } | null
+  const [collectAmount, setCollectAmount] = useState('');
+  const [collecting, setCollecting] = useState(false);
+  const [completingRow, setCompletingRow] = useState(null);
+  const [showRevenueDrawer, setShowRevenueDrawer] = useState(false);
 
   const isClientView = activeTab === 'Client';
   const isInvestmentView = activeTab === 'Investment';
-  const isExpenseView = activeTab === 'Expense';
 
   const [dataTab, setDataTab] = useState('Client');
   useEffect(() => {
@@ -190,6 +202,22 @@ const ClientRevenue = () => {
       data.sort((a, b) => {
         const valA = a[sortConfig.key];
         const valB = b[sortConfig.key];
+
+        if (sortConfig.key === 'realisedDate') {
+          const parseDateValue = (str) => {
+            if (!str) return 0;
+            try {
+              const d = parseSmartDate(str);
+              return isNaN(d.getTime()) ? 0 : d.getTime();
+            } catch {
+              return 0;
+            }
+          };
+          const dateA = parseDateValue(valA);
+          const dateB = parseDateValue(valB);
+          return sortConfig.direction === 'asc' ? dateA - dateB : dateB - dateA;
+        }
+
         if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
         if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
         return 0;
@@ -211,6 +239,13 @@ const ClientRevenue = () => {
     { name: isClientView ? 'Realised' : 'Total', value: stats.totalRealised, color: '#10b981' },
     { name: isClientView ? 'Receivables' : 'Remaining', value: stats.totalReceivables, color: '#f43f5e' }
   ], [stats, isClientView]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredData.length / PAGE_SIZE));
+
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredData.slice(start, start + PAGE_SIZE);
+  }, [filteredData, currentPage]);
 
   const timeData = useMemo(() => {
     const groups = revenueData.reduce((acc, curr) => {
@@ -235,7 +270,6 @@ const ClientRevenue = () => {
     }));
   }, [expenseDataRaw]);
 
-  const totalExpenses = useMemo(() => expenseData.reduce((sum, item) => sum + item.amount, 0), [expenseData]);
 
   const chartConfig = useMemo(() => ({
     gridStroke: theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.1)',
@@ -245,10 +279,7 @@ const ClientRevenue = () => {
     textColor: theme === 'dark' ? '#FFFFFF' : '#111827',
   }), [theme]);
 
-  const profitPieData = useMemo(() => [
-    { name: isClientView ? 'Revenue' : activeTab, value: stats.totalIncome, color: '#14b8a6' },
-    { name: 'Global Expenses', value: totalExpenses, color: '#f59e0b' }
-  ], [stats, totalExpenses, isClientView, activeTab]);
+
 
   const comparisonData = useMemo(() => {
     const months = {};
@@ -294,8 +325,9 @@ const ClientRevenue = () => {
         })
       });
       if (response.ok) {
-        setConfirmation({ show: true, title: 'Revenue Entry Added', message: 'The new revenue data has been successfully synced.' });
         setNewRevenue({ clientName: '', clientEmail: '', clientPhone: '', services: [{ name: '', amount: '' }], currency: 'INR', incomeAmount: '', realisedRevenue: '', realisedDate: '', receivables: '', receivableDate: '' });
+        setShowRevenueDrawer(false);
+        setConfirmation({ show: true, title: 'Revenue Entry Added', message: 'The new revenue data has been successfully synced.', onOk: () => refetch() });
       }
     } catch (error) {
       console.error('Failed to add revenue:', error);
@@ -304,11 +336,99 @@ const ClientRevenue = () => {
     }
   };
 
+  const REV_WEBHOOK = 'https://n8n.srv1010832.hstgr.cloud/webhook/92cd2226-0f40-44fe-969b-03bef4a3e7cb';
+
+  const handleMarkComplete = async (row) => {
+    if (row.receivables <= 0) return;
+    setCompletingRow(row.rowNumber);
+    try {
+      const newRealised = row.realisedRevenue + row.receivables;
+      const res = await fetch(`${REV_WEBHOOK}?action=clientrev`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientName: row.clientName,
+          realisedRevenue: newRealised,
+          receivables: 0,
+          amountCollected: row.receivables,
+          rowNumber: row.rowNumber,
+          timestamp: new Date().toISOString()
+        })
+      });
+      if (res.ok) {
+        setConfirmation({
+          show: true,
+          title: 'Marked Complete!',
+          message: `₹${row.receivables.toLocaleString()} realised from ${row.clientName}. Receivables cleared.`,
+          onOk: () => refetch()
+        });
+      } else {
+        alert('Failed to mark complete. Please try again.');
+      }
+    } catch (err) {
+      console.error('Mark complete error:', err);
+      alert('Network error. Please try again.');
+    } finally {
+      setCompletingRow(null);
+    }
+  };
+
+  const handleOpenCollect = (row) => {
+    setCollectModal(row);
+    setCollectAmount('');
+  };
+
+  const handleCollect = async () => {
+    if (!collectModal) return;
+    const row = collectModal;
+    const amountReceived = collectAmount
+      ? parseFloat(String(collectAmount).replace(/[^0-9.]/g, '')) || 0
+      : row.receivables;
+
+    if (amountReceived <= 0) return;
+
+    const newRealised = row.realisedRevenue + amountReceived;
+    const newReceivables = Math.max(0, row.receivables - amountReceived);
+
+    setCollecting(true);
+    try {
+      const res = await fetch(`${REV_WEBHOOK}?action=clientrev`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientName: row.clientName,
+          realisedRevenue: newRealised,
+          receivables: newReceivables,
+          amountCollected: amountReceived,
+          rowNumber: row.rowNumber,
+          timestamp: new Date().toISOString()
+        })
+      });
+      if (res.ok) {
+        setCollectModal(null);
+        setConfirmation({
+          show: true,
+          title: 'Payment Collected!',
+          message: `₹${amountReceived.toLocaleString()} collected from ${row.clientName}. Realised updated to ₹${newRealised.toLocaleString()}.`,
+          onOk: () => refetch()
+        });
+      } else {
+        alert('Failed to update. Please try again.');
+      }
+    } catch (err) {
+      console.error('Collect error:', err);
+      alert('Network error. Please try again.');
+    } finally {
+      setCollecting(false);
+    }
+  };
+
   const columns = [
     { 
       header: <div className="sort-header" onClick={() => requestSort('clientName')}>{isClientView ? 'Client Name' : 'Description'} <ArrowUpDown size={14} /></div>, 
       accessor: 'clientName',
       align: 'left',
+      style: { width: '38%' },
       render: (row) => (
         <div className="flex flex-col">
           <span className="font-semibold text-main">{row.clientName}</span>
@@ -320,12 +440,14 @@ const ClientRevenue = () => {
       header: <div className="sort-header" onClick={() => requestSort('incomeAmount')}>Value <ArrowUpDown size={14} /></div>, 
       accessor: 'incomeAmount',
       align: 'right',
-      render: (row) => <span className="font-medium text-white/80">₹{row.incomeAmount.toLocaleString()}</span>
+      style: { width: '17%' },
+      render: (row) => <span className="font-medium text-main">₹{row.incomeAmount.toLocaleString()}</span>
     },
     { 
       header: <div className="sort-header" onClick={() => requestSort('realisedRevenue')}>Realised <ArrowUpDown size={14} /></div>, 
       accessor: 'realisedRevenue',
       align: 'right',
+      style: { width: '20%' },
       render: (row) => (
         <div className="flex flex-col">
           <span className="font-bold text-emerald-400">₹{row.realisedRevenue.toLocaleString()}</span>
@@ -337,7 +459,37 @@ const ClientRevenue = () => {
       header: 'Receivables', 
       accessor: 'receivables',
       align: 'right',
-      render: (row) => <span className="font-bold text-rose-400">₹{row.receivables.toLocaleString()}</span>
+      style: { width: '25%' },
+      render: (row) => (
+        <div className="flex items-center justify-end gap-2">
+          <span className="font-bold text-rose-400">₹{row.receivables.toLocaleString()}</span>
+          {row.receivables > 0 && (
+            <div className="flex gap-1">
+              <button
+                className="mark-complete-btn"
+                onClick={(e) => { e.stopPropagation(); handleMarkComplete(row); }}
+                disabled={completingRow === row.rowNumber}
+                title="Mark as fully paid (receivables → 0)"
+              >
+                {completingRow === row.rowNumber ? (
+                  <RefreshCw size={11} className="animate-spin" />
+                ) : (
+                  <CheckCircle size={13} />
+                )}
+                Complete
+              </button>
+              <button
+                className="collect-btn"
+                onClick={(e) => { e.stopPropagation(); handleOpenCollect(row); }}
+                title="Collect partial or custom amount"
+              >
+                <CheckCircle2 size={13} />
+                Collect
+              </button>
+            </div>
+          )}
+        </div>
+      )
     }
   ];
 
@@ -460,7 +612,7 @@ const ClientRevenue = () => {
                         dataKey="value"
                         onMouseEnter={(_, index) => setActivePieIndex(index)}
                         onMouseLeave={() => setActivePieIndex(null)}
-                        label={({ cx, cy, midAngle, innerRadius, outerRadius, value, index }) => {
+                        label={({ cx, cy, midAngle, outerRadius, value, index }) => {
                           if (activePieIndex === index) return null;
                           const RADIAN = Math.PI / 180;
                           const radius = outerRadius + 18;
@@ -550,126 +702,169 @@ const ClientRevenue = () => {
               </div>
             </div>
             <div className="table-responsive">
-              <Table columns={columns} data={filteredData} emptyMessage="No data found." />
+              <Table columns={columns} data={paginatedData} emptyMessage="No data found." />
             </div>
+
+            {totalPages > 1 && (
+              <div className="pagination-bar">
+                <div className="pagination-info">
+                  Showing {(currentPage - 1) * PAGE_SIZE + 1}&ndash;{Math.min(currentPage * PAGE_SIZE, filteredData.length)} of {filteredData.length}
+                </div>
+                <div className="pagination-controls">
+                  <button
+                    className="pagination-btn"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(p => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+                    .map((p, idx, arr) => (
+                      <React.Fragment key={p}>
+                        {idx > 0 && arr[idx - 1] !== p - 1 && <span className="pagination-ellipsis">...</span>}
+                        <button
+                          className={`pagination-btn ${p === currentPage ? 'active' : ''}`}
+                          onClick={() => setCurrentPage(p)}
+                        >
+                          {p}
+                        </button>
+                      </React.Fragment>
+                    ))}
+                  <button
+                    className="pagination-btn"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              </div>
+            )}
           </Card>
         </div>
 
-        <aside className="reminder-sidebar">
-          {isClientView && (
-            <div className="premium-form-card">
-              <div className="form-head">
-                <div className="form-icon" style={{ background: 'rgba(20, 184, 166, 0.1)', color: '#14b8a6' }}>
-                  <TrendingUp size={24} />
-                </div>
-                <div>
-                  <h3>Add Revenue</h3>
-                  <p>New billing record</p>
-                </div>
-              </div>
-              
-              <form onSubmit={handleAddRevenue} className="reminder-form-redesign">
-                <div className="redesign-group">
-                  <label>Client Name</label>
-                  <div className="premium-input-field">
-                    <Briefcase size={16} className="icon-prefix" />
-                    <input 
-                      type="text" 
-                      placeholder="e.g. Acme Corp" 
-                      value={newRevenue.clientName} 
-                      onChange={(e) => setNewRevenue({...newRevenue, clientName: e.target.value})} 
-                      required 
-                    />
-                  </div>
-                </div>
-
-                <div className="redesign-group">
-                  <label>Total Value (INR)</label>
-                  <div className="premium-input-field">
-                    <IndianRupee size={16} className="icon-prefix" />
-                    <input 
-                      type="number" 
-                      placeholder="0.00" 
-                      value={newRevenue.incomeAmount} 
-                      onChange={(e) => setNewRevenue({...newRevenue, incomeAmount: e.target.value})} 
-                      required 
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row-compact" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <div className="redesign-group">
-                    <label>Realised (Paid)</label>
-                    <div className="premium-input-field">
-                      <Wallet size={16} className="icon-prefix text-emerald-400" />
-                      <input 
-                        type="number" 
-                        placeholder="0" 
-                        value={newRevenue.realisedRevenue} 
-                        onChange={(e) => setNewRevenue({...newRevenue, realisedRevenue: e.target.value})} 
-                      />
-                    </div>
-                  </div>
-                  <div className="redesign-group">
-                    <label>Receivables</label>
-                    <div className="premium-input-field">
-                      <Clock size={16} className="icon-prefix text-rose-400" />
-                      <input 
-                        type="number" 
-                        placeholder="0" 
-                        value={newRevenue.receivables} 
-                        onChange={(e) => setNewRevenue({...newRevenue, receivables: e.target.value})} 
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="redesign-group">
-                  <label>Realised Date</label>
-                  <div className="premium-input-field">
-                    <Calendar size={16} className="icon-prefix" />
-                    <input 
-                      type="date" 
-                      value={newRevenue.realisedDate} 
-                      onChange={(e) => setNewRevenue({...newRevenue, realisedDate: e.target.value})} 
-                      style={{ paddingLeft: '40px' }}
-                    />
-                  </div>
-                </div>
-
-                <div className="redesign-group">
-                  <label>Client Email</label>
-                  <div className="premium-input-field">
-                    <Mail size={16} className="icon-prefix" />
-                    <input 
-                      type="email" 
-                      placeholder="client@example.com" 
-                      value={newRevenue.clientEmail} 
-                      onChange={(e) => setNewRevenue({...newRevenue, clientEmail: e.target.value})} 
-                    />
-                  </div>
-                </div>
-
-                <button type="submit" className="btn-submit-redesign" disabled={submitting} style={{ background: '#14b8a6', marginTop: '0.5rem' }}>
-                  {submitting ? <RefreshCw size={20} className="animate-spin" /> : <><Send size={18} /> Add Entry</>}
-                </button>
-              </form>
-            </div>
-          )}
-          <div className="info-card-modern">
-            <div className="info-icon"><Info size={18} /></div>
-            <div className="info-text"><h4>Real-time Sync</h4><p>Data is instantly updated across the platform.</p></div>
-          </div>
-        </aside>
+        {/* Revenue Drawer Toggle Button */}
+        {isClientView && (
+          <button
+            className={`revenue-drawer-toggle ${showRevenueDrawer ? 'open' : ''}`}
+            onClick={() => setShowRevenueDrawer(!showRevenueDrawer)}
+            title="Add Revenue"
+          >
+            {showRevenueDrawer ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          </button>
+        )}
       </div>
 
-      <WebhookDataSection 
-        activeTab={activeTab} 
-        onTabChange={setActiveTab}
-        externalData={webhookResponse}
-        externalLoading={loading}
-        externalRefetch={refetch}
-      />
+      {/* Add Revenue Drawer */}
+      {isClientView && (
+        <div className="revenue-drawer-container">
+          <div className={`revenue-drawer-overlay ${showRevenueDrawer ? 'open' : ''}`} onClick={() => setShowRevenueDrawer(false)} />
+          <div className={`revenue-drawer-panel ${showRevenueDrawer ? 'open' : ''}`}>
+            <div className="drawer-header">
+              <div className="drawer-header-row">
+                <div className="form-icon" style={{ background: 'rgba(20, 184, 166, 0.1)', color: '#14b8a6' }}>
+                  <TrendingUp size={22} />
+                </div>
+                <div className="drawer-header-text">
+                  <span className="drawer-title">Add Revenue</span>
+                  <span className="drawer-subtitle">New billing record</span>
+                </div>
+                <button className="drawer-close-btn" onClick={() => setShowRevenueDrawer(false)}>
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            <form onSubmit={handleAddRevenue} className="drawer-form">
+              <div className="redesign-group">
+                <label>Client Name</label>
+                <div className="premium-input-field">
+                  <Briefcase size={16} className="icon-prefix" />
+                  <input 
+                    type="text" 
+                    placeholder="e.g. Acme Corp" 
+                    value={newRevenue.clientName} 
+                    onChange={(e) => setNewRevenue({...newRevenue, clientName: e.target.value})} 
+                    required 
+                  />
+                </div>
+              </div>
+
+              <div className="redesign-group">
+                <label>Total Value (INR)</label>
+                <div className="premium-input-field">
+                  <IndianRupee size={16} className="icon-prefix" />
+                  <input 
+                    type="number" 
+                    placeholder="0.00" 
+                    value={newRevenue.incomeAmount} 
+                    onChange={(e) => setNewRevenue({...newRevenue, incomeAmount: e.target.value})} 
+                    required 
+                  />
+                </div>
+              </div>
+
+              <div className="form-row-compact" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="redesign-group" style={{ marginBottom: 0 }}>
+                  <label>Realised (Paid)</label>
+                  <div className="premium-input-field">
+                    <Wallet size={16} className="icon-prefix text-emerald-400" />
+                    <input 
+                      type="number" 
+                      placeholder="0" 
+                      value={newRevenue.realisedRevenue} 
+                      onChange={(e) => setNewRevenue({...newRevenue, realisedRevenue: e.target.value})} 
+                    />
+                  </div>
+                </div>
+                <div className="redesign-group" style={{ marginBottom: 0 }}>
+                  <label>Receivables</label>
+                  <div className="premium-input-field">
+                    <Clock size={16} className="icon-prefix text-rose-400" />
+                    <input 
+                      type="number" 
+                      placeholder="0" 
+                      value={newRevenue.receivables} 
+                      onChange={(e) => setNewRevenue({...newRevenue, receivables: e.target.value})} 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="redesign-group">
+                <label>Realised Date</label>
+                <div className="premium-input-field">
+                  <Calendar size={16} className="icon-prefix" />
+                  <input 
+                    type="date" 
+                    value={newRevenue.realisedDate} 
+                    onChange={(e) => setNewRevenue({...newRevenue, realisedDate: e.target.value})} 
+                    style={{ paddingLeft: '40px' }}
+                  />
+                </div>
+              </div>
+
+              <div className="redesign-group">
+                <label>Client Email</label>
+                <div className="premium-input-field">
+                  <Mail size={16} className="icon-prefix" />
+                  <input 
+                    type="email" 
+                    placeholder="client@example.com" 
+                    value={newRevenue.clientEmail} 
+                    onChange={(e) => setNewRevenue({...newRevenue, clientEmail: e.target.value})} 
+                  />
+                </div>
+              </div>
+
+              <button type="submit" className="btn-submit-redesign" disabled={submitting} style={{ background: '#14b8a6', marginTop: '0.25rem' }}>
+                {submitting ? <RefreshCw size={20} className="animate-spin" /> : <><Send size={18} /> Add Entry</>}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {confirmation.show && (
         <div className="modal-overlay">
@@ -677,7 +872,82 @@ const ClientRevenue = () => {
             <div className="modal-icon success"><CheckCircle size={40} /></div>
             <h2>{confirmation.title}</h2>
             <p>{confirmation.message}</p>
-            <button className="btn-modal-ok" onClick={() => setConfirmation({show: false})}>OK</button>
+            <button className="btn-modal-ok" onClick={() => { if (confirmation.onOk) confirmation.onOk(); setConfirmation({show: false, onOk: null}); }}>OK</button>
+          </div>
+        </div>
+      )}
+
+      {/* Collect Receivable Modal */}
+      {collectModal && (
+        <div className="modal-overlay" onClick={() => setCollectModal(null)}>
+          <div className="collect-modal" onClick={e => e.stopPropagation()}>
+            <div className="collect-modal-header">
+              <div className="collect-modal-title-group">
+                <div className="collect-modal-icon">
+                  <CheckCircle2 size={22} />
+                </div>
+                <div>
+                  <h3>Collect Receivable</h3>
+                  <p className="collect-modal-client">{collectModal.clientName}</p>
+                </div>
+              </div>
+              <button className="collect-close-btn" onClick={() => setCollectModal(null)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="collect-modal-summary">
+              <div className="collect-summary-item">
+                <span className="collect-summary-label">Outstanding</span>
+                <span className="collect-summary-value outstanding">₹{collectModal.receivables.toLocaleString()}</span>
+              </div>
+              <div className="collect-summary-item">
+                <span className="collect-summary-label">Already Realised</span>
+                <span className="collect-summary-value realised">₹{collectModal.realisedRevenue.toLocaleString()}</span>
+              </div>
+            </div>
+
+            <div className="collect-custom-input-group">
+              <label className="collect-input-label">Amount Received (₹)</label>
+              <input
+                type="number"
+                className="collect-amount-input"
+                placeholder={`Outstanding: ₹${collectModal.receivables.toLocaleString()}`}
+                value={collectAmount}
+                onChange={e => setCollectAmount(e.target.value)}
+                min="0"
+                max={collectModal.receivables}
+                autoFocus
+              />
+              {collectAmount !== '' ? (
+                <p className="collect-preview-subtext" style={{ marginTop: '10px' }}>
+                  New Realised: <strong>₹{(collectModal.realisedRevenue + (parseFloat(collectAmount) || 0)).toLocaleString()}</strong>
+                  &nbsp;·&nbsp; Remaining: <strong>₹{Math.max(0, collectModal.receivables - (parseFloat(collectAmount) || 0)).toLocaleString()}</strong>
+                </p>
+              ) : (
+                <p className="collect-preview-subtext" style={{ marginTop: '10px' }}>
+                  Leave empty to collect full <strong>₹{collectModal.receivables.toLocaleString()}</strong>
+                  &nbsp;·&nbsp; New Receivable: <strong>₹0</strong>
+                </p>
+              )}
+            </div>
+
+            <div className="collect-modal-actions">
+              <button className="collect-cancel-btn" onClick={() => setCollectModal(null)} disabled={collecting}>
+                Cancel
+              </button>
+              <button
+                className="collect-confirm-btn"
+                onClick={handleCollect}
+                disabled={collecting}
+              >
+                {collecting ? (
+                  <RefreshCw size={16} className="animate-spin" />
+                ) : (
+                  <><CheckCircle2 size={16} /> Confirm Collection</>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

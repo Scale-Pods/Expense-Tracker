@@ -31,6 +31,7 @@ const Table = ({ columns, data, onRowClick, className }) => {
                   <td 
                     key={colIndex} 
                     className={clsx(col.className, col.align && `text-${col.align}`)}
+                    style={col.style}
                   >
                     {col.render ? col.render(row) : row[col.accessor]}
                   </td>
