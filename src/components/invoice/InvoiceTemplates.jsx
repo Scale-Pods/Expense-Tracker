@@ -1,5 +1,6 @@
 import React from 'react';
 import { formatDate, toWords } from '../../utils/invoiceUtils';
+import { getCurrencySymbol, getCurrencyName } from '../../utils/currencyConstants';
 
 export const IndiaTaxInvoice = ({ data }) => {
   if (!data) return null;
@@ -82,7 +83,7 @@ export const IndiaTaxInvoice = ({ data }) => {
             <tr style={{ background: '#1a1a1a', color: 'white' }}>
               <th style={{ padding: '6px 15px', textAlign: 'left', fontSize: '11px', textTransform: 'uppercase' }}>Description of Services</th>
               <th style={{ padding: '6px 15px', textAlign: 'center', fontSize: '11px', textTransform: 'uppercase', width: '100px' }}>SAC</th>
-              <th style={{ padding: '6px 15px', textAlign: 'right', fontSize: '11px', textTransform: 'uppercase', width: '150px' }}>Amount ({data.currency})</th>
+              <th style={{ padding: '6px 15px', textAlign: 'right', fontSize: '11px', textTransform: 'uppercase', width: '150px' }}>Amount ({getCurrencySymbol(data.currency)})</th>
             </tr>
           </thead>
           <tbody>
@@ -114,7 +115,7 @@ export const IndiaTaxInvoice = ({ data }) => {
             )}
             <tr style={{ background: '#f8f9fa' }}>
               <td colSpan="2" style={{ padding: '10px 15px', textAlign: 'right', fontWeight: '800', fontSize: '14px' }}>{showGst ? 'Grand Total (Incl. GST)' : 'Grand Total'}</td>
-              <td style={{ padding: '10px 15px', textAlign: 'right', fontWeight: '800', fontSize: '14px', color: '#1a1a1a' }}>{data.currency} {total.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+              <td style={{ padding: '10px 15px', textAlign: 'right', fontWeight: '800', fontSize: '14px', color: '#1a1a1a' }}>{getCurrencySymbol(data.currency)} {total.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
             </tr>
           </tbody>
         </table>
@@ -125,7 +126,7 @@ export const IndiaTaxInvoice = ({ data }) => {
           <div style={{ padding: '8px', background: '#fafafa', borderLeft: '4px solid #1a1a1a' }}>
             <strong style={{ display: 'block', fontSize: '11px', color: '#666', textTransform: 'uppercase', marginBottom: '3px' }}>Total Amount in Words:</strong>
             <span style={{ fontSize: '13px', fontWeight: '700', textTransform: 'capitalize' }}>
-              {total > 0 ? (data.amountInWords || toWords(total, 'INR')) : "Zero Rupees Only"}
+              {total > 0 ? (data.amountInWords || toWords(total, data.currency)) : "Zero " + getCurrencyName(data.currency) + " Only"}
             </span>
           </div>
         </div>
@@ -215,7 +216,7 @@ export const UAETaxInvoice = ({ data }) => {
           <thead>
             <tr style={{ background: '#1a1a1a', color: 'white' }}>
               <th style={{ padding: '6px 15px', textAlign: 'left', fontSize: '11px', textTransform: 'uppercase' }}>Description of Services</th>
-              <th style={{ padding: '6px 15px', textAlign: 'right', fontSize: '11px', textTransform: 'uppercase', width: '150px' }}>Amount ({data.currency})</th>
+              <th style={{ padding: '6px 15px', textAlign: 'right', fontSize: '11px', textTransform: 'uppercase', width: '150px' }}>Amount ({getCurrencySymbol(data.currency)})</th>
             </tr>
           </thead>
           <tbody>
@@ -230,7 +231,7 @@ export const UAETaxInvoice = ({ data }) => {
             
             <tr style={{ background: '#f8f9fa' }}>
               <td style={{ padding: '10px 15px', textAlign: 'right', fontWeight: '800', fontSize: '14px' }}>Total Invoice Value</td>
-              <td style={{ padding: '10px 15px', textAlign: 'right', fontWeight: '800', fontSize: '14px', color: '#1a1a1a' }}>{data.currency} {total.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+              <td style={{ padding: '10px 15px', textAlign: 'right', fontWeight: '800', fontSize: '14px', color: '#1a1a1a' }}>{getCurrencySymbol(data.currency)} {total.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
             </tr>
           </tbody>
         </table>
@@ -241,7 +242,7 @@ export const UAETaxInvoice = ({ data }) => {
           <div style={{ padding: '8px', background: '#fafafa', borderLeft: '4px solid #1a1a1a' }}>
             <strong style={{ display: 'block', fontSize: '11px', color: '#666', textTransform: 'uppercase', marginBottom: '3px' }}>Total Amount in Words:</strong>
             <span style={{ fontSize: '13px', fontWeight: '700', textTransform: 'capitalize' }}>
-              {total > 0 ? (data.amountInWords || toWords(total, 'AED')) : "Zero UAE Dirhams Only"}
+              {total > 0 ? (data.amountInWords || toWords(total, data.currency)) : "Zero " + getCurrencyName(data.currency) + " Only"}
             </span>
           </div>
         </div>
@@ -318,27 +319,27 @@ export const IndiaProformaInvoice = ({ data }) => {
           <div style={{ marginTop: '10px', padding: '15px', background: '#f9f9f9', borderRadius: '5px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
               <span>Subtotal:</span>
-              <strong>{data.currency} {subtotal.toLocaleString()}</strong>
+              <strong>{getCurrencySymbol(data.currency)} {subtotal.toLocaleString()}</strong>
             </div>
             {showGst && (
               <>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '12px', color: '#666' }}>
                   <span>CGST (9%):</span>
-                  <span>{data.currency} {cgst.toLocaleString()}</span>
+                  <span>{getCurrencySymbol(data.currency)} {cgst.toLocaleString()}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '12px', color: '#666' }}>
                   <span>SGST (9%):</span>
-                  <span>{data.currency} {sgst.toLocaleString()}</span>
+                  <span>{getCurrencySymbol(data.currency)} {sgst.toLocaleString()}</span>
                 </div>
               </>
             )}
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontWeight: 'bold', borderTop: '1px solid #ddd', paddingTop: '5px' }}>
               <span>Total Amount:</span>
-              <strong>{data.currency} {total.toLocaleString()}</strong>
+              <strong>{getCurrencySymbol(data.currency)} {total.toLocaleString()}</strong>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', color: '#d32f2f' }}>
               <span>Balance Due:</span>
-              <strong>{data.currency} {(total - (Number(data.amountPaid) || 0)).toLocaleString()}</strong>
+              <strong>{getCurrencySymbol(data.currency)} {(total - (Number(data.amountPaid) || 0)).toLocaleString()}</strong>
             </div>
           </div>
         </div>
@@ -349,7 +350,7 @@ export const IndiaProformaInvoice = ({ data }) => {
           <tr style={{ background: '#333', color: '#fff' }}>
             <th style={{ padding: '12px', textAlign: 'left' }}>Description</th>
             <th style={{ padding: '12px', textAlign: 'center', width: '100px' }}>SAC</th>
-            <th style={{ padding: '12px', textAlign: 'right', width: '150px' }}>Amount ({data.currency})</th>
+            <th style={{ padding: '12px', textAlign: 'right', width: '150px' }}>Amount ({getCurrencySymbol(data.currency)})</th>
           </tr>
         </thead>
         <tbody>
@@ -364,23 +365,23 @@ export const IndiaProformaInvoice = ({ data }) => {
           ))}
           <tr>
             <td colSpan="2" style={{ padding: '8px 12px', textAlign: 'right', color: '#666' }}>{showGst ? 'Subtotal (Taxable Value)' : 'Total Amount'}</td>
-            <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: '600' }}>{data.currency} {subtotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+            <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: '600' }}>{getCurrencySymbol(data.currency)} {subtotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
           </tr>
           {showGst && (
             <>
               <tr>
                 <td colSpan="2" style={{ padding: '5px 12px', textAlign: 'right', color: '#666' }}>CGST (9%)</td>
-                <td style={{ padding: '5px 12px', textAlign: 'right', fontWeight: '600' }}>{data.currency} {cgst.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                <td style={{ padding: '5px 12px', textAlign: 'right', fontWeight: '600' }}>{getCurrencySymbol(data.currency)} {cgst.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
               </tr>
               <tr>
                 <td colSpan="2" style={{ padding: '5px 12px', textAlign: 'right', color: '#666', borderBottom: '1px solid #eee' }}>SGST (9%)</td>
-                <td style={{ padding: '5px 12px', textAlign: 'right', fontWeight: '600', borderBottom: '1px solid #eee' }}>{data.currency} {sgst.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                <td style={{ padding: '5px 12px', textAlign: 'right', fontWeight: '600', borderBottom: '1px solid #eee' }}>{getCurrencySymbol(data.currency)} {sgst.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
               </tr>
             </>
           )}
           <tr>
             <td colSpan="2" style={{ padding: '12px', textAlign: 'right', fontWeight: 'bold', fontSize: '16px' }}>{showGst ? 'Grand Total (Incl. GST)' : 'Grand Total'}</td>
-            <td style={{ padding: '12px', textAlign: 'right', fontWeight: '800', fontSize: '18px', background: '#f9f9f9' }}>{data.currency} {total.toLocaleString()}</td>
+            <td style={{ padding: '12px', textAlign: 'right', fontWeight: '800', fontSize: '18px', background: '#f9f9f9' }}>{getCurrencySymbol(data.currency)} {total.toLocaleString()}</td>
           </tr>
         </tbody>
       </table>
@@ -388,7 +389,7 @@ export const IndiaProformaInvoice = ({ data }) => {
       <div className="terms-section" style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
         <div style={{ marginBottom: '30px', padding: '15px', background: '#f9f9f9', borderRadius: '5px', borderLeft: '5px solid #333' }}>
           <strong style={{ display: 'block', fontSize: '11px', color: '#666', textTransform: 'uppercase', marginBottom: '5px' }}>Amount in Words:</strong>
-          <span style={{ fontSize: '14px', fontWeight: 'bold' }}>{toWords(total, 'INR')}</span>
+          <span style={{ fontSize: '14px', fontWeight: 'bold' }}>{toWords(total, data.currency)}</span>
         </div>
 
         <div style={{ display: 'flex', gap: '30px' }}>
@@ -440,7 +441,7 @@ export const UAEProformaInvoice = ({ data }) => {
                 <tr><td style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 'bold', textAlign: 'right' }}>Due Date:</td><td style={{ padding: '4px 8px', fontSize: '13px', textAlign: 'left' }}>{formatDate(data.dueDate)}</td></tr>
                 <tr style={{ color: '#d32f2f', background: 'rgba(211, 47, 47, 0.05)' }}>
                   <td style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 'bold', textAlign: 'right' }}>Balance Due:</td>
-                  <td style={{ padding: '4px 8px', fontSize: '13px', textAlign: 'left', fontWeight: '800' }}>{data.currency} {(total - (Number(data.amountPaid) || 0)).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                  <td style={{ padding: '4px 8px', fontSize: '13px', textAlign: 'left', fontWeight: '800' }}>{getCurrencySymbol(data.currency)} {(total - (Number(data.amountPaid) || 0)).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
                 </tr>
               </tbody>
             </table>
@@ -475,8 +476,8 @@ export const UAEProformaInvoice = ({ data }) => {
                   <strong>{item.description}</strong>
                 </td>
                 <td style={{ padding: '12px', fontSize: '13px', verticalAlign: 'top' }}>1</td>
-                <td style={{ padding: '12px', fontSize: '13px', verticalAlign: 'top' }}>{data.currency} {Number(item.amount).toLocaleString()}</td>
-                <td style={{ padding: '12px', fontSize: '13px', verticalAlign: 'top', textAlign: 'right', fontWeight: '700' }}>{data.currency} {Number(item.amount).toLocaleString()}</td>
+                <td style={{ padding: '12px', fontSize: '13px', verticalAlign: 'top' }}>{getCurrencySymbol(data.currency)} {Number(item.amount).toLocaleString()}</td>
+                <td style={{ padding: '12px', fontSize: '13px', verticalAlign: 'top', textAlign: 'right', fontWeight: '700' }}>{getCurrencySymbol(data.currency)} {Number(item.amount).toLocaleString()}</td>
               </tr>
             ))}
           </tbody>
@@ -499,7 +500,7 @@ export const UAEProformaInvoice = ({ data }) => {
             <tbody>
               <tr className="total-row" style={{ backgroundColor: '#f8f8f8', fontWeight: 'bold', border: '1px solid #eee' }}>
                 <td style={{ padding: '12px', fontSize: '14px' }}>Total:</td>
-                <td style={{ textAlign: 'right', padding: '12px', fontSize: '14px' }}>{data.currency} {total.toLocaleString()}</td>
+                <td style={{ textAlign: 'right', padding: '12px', fontSize: '14px' }}>{getCurrencySymbol(data.currency)} {total.toLocaleString()}</td>
               </tr>
             </tbody>
           </table>
@@ -511,7 +512,7 @@ export const UAEProformaInvoice = ({ data }) => {
           <div style={{ padding: '8px', background: '#fafafa', borderLeft: '4px solid #1a1a1a' }}>
             <strong style={{ display: 'block', fontSize: '11px', color: '#666', textTransform: 'uppercase', marginBottom: '3px' }}>Total Amount in Words:</strong>
             <span style={{ fontSize: '13px', fontWeight: '700', textTransform: 'capitalize' }}>
-              {total > 0 ? (data.amountInWords || toWords(total, 'AED')) : "Zero UAE Dirhams Only"}
+              {total > 0 ? (data.amountInWords || toWords(total, data.currency)) : "Zero " + getCurrencyName(data.currency) + " Only"}
             </span>
           </div>
         </div>
@@ -536,13 +537,20 @@ export const UAEProformaInvoice = ({ data }) => {
   );
 };
 
+
+
 export const InvoicePaper = ({ data }) => {
   if (!data) return null;
-  const isIndia = (data.region || 'India').toLowerCase() === 'india';
+  const region = (data.region || 'United States').toLowerCase();
+  const isIndia = region === 'india';
+  const isUAE = region === 'uae';
   const isTax = (data.type || 'Proforma').toLowerCase() === 'tax';
 
   if (isIndia && isTax) return <IndiaTaxInvoice data={data} />;
   if (isIndia && !isTax) return <IndiaProformaInvoice data={data} />;
-  if (!isIndia && isTax) return <UAETaxInvoice data={data} />;
+  if (isUAE && isTax) return <UAETaxInvoice data={data} />;
+  if (isUAE && !isTax) return <UAEProformaInvoice data={data} />;
+  // For all other regions, use generic proforma or tax layout
+  if (isTax) return <UAETaxInvoice data={data} />;
   return <UAEProformaInvoice data={data} />;
 };

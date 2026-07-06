@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import { reconstructInvoiceData } from '../utils/invoiceUtils';
+import { getCurrencySymbol } from '../utils/currencyConstants';
 import { InvoicePaper } from '../components/invoice/InvoiceTemplates';
 import EmailDialog from '../components/invoice/EmailDialog';
 import CustomSelect from '../components/common/CustomSelect';
@@ -365,7 +366,7 @@ const AllInvoices = () => {
                     <td className="td-email">{inv.email || '—'}</td>
                     <td><span className={`ai-badge ${inv.type?.toLowerCase() === 'tax' ? 'badge-tax' : inv.type?.toLowerCase() === 'proforma' ? 'badge-proforma' : ''}`}>{inv.type || '—'}</span></td>
                     <td className="td-amount">
-                      <span className="currency">{inv.currency === 'AED' ? 'AED' : '₹'}</span>
+                      <span className="currency">{getCurrencySymbol(inv.currency || 'INR')}</span>
                       {Number(inv.amount || 0).toLocaleString()}
                     </td>
                     <td>

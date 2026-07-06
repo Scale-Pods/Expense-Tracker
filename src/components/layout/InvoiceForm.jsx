@@ -3,6 +3,7 @@ import { Send, RotateCcw, Globe, Building2, Calendar, Mail, FileText, FileCheck,
 import '../../styles/invoice-form.css';
 import BillingQueue from './BillingQueue';
 import { parseSmartDate } from '../../utils/invoiceUtils';
+import { REGIONS, CURRENCIES, getDefaultCurrency, getCurrencySymbol } from '../../utils/currencyConstants';
 
 const CACHE_KEY = 'invoice_form_cache';
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour
@@ -159,13 +160,11 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
   }, [formData.items, formData.amountPaid]);
 
   React.useEffect(() => {
-    // Only auto-update currency if it's currently a default one that doesn't match the region
-    if (formData.region === 'UAE' && formData.currency === 'INR') {
-      setFormData(prev => ({ ...prev, currency: 'AED' }));
-    } else if (formData.region === 'India' && formData.currency === 'AED') {
-      setFormData(prev => ({ ...prev, currency: 'INR' }));
+    const defaultCurrency = getDefaultCurrency(formData.region);
+    if (formData.currency !== defaultCurrency) {
+      setFormData(prev => ({ ...prev, currency: defaultCurrency }));
     }
-  }, [formData.region, formData.currency]);
+  }, [formData.region]);
 
   // Convert DD/MM/YYYY to YYYY-MM-DD for HTML date inputs
   const convertDate = (dateStr) => {
@@ -186,11 +185,11 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
     const rawCurrency = (clientData['Currency'] || 'INR').toString().toUpperCase().trim();
     // Normalize currency to supported values
     let currency = 'INR';
-    if (rawCurrency.includes('AED')) currency = 'AED';
-    else if (rawCurrency.includes('USD')) currency = 'USD';
-    else currency = 'INR';
+    const matchedCurrency = CURRENCIES.find(c => rawCurrency.includes(c.code));
+    if (matchedCurrency) currency = matchedCurrency.code;
 
-    const region = currency === 'AED' ? 'UAE' : 'India';
+    const matchedRegion = REGIONS.find(r => r.currency === currency);
+    const region = matchedRegion ? matchedRegion.name : 'United States';
     
     const incomeAmount = Number(clientData['Income Amount']) || 0;
     const receivables = Number(clientData['Receivables']) || 0;
@@ -281,23 +280,11 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
                 <Globe size={18} />
                 <span>Region</span>
               </div>
-              <div className={`region-slider ${formData.region}`}>
-                <button 
-                  type="button" 
-                  className={formData.region === 'India' ? 'active' : ''}
-                  onClick={() => setFormData(prev => ({ ...prev, region: 'India' }))}
-                >
-                  India
-                </button>
-                <button 
-                  type="button" 
-                  className={formData.region === 'UAE' ? 'active' : ''}
-                  onClick={() => setFormData(prev => ({ ...prev, region: 'UAE' }))}
-                >
-                  UAE
-                </button>
-                <div className="slider-thumb"></div>
-              </div>
+              <select name="region" value={formData.region} onChange={handleChange} style={{ width: '160px' }}>
+                {REGIONS.map(r => (
+                  <option key={r.name} value={r.name}>{r.name} ({getCurrencySymbol(r.currency)})</option>
+                ))}
+              </select>
             </div>
 
             <div className="form-section compact">
@@ -501,9 +488,9 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
                 <div className="form-group flex-1">
                   <label>Currency</label>
                   <select name="currency" value={formData.currency} onChange={handleChange}>
-                    <option value="USD">USD ($)</option>
-                    <option value="INR">INR (₹)</option>
-                    <option value="AED">AED (د.إ)</option>
+                    {CURRENCIES.map(c => (
+                      <option key={c.code} value={c.code}>{c.code} ({c.symbol})</option>
+                    ))}
                   </select>
                 </div>
                 <div className="form-group flex-1">
@@ -594,7 +581,7 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
                 <input 
                   type="text" 
                   name="amountInWords" 
-                  placeholder={formData.region === 'India' ? "Rupees Five Thousand Only" : "Five Thousand Dirhams Only"} 
+                  placeholder={formData.region === 'India' ? "Rupees Five Thousand Only" : formData.region === 'UAE' ? "Five Thousand Dirhams Only" : "Five Thousand Only"} 
                   value={formData.amountInWords}
                   onChange={handleChange}
                 />

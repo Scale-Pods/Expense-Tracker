@@ -1,6 +1,7 @@
 /**
  * Shared invoice utility functions used by both Create Invoice and All Invoices pages.
  */
+import { getDefaultCurrency, getCurrencyName } from './currencyConstants';
 
 export const parseSmartDate = (dateStr) => {
   if (!dateStr) return null;
@@ -78,14 +79,18 @@ export const toWords = (num, currency = 'INR') => {
 
   const whole = Math.floor(num);
   const fraction = Math.round((num - whole) * 100);
+  const currencyName = getCurrencyName(currency);
   
   let res = '';
   if (currency === 'INR') {
     res = convertIndia(whole) + 'Rupees ';
     if (fraction > 0) res += 'and ' + convertIndia(fraction) + 'Paise ';
+  } else if (currency === 'AED') {
+    res = convertInternational(whole) + 'UAE Dirhams ';
+    if (fraction > 0) res += 'and ' + convertInternational(fraction) + 'Fils ';
   } else {
-    res = convertInternational(whole) + (currency === 'AED' ? 'UAE Dirhams ' : currency + ' ');
-    if (fraction > 0) res += 'and ' + convertInternational(fraction) + (currency === 'AED' ? 'Fils ' : '');
+    res = convertInternational(whole) + currencyName + ' ';
+    if (fraction > 0) res += 'and ' + convertInternational(fraction) + 'Cents ';
   }
   return res + 'Only';
 };
@@ -125,7 +130,7 @@ export const reconstructInvoiceData = (row) => {
 
   // Determine type and region
   let type = row.type || 'Proforma';
-  let region = row.region || 'India';
+  let region = row.region || 'United States';
   if (row.invoiceType) {
     const it = row.invoiceType.toLowerCase();
     if (it.includes('tax')) type = 'Tax';
@@ -140,7 +145,7 @@ export const reconstructInvoiceData = (row) => {
     region,
     name,
     email: row.email || '',
-    currency: row.currency || (region === 'UAE' ? 'AED' : 'INR'),
+    currency: row.currency || getDefaultCurrency(region),
     amount: String(row.amount || '0'),
     amountPaid: String(row.amountPaid || '0'),
     dueAmount: String(row.dueAmount || '0'),
