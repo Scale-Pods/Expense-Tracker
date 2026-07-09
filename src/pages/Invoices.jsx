@@ -158,6 +158,7 @@ const Invoices = () => {
       dueAmount: liveData.dueAmount || '',
       invoiceDate: liveData.invoiceDate || '',
       dueDate: liveData.dueDate || '',
+      invoiceNo: liveData.invoiceNo || '',
       paymentTerm: liveData.paymentTerm || '',
       items: itemsJson,
       clientGstin: liveData.clientGstin || '',

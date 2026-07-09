@@ -34,7 +34,7 @@ export const IndiaTaxInvoice = ({ data }) => {
         <div style={{ flex: '0 1 280px', minWidth: '200px', padding: '10px', background: '#fafafa', fontSize: '12px', lineHeight: '1.2' }}>
           <div style={{ marginBottom: '10px' }}>
             <span style={{ color: '#666', textTransform: 'uppercase', fontSize: '10px', fontWeight: '700', display: 'block' }}>Invoice Number</span>
-            <strong style={{ fontSize: '13px' }}>#{showGst ? 'TX' : 'INV'}//{(data.invoiceDate || "").split('-').join('')}</strong>
+            <strong style={{ fontSize: '13px' }}>{data.invoiceNo || `#${showGst ? 'TX' : 'INV'}//${(data.invoiceDate || "").split('-').join('')}`}</strong>
           </div>
           <div style={{ marginBottom: '10px' }}>
             <span style={{ color: '#666', textTransform: 'uppercase', fontSize: '10px', fontWeight: '700', display: 'block' }}>Invoice Date</span>
@@ -173,7 +173,7 @@ export const UAETaxInvoice = ({ data }) => {
         <div style={{ flex: '0 1 280px', minWidth: '200px', padding: '10px', background: '#fafafa', fontSize: '12px', lineHeight: '1.2' }}>
           <div style={{ marginBottom: '10px' }}>
             <span style={{ color: '#666', textTransform: 'uppercase', fontSize: '10px', fontWeight: '700', display: 'block' }}>Invoice Number</span>
-            <strong style={{ fontSize: '13px' }}>#TX/{data.name?.split('\n')[0].toUpperCase().replace(/\s+/g, '')}/{(data.invoiceDate || "").split('-').join('')}</strong>
+            <strong style={{ fontSize: '13px' }}>{data.invoiceNo || `#TX/${data.name?.split('\n')[0].toUpperCase().replace(/\s+/g, '')}/${(data.invoiceDate || "").split('-').join('')}`}</strong>
           </div>
           <div style={{ marginBottom: '10px' }}>
             <span style={{ color: '#666', textTransform: 'uppercase', fontSize: '10px', fontWeight: '700', display: 'block' }}>Invoice Date</span>
@@ -295,7 +295,7 @@ export const IndiaProformaInvoice = ({ data }) => {
         </div>
         <div style={{ textAlign: 'right' }}>
           <h1 style={{ margin: '0 0 10px 0', fontSize: '28px', color: '#1a1a1a', textTransform: 'uppercase', fontWeight: '800' }}>Proforma Invoice</h1>
-          <p style={{ margin: '5px 0', fontWeight: 'bold' }}>#SPx{data.name?.split('\n')[0].replace(/\s+/g, '')}-{(formatDate(data.invoiceDate)).replace(/-/g, '.')}</p>
+          <p style={{ margin: '5px 0', fontWeight: 'bold' }}>{data.invoiceNo || `#SPx${data.name?.split('\n')[0].replace(/\s+/g, '')}-${(formatDate(data.invoiceDate)).replace(/-/g, '.')}`}</p>
           <div style={{ marginTop: '10px' }}>
             <strong>Date:</strong> {formatDate(data.invoiceDate)}<br />
             <strong>Due Date:</strong> {formatDate(data.dueDate)}<br />
@@ -434,7 +434,7 @@ export const UAEProformaInvoice = ({ data }) => {
         
         <div className="invoice-details" style={{ flex: '0 1 auto', textAlign: 'right', minWidth: '200px' }}>
           <h2 style={{ margin: 0, color: '#444', textTransform: 'uppercase', fontSize: '20px', fontWeight: '800' }}>Proforma Invoice</h2>
-          <p style={{ margin: '5px 0', fontSize: '13px', fontWeight: '600', color: '#666' }}>#SPx{data.name?.split('\n')[0].replace(/\s+/g, '')}-{(formatDate(data.invoiceDate)).replace(/-/g, '.')}</p>
+          <p style={{ margin: '5px 0', fontSize: '13px', fontWeight: '600', color: '#666' }}>{data.invoiceNo || `#SPx${data.name?.split('\n')[0].replace(/\s+/g, '')}-${(formatDate(data.invoiceDate)).replace(/-/g, '.')}`}</p>
           <div style={{ marginTop: '10px', display: 'inline-block' }}>
             <table className="details-table" style={{ borderCollapse: 'collapse', marginLeft: 'auto' }}>
               <tbody>

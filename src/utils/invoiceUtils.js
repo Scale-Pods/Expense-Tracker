@@ -152,6 +152,7 @@ export const reconstructInvoiceData = (row) => {
     items,
     dueDate: row.dueDate || '',
     invoiceDate: row.invoiceDate || '',
+    invoiceNo: row.invoiceNo || '',
     terms: row.terms || '',
     accHolder: row.accHolder || 'SCALEPODS LLP',
     bankName: row.bankName || 'HDFC Bank Ltd',

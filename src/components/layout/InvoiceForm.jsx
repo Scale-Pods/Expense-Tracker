@@ -23,6 +23,7 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
     items: [{ description: '', amount: '' }],
     dueDate: '',
     invoiceDate: '',
+    invoiceNo: '',
     email: '',
     extraEmails: [],
     terms: '1. Currency & Charges: Payments must be made in the currency mentioned. Any additional bank charges, conversion fees, or transaction fees are to be borne by the client.\n2. Scope of Work: The services covered under this invoice are as per the agreed discussion.\n3. Non-Refundable: Payments made are non-refundable unless otherwise agreed in writing.\n4. Confidentiality: Both parties agree to maintain the confidentiality of any business or project-related information shared during the engagement.\n5. Intellectual Property: All deliverables and work products remain the property of ScalePods LLP until full payment is received.\n6. Termination: Engagement can be terminated based on terms mentioned in the Service Level Agreement (SLA).\n7. Support: For any queries regarding this invoice, please contact info@scalepods.co',
@@ -336,6 +337,16 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
                     />
                   </div>
                 )}
+                <div className="form-group flex-1">
+                  <label><FileText size={16} /> Invoice No.</label>
+                  <input 
+                    type="text" 
+                    name="invoiceNo" 
+                    placeholder="INV-001" 
+                    value={formData.invoiceNo}
+                    onChange={handleChange}
+                  />
+                </div>
               </div>
 
               <div className="form-section compact">
