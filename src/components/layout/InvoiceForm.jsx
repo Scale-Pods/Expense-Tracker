@@ -5,7 +5,7 @@ import BillingQueue from './BillingQueue';
 import { parseSmartDate } from '../../utils/invoiceUtils';
 import { REGIONS, CURRENCIES, getDefaultCurrency, getCurrencySymbol } from '../../utils/currencyConstants';
 
-const CACHE_KEY = 'invoice_form_cache';
+const CACHE_KEY = 'invoice_form_cache_v2';
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour
 
 const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
@@ -32,6 +32,7 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
     ifsc: 'HDFC0000060',
     branch: 'FORT',
     accType: 'Current Account',
+    swiftCode: 'HDFCINBB',
     myGstin: '27AFUFS0352J1ZI',
     clientGstin: '',
     clientState: 'Maharashtra',
@@ -548,6 +549,15 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
                       <input type="text" name="branch" value={formData.branch} onChange={handleChange} />
                     </div>
                   </div>
+                  {formData.region !== 'India' && (
+                    <div className="form-row-flex">
+                      <div className="form-group flex-1">
+                        <label>SWIFT Code</label>
+                        <input type="text" name="swiftCode" value={formData.swiftCode} onChange={handleChange} placeholder="HDFCINBB" />
+                      </div>
+                      <div className="form-group flex-1" />
+                    </div>
+                  )}
                   {formData.region === 'India' && (
                     <div className="form-group" style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', gridColumn: '1 / -1' }}>
                       <div style={{ flex: 1 }}>

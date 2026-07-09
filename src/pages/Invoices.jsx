@@ -169,6 +169,7 @@ const Invoices = () => {
       bankName: liveData.bankName || '',
       accNo: liveData.accNo || '',
       ifsc: liveData.ifsc || '',
+      swiftCode: liveData.swiftCode || '',
       branch: liveData.branch || '',
       accType: liveData.accType || '',
       terms: liveData.terms || '',

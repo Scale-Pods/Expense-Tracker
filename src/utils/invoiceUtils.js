@@ -158,6 +158,7 @@ export const reconstructInvoiceData = (row) => {
     accNo: String(row.accNo || '50200119456950'),
     ifsc: row.ifsc || 'HDFC0000060',
     branch: row.branch || 'FORT',
+    swiftCode: row.swiftCode || 'HDFCINBB',
     accType: row.accType || 'Current Account',
     myGstin: row.myGstin || '27AFUFS0352J1ZI',
     clientGstin: String(row.clientGstin || ''),
