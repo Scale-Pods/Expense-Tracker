@@ -42,6 +42,8 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
     sacCode: '998313',
     showGst: true,
     showMyGst: true,
+    lutEnabled: false,
+    lutArn: 'AD270326114883Z',
     originalDetails: null
   };
 
@@ -55,7 +57,9 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
           if (data.myGstin === '27AALFS4567J1Z3' || data.myGstin === '27AFUFS0352J1Z1') {
             data.myGstin = '27AFUFS0352J1ZI';
           }
-          return data;
+          // Merge with initialData so any new fields added after the cache was
+          // written (e.g. lutEnabled, lutArn) receive their correct defaults.
+          return { ...initialData, ...data };
         }
       } catch (e) {
         console.error('Failed to parse cached invoice data', e);
@@ -289,27 +293,65 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
               </select>
             </div>
 
+            {formData.region === 'India' && (
+              <div className="form-section compact">
+                <div className="section-title">
+                  <FileCheck size={18} />
+                  <span>GST (18%)</span>
+                </div>
+                <div className={`region-slider type-slider gst-slider ${formData.showGst ? 'on' : 'off'}`}>
+                  <button 
+                    type="button" 
+                    className={formData.showGst ? 'active' : ''}
+                    onClick={() => setFormData(prev => ({ ...prev, showGst: true }))}
+                  >
+                    On
+                  </button>
+                  <button 
+                    type="button" 
+                    className={!formData.showGst ? 'active' : ''}
+                    onClick={() => setFormData(prev => ({ ...prev, showGst: false }))}
+                  >
+                    Off
+                  </button>
+                  <div className="slider-thumb"></div>
+                </div>
+              </div>
+            )}
+
             <div className="form-section compact">
               <div className="section-title">
                 <FileCheck size={18} />
-                <span>GST (18%)</span>
+                <span>LUT Export</span>
               </div>
-              <div className={`region-slider type-slider gst-slider ${formData.showGst ? 'on' : 'off'}`}>
-                <button 
-                  type="button" 
-                  className={formData.showGst ? 'active' : ''}
-                  onClick={() => setFormData(prev => ({ ...prev, showGst: true }))}
-                >
-                  On
-                </button>
-                <button 
-                  type="button" 
-                  className={!formData.showGst ? 'active' : ''}
-                  onClick={() => setFormData(prev => ({ ...prev, showGst: false }))}
-                >
-                  Off
-                </button>
-                <div className="slider-thumb"></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div className={`region-slider type-slider gst-slider ${formData.lutEnabled ? 'on' : 'off'}`}>
+                  <button
+                    type="button"
+                    className={formData.lutEnabled ? 'active' : ''}
+                    onClick={() => setFormData(prev => ({ ...prev, lutEnabled: true }))}
+                  >
+                    On
+                  </button>
+                  <button
+                    type="button"
+                    className={!formData.lutEnabled ? 'active' : ''}
+                    onClick={() => setFormData(prev => ({ ...prev, lutEnabled: false }))}
+                  >
+                    Off
+                  </button>
+                  <div className="slider-thumb"></div>
+                </div>
+                {formData.lutEnabled && (
+                  <input
+                    type="text"
+                    name="lutArn"
+                    placeholder="LUT ARN No."
+                    value={formData.lutArn}
+                    onChange={handleChange}
+                    style={{ flex: 1, padding: '0.4rem 0.75rem', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'var(--color-bg-subtle)', color: 'var(--color-text-main)', fontSize: '0.8rem' }}
+                  />
+                )}
               </div>
             </div>
 
@@ -515,7 +557,7 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
                 <div className="form-row-flex">
                   <div className="form-group flex-1">
                     <label>Paid</label>
-                    <input type="number" name="amountPaid" value={formData.amountPaid} onChange={handleChange} placeholder="0" />
+                    <input type="number" name="amountPaid" value={formData.amountPaid} onChange={handleChange} placeholder="0" onFocus={(e) => e.target.select()} />
                   </div>
                   <div className="form-group flex-1">
                     <label>Due</label>

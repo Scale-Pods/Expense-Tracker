@@ -540,9 +540,243 @@ export const UAEProformaInvoice = ({ data }) => {
 };
 
 
+export const LUTExportInvoice = ({ data }) => {
+  if (!data) return null;
+  const termsArray = data.terms ? data.terms.split('\n').filter(t => t.trim() !== '') : [];
+  const total = Number(data.amount) || 0;
+  const currSym = getCurrencySymbol(data.currency);
+  const currName = data.currency || 'AED';
+  const lutArn = data.lutArn || 'AD270326114883Z';
+  const invoiceNo = data.invoiceNo || 'SP/EXP/2026-27/001';
+
+  // INR conversion for display
+  const exchangeRate = 22.86;
+  const inrEquiv = (total * exchangeRate).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const inrRealised = (total * exchangeRate).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  // Qty and unit price from items
+  const items = data.items || [];
+
+  const cell = (content, style = {}) => (
+    <td style={{ padding: '6px 8px', border: '1px solid #ccc', fontSize: '11px', verticalAlign: 'top', ...style }}>{content}</td>
+  );
+
+  const th = (content, style = {}) => (
+    <th style={{ padding: '6px 8px', border: '1px solid #ccc', background: '#1a1a1a', color: '#fff', fontSize: '10px', textTransform: 'uppercase', textAlign: 'center', ...style }}>{content}</th>
+  );
+
+  const twoColRow = (label, value, labelStyle = {}, valueStyle = {}) => (
+    <tr>
+      <td style={{ padding: '3px 8px', fontSize: '11px', fontWeight: '600', color: '#333', width: '45%', ...labelStyle }}>{label}</td>
+      <td style={{ padding: '3px 8px', fontSize: '11px', color: '#222', ...valueStyle }}>{value}</td>
+    </tr>
+  );
+
+  return (
+    <div style={{ color: '#1a1a1a', background: '#fff', width: '210mm', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
+
+      {/* ── PAGE 1 ── */}
+      <div style={{ padding: '0', boxShadow: '0 0 10px rgba(0,0,0,0.1)' }}>
+
+        {/* Header Banner */}
+        <div style={{ background: '#f7f7f7', borderBottom: '2px solid #1a1a1a', padding: '8px 12px', textAlign: 'center' }}>
+          <div style={{ fontSize: '16px', fontWeight: '900', color: '#0a4fa6', letterSpacing: '1px', textTransform: 'uppercase' }}>TAX INVOICE FOR EXPORT</div>
+          <div style={{ fontSize: '9px', fontWeight: '700', color: '#c00', letterSpacing: '0.5px', textTransform: 'uppercase', marginTop: '2px' }}>
+            SUPPLY MEANT FOR EXPORT UNDER LUT / BOND WITHOUT PAYMENT OF INTEGRATED TAX
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '30px', marginTop: '4px', fontSize: '10px', color: '#444' }}>
+            <span>Invoice No: <strong>{invoiceNo}</strong></span>
+            <span>Invoice Date: <strong>{data.invoiceDate ? new Date(data.invoiceDate).toLocaleDateString('en-GB').replace(/\//g, '-') : '—'}</strong></span>
+            <span>Place of Supply: <strong>Outside India</strong></span>
+          </div>
+        </div>
+
+        {/* Company + Bill To row */}
+        <div style={{ display: 'flex', borderBottom: '1px solid #ccc' }}>
+          {/* Company info */}
+          <div style={{ flex: 1, padding: '10px 12px', borderRight: '1px solid #ccc' }}>
+            <img src="https://res.cloudinary.com/dc3a1bfvk/image/upload/v1777098139/ScalePods_-_Logo-_FINAL_----1-01_1_-min_hvvqyt.png" width="140" alt="Logo" style={{ display: 'block', marginBottom: '6px' }} />
+            <div style={{ fontSize: '11px', lineHeight: '1.5' }}>
+              <strong style={{ fontSize: '13px', display: 'block' }}>SCALEPODS LLP</strong>
+              503-A Floor-5th, 159/161, Crescent House,<br />
+              Mumbai, Maharashtra, India - 400009<br />
+              Email: info@scalepods.co
+            </div>
+            <div style={{ marginTop: '6px', fontSize: '11px', lineHeight: '1.5' }}>
+              <strong>GSTIN: </strong>{data.myGstin || '27AFUFS0352J1ZI'}<br />
+              <strong>LUT ARN: </strong>{lutArn}
+            </div>
+          </div>
+          {/* Bill To */}
+          <div style={{ flex: 1, padding: '10px 12px' }}>
+            <div style={{ fontSize: '9px', fontWeight: '700', color: '#999', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Bill To / Exported To (Recipient)</div>
+            <div style={{ fontSize: '11px', lineHeight: '1.5' }}>
+              {data.name ? data.name.split('\n').map((line, i) => (
+                i === 0
+                  ? <strong key={i} style={{ fontSize: '13px', display: 'block' }}>{line}</strong>
+                  : <span key={i} style={{ display: 'block' }}>{line}</span>
+              )) : null}
+              {data.email && <div style={{ marginTop: '4px' }}>Email: {data.email}</div>}
+              {data.clientGstin && <div>TRN: {data.clientGstin}</div>}
+            </div>
+          </div>
+        </div>
+
+        {/* Items Table */}
+        <div style={{ borderBottom: '1px solid #ccc', overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                {th('Description of Services', { textAlign: 'left', width: '40%' })}
+                {th('SAC Code', { width: '12%' })}
+                {th('QTY', { width: '8%' })}
+                {th(`Unit Price (${currSym})`, { width: '18%' })}
+                {th(`Amount (${currSym})`, { width: '18%', background: '#222' })}
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item, idx) => (
+                <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
+                  {cell(
+                    <>
+                      <strong style={{ fontSize: '11px' }}>{item.description}</strong>
+                      {item.note && <div style={{ fontSize: '9px', color: '#666', marginTop: '2px' }}>{item.note}</div>}
+                    </>
+                  )}
+                  {cell(data.sacCode || '99831300', { textAlign: 'center', color: '#555' })}
+                  {cell('1', { textAlign: 'center' })}
+                  {cell(Number(item.amount).toLocaleString(undefined, { minimumFractionDigits: 2 }), { textAlign: 'right' })}
+                  {cell(<strong>{Number(item.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong>, { textAlign: 'right', background: '#f9f9f9' })}
+                </tr>
+              ))}
+              <tr style={{ background: '#f2f2f2' }}>
+                <td colSpan={4} style={{ padding: '6px 8px', textAlign: 'right', fontWeight: '800', fontSize: '12px', border: '1px solid #ccc' }}>Total ({currSym})</td>
+                <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: '900', fontSize: '12px', color: '#c00', border: '1px solid #ccc' }}>{total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Currency + Words | GST Declaration */}
+        <div style={{ display: 'flex', borderBottom: '1px solid #ccc' }}>
+          {/* Currency & Exchange Rate */}
+          <div style={{ flex: 1, padding: '8px 12px', borderRight: '1px solid #ccc', fontSize: '11px', lineHeight: '1.6' }}>
+            <div style={{ fontWeight: '700', fontSize: '10px', textTransform: 'uppercase', color: '#666', marginBottom: '4px' }}>Currency & Exchange Rate Details</div>
+            <div><strong>Invoice Currency:</strong> {currName} ({data.currency === 'AED' ? 'UAE Dirhams' : data.currency})</div>
+            <div><strong>Total Invoice Value:</strong> {currSym} {total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+            <div><strong>Exchange Rate (Bank-realised):</strong> 1 {currName} = INR {exchangeRate.toFixed(5)}</div>
+            <div style={{ marginTop: '6px', padding: '4px 8px', background: '#fff8e1', border: '1px solid #ffd54f', borderRadius: '4px' }}>
+              <strong>INR Equivalent (Realised Amount):</strong>{' '}
+              <span style={{ color: '#c00', fontWeight: '700' }}>₹ {inrRealised}</span>
+            </div>
+            <div style={{ fontSize: '9px', color: '#888', marginTop: '3px' }}>*As per actual bank statement advice. RBI does not publish daily bank realisation rate for AED.</div>
+          </div>
+          {/* Total in Words + GST Declaration */}
+          <div style={{ flex: 1, padding: '8px 12px', fontSize: '11px', lineHeight: '1.6' }}>
+            <div style={{ fontWeight: '700', fontSize: '10px', textTransform: 'uppercase', color: '#666', marginBottom: '4px' }}>Total Amount in Words</div>
+            <div style={{ fontWeight: '700', fontSize: '11px', textTransform: 'capitalize', marginBottom: '8px' }}>
+              {total > 0 ? (data.amountInWords || toWords(total, data.currency)) : `Zero ${getCurrencyName(data.currency)} Only`}
+            </div>
+            <div style={{ marginTop: '6px', padding: '6px 8px', background: '#f0f4ff', border: '1px solid #c5d0e8', borderRadius: '4px' }}>
+              <div style={{ fontWeight: '700', fontSize: '10px', textTransform: 'uppercase', color: '#444', marginBottom: '2px' }}>GST Declaration</div>
+              <div style={{ fontSize: '10px', color: '#333' }}>Supply solely meant for export under LUT / Bond without payment of Integrated Tax (IGST).</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bank Details + Payment Terms */}
+        <div style={{ display: 'flex', borderBottom: '1px solid #ccc' }}>
+          {/* Bank Details */}
+          <div style={{ flex: 1, padding: '8px 12px', borderRight: '1px solid #ccc', fontSize: '11px', lineHeight: '1.6' }}>
+            <div style={{ fontWeight: '700', fontSize: '10px', textTransform: 'uppercase', color: '#666', marginBottom: '4px' }}>Bank Details for Transfer</div>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <tbody>
+                {twoColRow('Account Holder:', data.accHolder || 'SCALEPODS LLP')}
+                {twoColRow('Bank Name:', data.bankName || 'HDFC Bank Ltd')}
+                {twoColRow('Account Number:', data.accNo || '50200119456950')}
+                {twoColRow('Branch IFSC:', data.ifsc || 'HDFC0000060')}
+                {twoColRow('SWIFT:', data.swiftCode || 'HDFCINBB')}
+                {twoColRow('A/c Type:', data.accType || 'Current Account')}
+                {twoColRow('Branch:', data.branch || 'FORT, Mumbai')}
+              </tbody>
+            </table>
+          </div>
+          {/* Payment Terms */}
+          <div style={{ flex: 1, padding: '8px 12px', fontSize: '11px', lineHeight: '1.6' }}>
+            <div style={{ fontWeight: '700', fontSize: '10px', textTransform: 'uppercase', color: '#666', marginBottom: '4px' }}>Terms of Sale / Payment Terms</div>
+            <div style={{ fontSize: '11px', color: '#333', marginBottom: '8px' }}>
+              {data.paymentTerm === 'Recurring'
+                ? '50% Advance via Wire Transfer to commence work (this invoice). Balance 50% payable via Wire Transfer on delivery.'
+                : '100% Advance via Wire Transfer to commence work (this invoice). Payment due upon receipt.'}
+            </div>
+            <div style={{ padding: '6px 8px', background: '#e8f5e9', border: '1px solid #a5d6a7', borderRadius: '4px', fontSize: '11px' }}>
+              <strong style={{ color: '#2e7d32' }}>Payment Status:</strong>{' '}
+              <span style={{ color: '#2e7d32' }}>Advance of {currSym} {total.toLocaleString(undefined, { minimumFractionDigits: 2 })} realised on {data.invoiceDate ? new Date(data.invoiceDate).toLocaleDateString('en-GB').replace(/\//g, '-') : '—'} ({data.currency === 'AED' ? `₹${inrRealised}` : `₹${inrEquiv}`}).</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Statutory Declaration Footer */}
+        <div style={{ padding: '8px 12px', background: '#f7f7f7', borderTop: '2px solid #1a1a1a', textAlign: 'center' }}>
+          <div style={{ fontSize: '10px', fontWeight: '800', color: '#c00', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            STATUTORY DECLARATION
+          </div>
+          <div style={{ fontSize: '9px', fontWeight: '700', color: '#333', marginTop: '2px', textTransform: 'uppercase' }}>
+            "SUPPLY MEANT FOR EXPORT UNDER LUT / BOND WITHOUT PAYMENT OF INTEGRATED TAX"
+          </div>
+        </div>
+      </div>
+
+      {/* ── PAGE 2 ── */}
+      <div style={{ marginTop: '8px', padding: '20px 24px', boxShadow: '0 0 10px rgba(0,0,0,0.1)', background: '#fff', pageBreakBefore: 'always' }}>
+        {/* Export Declaration */}
+        <div style={{ fontSize: '11px', lineHeight: '1.8', color: '#333', marginBottom: '16px', borderBottom: '1px solid #eee', paddingBottom: '12px' }}>
+          This is an export of services and a zero-rated supply under Section 16 of the IGST Act, 2017, made under cover of Letter of
+          Undertaking (LUT), without payment of Integrated Tax (IGST).
+          <br />
+          <strong>LUT ARN No.: {lutArn}</strong>
+        </div>
+
+        {/* Terms & Conditions */}
+        <div style={{ marginBottom: '24px' }}>
+          <div style={{ fontWeight: '700', fontSize: '11px', textTransform: 'uppercase', marginBottom: '8px', color: '#444' }}>Terms &amp; Conditions</div>
+          {termsArray.length > 0 ? (
+            termsArray.map((t, i) => (
+              <div key={i} style={{ fontSize: '10px', color: '#555', lineHeight: '1.6', marginBottom: '3px' }}>{t}</div>
+            ))
+          ) : (
+            <div style={{ fontSize: '10px', color: '#555', lineHeight: '1.6' }}>
+              1. Currency &amp; Charges: Payments must be made in the currency mentioned. Any additional bank charges, conversion fees, or transaction fees are to be borne by the client.<br />
+              2. Scope of Work: The services covered under this invoice are as per agreed discussion.<br />
+              3. Non-Refundable: Payments made are non-refundable unless otherwise agreed in writing.<br />
+              4. Confidentiality: Both parties agree to maintain the confidentiality of any business or project-related information shared during the engagement.<br />
+              5. Intellectual Property: All deliverables and work products remain the property of ScalePods LLP until full payment is received.<br />
+              6. Termination: Engagement can be terminated based on terms mentioned in the Service Level Agreement (SLA).<br />
+              7. This invoice is issued for export of services and is not subject to Indian GST as the supply is made under LUT.<br />
+              8. Support: For any queries regarding this invoice, please contact info@scalepods.co
+            </div>
+          )}
+        </div>
+
+        {/* Signature */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <div style={{ textAlign: 'center', minWidth: '180px' }}>
+            <div style={{ fontSize: '11px', fontWeight: '700', marginBottom: '50px' }}>For SCALEPODS LLP</div>
+            <div style={{ borderTop: '1px solid #aaa', paddingTop: '6px', fontSize: '11px', color: '#444' }}>Authorised Signatory</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 export const InvoicePaper = ({ data }) => {
   if (!data) return null;
+
+  // LUT Export overrides all other templates
+  if (data.lutEnabled) return <LUTExportInvoice data={data} />;
+
   const region = (data.region || 'United States').toLowerCase();
   const isIndia = region === 'india';
   const isUAE = region === 'uae';
