@@ -88,6 +88,9 @@ export const toWords = (num, currency = 'INR') => {
   } else if (currency === 'AED') {
     res = convertInternational(whole) + 'UAE Dirhams ';
     if (fraction > 0) res += 'and ' + convertInternational(fraction) + 'Fils ';
+  } else if (currency === 'QAR') {
+    res = convertInternational(whole) + 'Qatari Riyals ';
+    if (fraction > 0) res += 'and ' + convertInternational(fraction) + 'Dirhams ';
   } else {
     res = convertInternational(whole) + currencyName + ' ';
     if (fraction > 0) res += 'and ' + convertInternational(fraction) + 'Cents ';
