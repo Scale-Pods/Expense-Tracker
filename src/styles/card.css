@@ -1,21 +1,38 @@
 .card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid var(--glass-border);
-  border-radius: 20px;
-  box-shadow: 
-    var(--glass-shadow),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.05); /* Inner border for definition */
   position: relative;
+  isolation: isolate;
   overflow: hidden;
-  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease;
+  background: var(--card-bg);
+  background-color: var(--color-bg-card);
+  backdrop-filter: blur(28px) saturate(170%);
+  -webkit-backdrop-filter: blur(28px) saturate(170%);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  box-shadow: var(--card-shadow);
+  transition:
+    transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
 }
 
+/* Soft top-left glass reflection */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--card-highlight);
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Fine grain texture for a more physical glass surface */
 .card::after {
   content: '';
   position: absolute;
   inset: 0;
+  border-radius: inherit;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
   opacity: var(--glass-texture-opacity);
   pointer-events: none;
@@ -30,24 +47,13 @@
 
 .card:hover {
   transform: translateY(-4px);
-  box-shadow: 
-    0 20px 80px rgba(0, 0, 0, 0.25),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-}
-
-.card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: var(--glass-highlight);
+  border-color: var(--card-border-strong);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .card-header {
   padding: 20px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--color-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -56,7 +62,7 @@
 .card-title {
   font-size: 16px;
   font-weight: 600;
-  color: white;
+  color: var(--color-text-main);
 }
 
 .card-content {
@@ -69,5 +75,20 @@
   }
   .card-content {
     padding: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+  .card:hover {
+    transform: none;
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .card {
+    background: var(--color-bg-card);
   }
 }

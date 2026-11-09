@@ -3,9 +3,55 @@
   --glass-bg: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(0, 0, 0, 0.08);
   --glass-highlight: rgba(255, 255, 255, 0.9);
-  --glass-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+  --glass-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 8px 24px -6px rgba(15, 23, 42, 0.10),
+    0 24px 60px -20px rgba(15, 23, 42, 0.16);
   --glass-texture-opacity: 0.03;
-  
+
+  /* Layered glass card surface */
+  --card-bg: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.84) 0%,
+    rgba(255, 255, 255, 0.64) 48%,
+    rgba(255, 255, 255, 0.52) 100%
+  );
+  --card-border: rgba(255, 255, 255, 0.72);
+  --card-border-strong: rgba(148, 163, 184, 0.28);
+  --card-highlight: radial-gradient(
+    120% 85% at 18% 0%,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0) 58%
+  );
+  --card-shadow:
+    0 1px 1px rgba(15, 23, 42, 0.04),
+    0 4px 10px -2px rgba(15, 23, 42, 0.07),
+    0 18px 40px -12px rgba(15, 23, 42, 0.15),
+    0 32px 80px -30px rgba(15, 23, 42, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -1px 0 rgba(15, 23, 42, 0.04);
+  --card-shadow-hover:
+    0 2px 3px rgba(15, 23, 42, 0.05),
+    0 8px 18px -4px rgba(15, 23, 42, 0.10),
+    0 28px 60px -18px rgba(15, 23, 42, 0.20),
+    0 50px 110px -40px rgba(15, 23, 42, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    inset 0 -1px 0 rgba(15, 23, 42, 0.05);
+
+  /* Shared surface tokens (legacy aliases) */
+  --color-bg-card: rgba(255, 255, 255, 0.72);
+  --color-bg-subtle: rgba(255, 255, 255, 0.42);
+  --color-border: rgba(15, 23, 42, 0.09);
+  --shadow-sm:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 2px 8px rgba(15, 23, 42, 0.05);
+  --shadow-md:
+    0 2px 4px rgba(15, 23, 42, 0.04),
+    0 12px 28px -8px rgba(15, 23, 42, 0.12);
+  --shadow-lg:
+    0 4px 8px rgba(15, 23, 42, 0.05),
+    0 24px 54px -14px rgba(15, 23, 42, 0.18);
+
   --color-bg-mesh: #F4F6FA;
   --color-bg-body: #F4F6FA;
   --blob-opacity: 0.12;
@@ -43,8 +89,55 @@
   --glass-bg: rgba(10, 18, 40, 0.65);
   --glass-border: rgba(100, 180, 255, 0.08);
   --glass-highlight: rgba(255, 255, 255, 0.06);
-  --glass-shadow: 0 25px 80px rgba(0, 0, 0, 0.7), 0 0 60px rgba(0, 229, 204, 0.03);
+  --glass-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.35),
+    0 12px 30px -8px rgba(0, 0, 0, 0.50),
+    0 30px 80px -20px rgba(0, 0, 0, 0.62),
+    0 0 60px rgba(0, 229, 204, 0.03);
   --glass-texture-opacity: 0.08;
+
+  /* Layered glass card surface */
+  --card-bg: linear-gradient(
+    145deg,
+    rgba(38, 52, 82, 0.74) 0%,
+    rgba(15, 23, 42, 0.66) 50%,
+    rgba(8, 13, 26, 0.72) 100%
+  );
+  --card-border: rgba(148, 163, 184, 0.16);
+  --card-border-strong: rgba(0, 229, 204, 0.24);
+  --card-highlight: radial-gradient(
+    120% 85% at 18% 0%,
+    rgba(255, 255, 255, 0.10) 0%,
+    rgba(255, 255, 255, 0) 60%
+  );
+  --card-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.35),
+    0 8px 18px -4px rgba(0, 0, 0, 0.40),
+    0 24px 60px -16px rgba(0, 0, 0, 0.55),
+    0 44px 110px -30px rgba(0, 0, 0, 0.68),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22);
+  --card-shadow-hover:
+    0 2px 3px rgba(0, 0, 0, 0.40),
+    0 12px 26px -6px rgba(0, 0, 0, 0.50),
+    0 34px 80px -20px rgba(0, 0, 0, 0.65),
+    0 0 70px rgba(0, 229, 204, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.10),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.26);
+
+  /* Shared surface tokens (legacy aliases) */
+  --color-bg-card: rgba(15, 23, 42, 0.62);
+  --color-bg-subtle: rgba(255, 255, 255, 0.03);
+  --color-border: rgba(148, 163, 184, 0.14);
+  --shadow-sm:
+    0 1px 2px rgba(0, 0, 0, 0.30),
+    0 3px 10px rgba(0, 0, 0, 0.22);
+  --shadow-md:
+    0 2px 4px rgba(0, 0, 0, 0.35),
+    0 14px 32px -8px rgba(0, 0, 0, 0.45);
+  --shadow-lg:
+    0 4px 8px rgba(0, 0, 0, 0.40),
+    0 28px 64px -14px rgba(0, 0, 0, 0.60);
 
   --color-bg-mesh: radial-gradient(ellipse at 15% 40%, #0E1A35 0%, #050A18 40%, #080D1A 100%);
   --color-bg-body: #080D1A;
@@ -55,6 +148,23 @@
   --color-text-main: #E8EDFF;
   --color-text-secondary: rgba(160, 190, 255, 0.55);
   --color-text-muted: rgba(160, 190, 255, 0.25);
+}
+
+/* Shared glass surface used by panels/tables */
+.glass-panel {
+  background: var(--card-bg);
+  background-color: var(--color-bg-card);
+  backdrop-filter: blur(26px) saturate(165%);
+  -webkit-backdrop-filter: blur(26px) saturate(165%);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
+}
+
+/* Fallback for browsers without backdrop-filter support */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-panel {
+    background: var(--color-bg-card);
+  }
 }
 
 /* Global Form Theming */

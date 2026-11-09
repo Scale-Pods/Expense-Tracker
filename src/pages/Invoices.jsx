@@ -15,7 +15,16 @@ import {
 import InvoiceForm from '../components/layout/InvoiceForm';
 import { InvoicePaper } from '../components/invoice/InvoiceTemplates';
 import EmailDialog from '../components/invoice/EmailDialog';
+import { getNextInvoiceNumber, getInvoiceNumberFromRow, buildInvoiceFileName } from '../utils/invoiceUtils';
 import '../styles/invoices.css';
+
+const extractInvoiceRows = (json) => {
+  const list = (Array.isArray(json) && json[0]?.data)
+    ? json[0].data
+    : (Array.isArray(json) ? json : (json?.data ? (Array.isArray(json.data) ? json.data : [json.data]) : [json]));
+  const rows = Array.isArray(list) ? list : [list];
+  return rows.filter(Boolean).map(item => item.json || item);
+};
 
 const Invoices = () => {
   const location = useLocation();
@@ -35,8 +44,39 @@ const Invoices = () => {
     window.innerWidth <= 480 ? 0.5 : null
   );
   const [containerHeight, setContainerHeight] = useState(null);
+  const [nextInvoiceNo, setNextInvoiceNo] = useState('');
   const invoiceRef = useRef();
   const previewContentRef = useRef(null);
+  const invoiceRowsRef = useRef([]);
+
+  const refreshNextInvoiceNo = useCallback(async () => {
+    try {
+      const url = `${import.meta.env.VITE_N8N_BASE_URL}/${import.meta.env.VITE_WEBHOOK_ID_DATA}?action=Invoice`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Failed to fetch saved invoices');
+      const rows = extractInvoiceRows(await res.json());
+      invoiceRowsRef.current = rows;
+      setNextInvoiceNo(getNextInvoiceNumber(rows));
+    } catch (err) {
+      console.warn('Could not determine the next invoice number:', err);
+      setNextInvoiceNo(prev => prev || getNextInvoiceNumber([]));
+    }
+  }, []);
+
+  const markInvoiceNoUsed = useCallback((invoiceNo) => {
+    if (!invoiceNo) return;
+    const alreadyKnown = invoiceRowsRef.current.some(
+      row => getInvoiceNumberFromRow(row) === invoiceNo
+    );
+    if (!alreadyKnown) {
+      invoiceRowsRef.current = [...invoiceRowsRef.current, { invoiceNo }];
+    }
+    setNextInvoiceNo(getNextInvoiceNumber(invoiceRowsRef.current));
+  }, []);
+
+  useEffect(() => {
+    refreshNextInvoiceNo();
+  }, [refreshNextInvoiceNo]);
 
   useEffect(() => {
     const el = previewContentRef.current;
@@ -94,7 +134,7 @@ const Invoices = () => {
       const element = invoiceRef.current;
       const opt = {
         margin: 0,
-        filename: `Invoice_${currentData?.name?.split('\n')[0] || 'ScalePods'}.pdf`,
+        filename: buildInvoiceFileName(currentData.invoiceNo, currentData.name),
         image: { type: 'png', quality: 1.0 },
         html2canvas: { 
           scale: 2, 
@@ -208,10 +248,11 @@ const Invoices = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       }).catch(() => {});
+      markInvoiceNoUsed(liveData.invoiceNo);
 
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Invoice_${liveData?.name?.split('\n')[0].replace(/\s+/g, '_')}.pdf`;
+      link.download = buildInvoiceFileName(liveData.invoiceNo, liveData.name);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -219,7 +260,7 @@ const Invoices = () => {
     } catch (e) {
       console.warn('Download failed', e);
     }
-  }, [generatePdf, liveData, buildWebhookPayload, getActionType]);
+  }, [generatePdf, liveData, buildWebhookPayload, getActionType, markInvoiceNoUsed]);
 
   const handleChoiceEmail = useCallback(async () => {
     setShowActionChoice(false);
@@ -260,7 +301,7 @@ const Invoices = () => {
       const webhookUrl = `${import.meta.env.VITE_N8N_BASE_URL}/${import.meta.env.VITE_WEBHOOK_ID_INVOICE}?action=${getActionType()}`;
 
       const formData = new FormData();
-      formData.append('file', currentBlob, `Invoice_${liveData.name?.split('\n')[0].replace(/\s+/g, '_')}.pdf`);
+      formData.append('file', currentBlob, buildInvoiceFileName(liveData.invoiceNo, liveData.name));
       Object.entries(payload).forEach(([key, value]) => {
         formData.append(key, value);
       });
@@ -271,6 +312,7 @@ const Invoices = () => {
       });
 
       if (response.ok) {
+        markInvoiceNoUsed(liveData.invoiceNo);
         setShowEmailDialog(false);
         setPdfUrl(null);
         setPdfBlob(null);
@@ -304,10 +346,11 @@ const Invoices = () => {
     } catch (e) {
       console.warn('Track download failed', e);
     }
+    markInvoiceNoUsed(liveData.invoiceNo);
 
     const link = document.createElement('a');
     link.href = pdfUrl;
-    link.download = `Invoice_${liveData?.name?.split('\n')[0].replace(/\s+/g, '_')}.pdf`;
+    link.download = buildInvoiceFileName(liveData.invoiceNo, liveData.name);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -372,7 +415,7 @@ const Invoices = () => {
             <ChevronRight size={20} />
           </button>
         </div>
-        <InvoiceForm onGenerate={handleFormGenerate} onUpdate={setLiveData} prefill={prefillData} />
+        <InvoiceForm onGenerate={handleFormGenerate} onUpdate={setLiveData} prefill={prefillData} suggestedInvoiceNo={nextInvoiceNo} />
       </div>
 
       {showForm && <div className="form-drawer-overlay" onClick={() => setShowForm(false)} />}

@@ -8,9 +8,10 @@ import { REGIONS, CURRENCIES, getDefaultCurrency, getCurrencySymbol } from '../.
 const CACHE_KEY = 'invoice_form_cache_v2';
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour
 
-const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
+const InvoiceForm = ({ onGenerate, onUpdate, prefill, suggestedInvoiceNo }) => {
   const [activeTab, setActiveTab] = useState('create'); // 'create' or 'queue'
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const hasAppliedSuggestion = React.useRef(false);
   
   const initialData = {
     type: 'Proforma',
@@ -76,8 +77,33 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
     }));
   }, [formData, onUpdate]);
 
+  // Pre-fill the invoice number with the next sequential number based on the
+  // last invoice already saved. The number is applied when the form first
+  // loads (or when it is blank); it never rewrites the invoice currently being
+  // previewed or one being edited (prefill). Clicking Clear picks up the
+  // latest number again.
+  React.useEffect(() => {
+    if (!suggestedInvoiceNo || prefill) return;
+
+    if (!hasAppliedSuggestion.current) {
+      hasAppliedSuggestion.current = true;
+      setFormData(prev =>
+        prev.invoiceNo === suggestedInvoiceNo
+          ? prev
+          : { ...prev, invoiceNo: suggestedInvoiceNo }
+      );
+      return;
+    }
+
+    if (!formData.invoiceNo) {
+      setFormData(prev =>
+        prev.invoiceNo ? prev : { ...prev, invoiceNo: suggestedInvoiceNo }
+      );
+    }
+  }, [suggestedInvoiceNo, prefill, formData.invoiceNo]);
+
   const handleClear = () => {
-    setFormData({ ...initialData });
+    setFormData({ ...initialData, invoiceNo: suggestedInvoiceNo || '' });
   };
 
   const handleSubmit = async (e) => {
@@ -384,7 +410,7 @@ const InvoiceForm = ({ onGenerate, onUpdate, prefill }) => {
                   <input 
                     type="text" 
                     name="invoiceNo" 
-                    placeholder="INV-001" 
+                    placeholder={suggestedInvoiceNo || "SP/INV-001"} 
                     value={formData.invoiceNo}
                     onChange={handleChange}
                   />

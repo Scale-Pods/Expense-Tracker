@@ -14,18 +14,43 @@
 
 .kpi-card {
   position: relative;
-  background: var(--glass-bg);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid var(--glass-border);
+  background: var(--card-bg);
+  background-color: var(--color-bg-card);
+  backdrop-filter: blur(28px) saturate(170%);
+  -webkit-backdrop-filter: blur(28px) saturate(170%);
+  border: 1px solid var(--card-border);
   border-radius: 24px;
   padding: 24px;
   display: flex;
   align-items: center; /* Center items vertically */
   gap: 20px;
-  box-shadow: var(--glass-shadow);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--card-shadow);
+  transition:
+    transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
   overflow: hidden;
+}
+
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--card-highlight);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.kpi-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.kpi-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--card-border-strong);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .kpi-icon-wrapper {
@@ -82,12 +107,25 @@
 }
 
 .chart-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(24px);
-  border: 1px solid var(--glass-border);
+  position: relative;
+  background: var(--card-bg);
+  background-color: var(--color-bg-card);
+  backdrop-filter: blur(28px) saturate(170%);
+  -webkit-backdrop-filter: blur(28px) saturate(170%);
+  border: 1px solid var(--card-border);
   border-radius: 24px;
   padding: 32px;
-  box-shadow: var(--glass-shadow);
+  box-shadow: var(--card-shadow);
+  transition:
+    transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
+}
+
+.chart-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--card-border-strong);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .renewals-section {

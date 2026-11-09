@@ -5,7 +5,7 @@ import {
   Calendar, User, DollarSign, Loader2, AlertCircle, Receipt, Eye, X, Send, Repeat
 } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
-import { reconstructInvoiceData } from '../utils/invoiceUtils';
+import { reconstructInvoiceData, getInvoiceNumberFromRow, buildInvoiceFileName } from '../utils/invoiceUtils';
 import { getCurrencySymbol } from '../utils/currencyConstants';
 import { InvoicePaper } from '../components/invoice/InvoiceTemplates';
 import EmailDialog from '../components/invoice/EmailDialog';
@@ -44,13 +44,19 @@ const AllInvoices = () => {
       if (!res.ok) throw new Error('Failed to fetch invoices');
       const json = await res.json();
       
-      let list = [];
-      if (Array.isArray(json) && json[0]?.data) list = json[0].data;
-      else if (Array.isArray(json)) list = json;
-      else if (json?.data) list = Array.isArray(json.data) ? json.data : [json.data];
-      else list = [json];
+      const list = (Array.isArray(json) && json[0]?.data) 
+        ? json[0].data 
+        : (Array.isArray(json) ? json : (json?.data ? (Array.isArray(json.data) ? json.data : [json.data]) : [json]));
       
-      setInvoices(list);
+      const normalizedList = list.map(item => {
+        const accurateInvNo = getInvoiceNumberFromRow(item);
+        return {
+          ...item,
+          invoiceNo: accurateInvNo || item.invoiceNo || ''
+        };
+      });
+      
+      setInvoices(normalizedList);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -79,7 +85,7 @@ const AllInvoices = () => {
       const pdfElement = downloadContainerRef.current;
       const opt = {
         margin: 0,
-        filename: `Invoice_${data.name?.split('\n')[0] || 'Record'}.pdf`,
+        filename: buildInvoiceFileName(data.invoiceNo, data.name),
         image: { type: 'png', quality: 1.0 },
         html2canvas: { 
           scale: 2, 
@@ -202,7 +208,7 @@ const AllInvoices = () => {
       const webhookUrl = `${import.meta.env.VITE_N8N_BASE_URL}/${import.meta.env.VITE_WEBHOOK_ID_INVOICE}?action=${actionType}`;
 
       const formData = new FormData();
-      formData.append('file', emailPdfBlob, `Invoice_${clientName.replace(/\s+/g, '_')}.pdf`);
+      formData.append('file', emailPdfBlob, buildInvoiceFileName(data.invoiceNo, data.name));
       Object.entries(payload).forEach(([key, value]) => {
         formData.append(key, value);
       });
@@ -271,8 +277,9 @@ const AllInvoices = () => {
   const filtered = invoices.filter(inv => {
     const name = (inv.clientName || inv.name || '').toLowerCase();
     const email = (inv.email || '').toLowerCase();
+    const invNo = (inv.invoiceNo || '').toLowerCase();
     const search = searchTerm.toLowerCase();
-    const matchesSearch = !searchTerm || name.includes(search) || email.includes(search);
+    const matchesSearch = !searchTerm || name.includes(search) || email.includes(search) || invNo.includes(search);
     const matchesType = filterType === 'all' || (inv.type || '').toLowerCase() === filterType;
     return matchesSearch && matchesType;
   });

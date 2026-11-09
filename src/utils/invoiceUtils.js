@@ -99,15 +99,116 @@ export const toWords = (num, currency = 'INR') => {
 };
 
 /**
+ * Parse body column or body JSON object from webhook row if present.
+ */
+export const extractRowBody = (row) => {
+  if (!row) return {};
+  if (row.body) {
+    if (typeof row.body === 'object') return row.body;
+    if (typeof row.body === 'string') {
+      try {
+        return JSON.parse(row.body);
+      } catch (e) {
+        console.warn('Failed to parse row.body JSON', e);
+      }
+    }
+  }
+  return {};
+};
+
+/**
+ * Extract the accurate invoice number from a webhook row,
+ * prioritizing the nested 'body' column where payload data is recorded.
+ */
+export const getInvoiceNumberFromRow = (row) => {
+  if (!row) return '';
+  const parsedBody = extractRowBody(row);
+  return (
+    parsedBody.invoiceNo ||
+    parsedBody.invoice_no ||
+    parsedBody['Invoice No'] ||
+    parsedBody['Invoice Number'] ||
+    row.invoiceNo ||
+    row.invoice_no ||
+    row['Invoice No'] ||
+    row['Invoice Number'] ||
+    ''
+  );
+};
+
+/**
+ * Given a list of existing invoice objects or raw rows, calculate the next sequential invoice number.
+ * e.g., if highest existing number is 27 (or 027), next is 28 (or SP/INV-028 / INV-028).
+ */
+export const getNextInvoiceNumber = (invoices = [], defaultPrefix = 'SP/INV-') => {
+  let maxNum = 0;
+  let detectedPrefix = defaultPrefix;
+  let paddingLength = 3;
+
+  invoices.forEach(inv => {
+    const invNo = getInvoiceNumberFromRow(inv);
+    if (!invNo) return;
+
+    // Match any trailing or standalone number, e.g. "SP/INV-027" -> 27, "SP-25" -> 25, "27" -> 27
+    const match = String(invNo).trim().match(/^(.*?)(0*)(\d+)$/);
+    if (match) {
+      const prefix = match[1];
+      const leadingZeros = match[2];
+      const digits = match[3];
+      const num = parseInt(digits, 10);
+      if (!isNaN(num) && num > maxNum) {
+        maxNum = num;
+        if (prefix) detectedPrefix = prefix;
+        paddingLength = Math.max((leadingZeros + digits).length, 3);
+      }
+    }
+  });
+
+  if (maxNum === 0) {
+    return `${defaultPrefix}001`;
+  }
+
+  const nextNum = maxNum + 1;
+  const paddedNext = String(nextNum).padStart(paddingLength, '0');
+  return `${detectedPrefix}${paddedNext}`;
+};
+
+/**
+ * Remove characters that are not allowed in file names (Windows/macOS).
+ * Invoice numbers like "SP/INV-034" become "SP-INV-034".
+ */
+export const sanitizeForFileName = (value) =>
+  String(value || '')
+    .replace(/[\\/:*?"<>|]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^[-\s]+|[-\s]+$/g, '');
+
+/**
+ * Build the PDF file name so it ends with the invoice number,
+ * e.g. "Invoice_Acme_Corp_SP-INV-034.pdf".
+ */
+export const buildInvoiceFileName = (invoiceNo, clientName = 'Record') => {
+  const client = sanitizeForFileName(String(clientName || '').split('\n')[0])
+    .replace(/\s+/g, '_') || 'Record';
+  const safeInvoiceNo = sanitizeForFileName(invoiceNo);
+  return safeInvoiceNo
+    ? `Invoice_${client}_${safeInvoiceNo}.pdf`
+    : `Invoice_${client}.pdf`;
+};
+
+/**
  * Reconstruct a full invoice data object from a flat webhook row
  * for re-rendering the invoice template.
  */
 export const reconstructInvoiceData = (row) => {
-  // Reconstruct items: prioritize JSON 'items' field, then fallback to flattened fields
+  const parsedBody = extractRowBody(row);
+
+  // Reconstruct items: prioritize body.items, then row.items, then flattened fields
   let items = [];
-  if (row.items) {
+  const rawItems = parsedBody.items || row.items;
+  if (rawItems) {
     try {
-      items = typeof row.items === 'string' ? JSON.parse(row.items) : row.items;
+      items = typeof rawItems === 'string' ? JSON.parse(rawItems) : rawItems;
       if (!Array.isArray(items)) items = [];
     } catch (e) {
       console.warn('Failed to parse items JSON', e);
@@ -115,27 +216,32 @@ export const reconstructInvoiceData = (row) => {
     }
   }
   
-  if (items.length === 0 && row.itemDescriptions && row.itemAmounts) {
-    const descs = row.itemDescriptions.split(',').map(s => s.trim());
-    const amts = row.itemAmounts.split(',').map(s => s.trim());
+  if (items.length === 0 && (parsedBody.itemDescriptions || row.itemDescriptions) && (parsedBody.itemAmounts || row.itemAmounts)) {
+    const descsStr = parsedBody.itemDescriptions || row.itemDescriptions;
+    const amtsStr = parsedBody.itemAmounts || row.itemAmounts;
+    const descs = descsStr.split(',').map(s => s.trim());
+    const amts = amtsStr.split(',').map(s => s.trim());
     items = descs.map((d, i) => ({ description: d, amount: amts[i] || '0' }));
   }
   
   if (items.length === 0) {
-    items = [{ description: row.description || 'Service', amount: String(row.amount || '0') }];
+    items = [{ description: parsedBody.description || row.description || 'Service', amount: String(parsedBody.amount || row.amount || '0') }];
   }
 
   // Reconstruct name (clientName + clientAddress with newline)
-  let name = row.name || '';
-  if (!name && row.clientName) {
-    name = row.clientAddress ? `${row.clientName}\n${row.clientAddress}` : row.clientName;
+  let name = parsedBody.name || row.name || '';
+  const clientName = parsedBody.clientName || row.clientName;
+  const clientAddress = parsedBody.clientAddress || row.clientAddress;
+  if (!name && clientName) {
+    name = clientAddress ? `${clientName}\n${clientAddress}` : clientName;
   }
 
   // Determine type and region
-  let type = row.type || 'Proforma';
-  let region = row.region || 'United States';
-  if (row.invoiceType) {
-    const it = row.invoiceType.toLowerCase();
+  let type = parsedBody.type || row.type || 'Proforma';
+  let region = parsedBody.region || row.region || 'United States';
+  const invoiceType = parsedBody.invoiceType || row.invoiceType;
+  if (invoiceType) {
+    const it = invoiceType.toLowerCase();
     if (it.includes('tax')) type = 'Tax';
     else if (it.includes('performa') || it.includes('proforma')) type = 'Proforma';
     
@@ -143,32 +249,36 @@ export const reconstructInvoiceData = (row) => {
     else if (it.includes('india')) region = 'India';
   }
 
+  const invoiceNo = getInvoiceNumberFromRow(row);
+
   return {
     type,
     region,
     name,
-    email: row.email || '',
-    currency: row.currency || getDefaultCurrency(region),
-    amount: String(row.amount || '0'),
-    amountPaid: String(row.amountPaid || '0'),
-    dueAmount: String(row.dueAmount || '0'),
+    email: parsedBody.email || row.email || '',
+    currency: parsedBody.currency || row.currency || getDefaultCurrency(region),
+    amount: String(parsedBody.amount || row.amount || '0'),
+    amountPaid: String(parsedBody.amountPaid || row.amountPaid || '0'),
+    dueAmount: String(parsedBody.dueAmount || row.dueAmount || '0'),
     items,
-    dueDate: row.dueDate || '',
-    invoiceDate: row.invoiceDate || '',
-    invoiceNo: row.invoiceNo || '',
-    terms: row.terms || '',
-    accHolder: row.accHolder || 'SCALEPODS LLP',
-    bankName: row.bankName || 'HDFC Bank Ltd',
-    accNo: String(row.accNo || '50200119456950'),
-    ifsc: row.ifsc || 'HDFC0000060',
-    branch: row.branch || 'FORT',
-    swiftCode: row.swiftCode || 'HDFCINBB',
-    accType: row.accType || 'Current Account',
-    myGstin: row.myGstin || '27AFUFS0352J1ZI',
-    clientGstin: String(row.clientGstin || ''),
-    clientState: row.clientState || (region === 'India' ? 'Maharashtra' : ''),
-    amountInWords: row.amountInWords || '',
-    paymentTerm: row.paymentTerm || 'One Time',
-    sacCode: String(row.sacCode || '998313'),
+    dueDate: parsedBody.dueDate || row.dueDate || '',
+    invoiceDate: parsedBody.invoiceDate || row.invoiceDate || '',
+    invoiceNo: invoiceNo || '',
+    terms: parsedBody.terms || row.terms || '',
+    accHolder: parsedBody.accHolder || row.accHolder || 'SCALEPODS LLP',
+    bankName: parsedBody.bankName || row.bankName || 'HDFC Bank Ltd',
+    accNo: String(parsedBody.accNo || row.accNo || '50200119456950'),
+    ifsc: parsedBody.ifsc || row.ifsc || 'HDFC0000060',
+    branch: parsedBody.branch || row.branch || 'FORT',
+    swiftCode: parsedBody.swiftCode || row.swiftCode || 'HDFCINBB',
+    accType: parsedBody.accType || row.accType || 'Current Account',
+    myGstin: parsedBody.myGstin || row.myGstin || '27AFUFS0352J1ZI',
+    clientGstin: String(parsedBody.clientGstin || row.clientGstin || ''),
+    clientState: parsedBody.clientState || row.clientState || (region === 'India' ? 'Maharashtra' : ''),
+    amountInWords: parsedBody.amountInWords || row.amountInWords || '',
+    paymentTerm: parsedBody.paymentTerm || row.paymentTerm || 'One Time',
+    sacCode: String(parsedBody.sacCode || row.sacCode || '998313'),
+    lutEnabled: parsedBody.lutEnabled === 'true' || parsedBody.lutEnabled === true || row.lutEnabled === 'true' || row.lutEnabled === true,
+    lutArn: parsedBody.lutArn || row.lutArn || '',
   };
 };
